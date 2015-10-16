@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <item name="level1" type="id" />
+    <item name="level2" type="id" />
+    <item name="level3" type="id" />
+    <item name="radio1" type="id" />
+    <item name="radio2" type="id" />
+    <item name="radio3" type="id" />
+    <item name="radio4" type="id" />
+    <item name="back" type="id" />
+    <item name="node" type="id" />
+    <item name="line" type="id" />
+    <item name="deleteId" type="id" />
+    <item name="addId" type="id" />
+    <item name="settings" type="id" />
+    <item name="adItemId" type="id" />
+    <item name="itemId" type="id" />
+     <item type="id" name="gridView" />
+    <item type="id" name="webView" />
+    <item type="id" name="scrollView" />
+    <item name="tag0" type="id"/>
+    <item name="tag1" type="id"/>
+    <item name="tag2" type="id"/>
+    <item name="floatCameraBtn" type="id"/>
+    <item name="historyUserViewId" type="id"/>
+
+    <!--普通的遮罩-->
+    <item name="maskBar1" type="id"/>
+    <item name="progressBar1" type="id"/>
+    <item name="progressText1" type="id"/>
+
+    <!--刷新控件-->
+    <item name="pullToRefreshText" type="id"/>
+    <item name="pullToRefreshImage" type="id"/>
+    <item name="pullToRefreshProgress" type="id"/>
+
+</resources>

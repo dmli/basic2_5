@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">basic</string>
+    <string name="down_push_to_rrefresh_text">下拉刷新</string>
+    <string name="loading_text">加载中...</string>
+    <string name="unlock_to_refresh">松手刷新</string>
+</resources>
