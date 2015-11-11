@@ -87,6 +87,7 @@ public abstract class BasicApplication extends Application implements Serializab
 
     @Override
     public void onCreate() {
+        super.onCreate();
         app = this;
         // 尝试检查是否有配置了GlobalCacheListener接口
         initGlobalCacheListener(getApplicationContext());
@@ -304,20 +305,18 @@ public abstract class BasicApplication extends Application implements Serializab
         if (globalCacheListener != null || context == null) {
             return;
         }
-        if (context != null) {
-            Properties p = PropertiesHelper.loadProperties(context, Configuration.SYS_CONFIG_FILE_NAME, "raw", context.getPackageName());
-            if (p != null) {
-                String cs = p.getProperty(Configuration.SYS_CONFIG_GLOBAL_CACHE_LISTENER_KEY, null);
-                if (cs != null) {
-                    try {
-                        Class<?> c = Class.forName(cs);
-                        GlobalCacheListener gcl = (GlobalCacheListener) c.newInstance();
-                        if (gcl != null) {
-                            setGlobalCacheListener(gcl);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+        Properties p = PropertiesHelper.loadProperties(context, Configuration.SYS_CONFIG_FILE_NAME, "raw", context.getPackageName());
+        if (p != null) {
+            String cs = p.getProperty(Configuration.SYS_CONFIG_GLOBAL_CACHE_LISTENER_KEY, null);
+            if (cs != null) {
+                try {
+                    Class<?> c = Class.forName(cs);
+                    GlobalCacheListener gcl = (GlobalCacheListener) c.newInstance();
+                    if (gcl != null) {
+                        setGlobalCacheListener(gcl);
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }
@@ -326,23 +325,23 @@ public abstract class BasicApplication extends Application implements Serializab
     /**
      * 异步完成结束后的回调函数，SecurityHandler及Asynchronous接口的任务处理
      *
-     * @param tag 标识，用户可以用该标识来区分任务
+     * @param what 标识，用户可以用该标识来区分任务
      * @param obj Asynchronous接口中async方法的返回参数
      */
-    public void handleMessage(int tag, Object obj) {
+    public void handleMessage(int what, Object obj) {
 
     }
 
     /**
      * 相对安全的Handler
      */
-    public SecurityHandler<BasicApplication> securityHandler = new SecurityHandler<BasicApplication>(this);
+    public SecurityHandler<BasicApplication> securityHandler = new SecurityHandler<>(this);
 
     protected static class SecurityHandler<T extends BasicApplication> extends Handler {
         WeakReference<T> w;
 
         private SecurityHandler(T t) {
-            w = new WeakReference<T>(t);
+            w = new WeakReference<>(t);
         }
 
         @Override

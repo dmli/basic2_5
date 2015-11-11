@@ -216,8 +216,8 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
 
     /**
      * 接收由BasicFragmentActivity发来的消息
-     *
-     * @param objs Object[]
+     * @param state 状态
+     * @param obj Object
      * @return Object
      */
     public Object receiverMessageFromSuper(int state, Object obj) {
@@ -535,7 +535,7 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
             timer = new Timer();
         }
         if (timerTasks == null) {
-            timerTasks = new HashMap<String, BasicTimerTask>();
+            timerTasks = new HashMap<>();
         }
         if (timerTasks.containsKey(task.getTag())) {
             BasicTimerTask t;
@@ -594,7 +594,7 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
     /**
      * 启动接收器
      *
-     * @param action 多个用 , 号分割
+     * @param actions 动作
      */
     protected void startReceiver(String... actions) {
         IntentFilter localIntentFilter = new IntentFilter();
@@ -756,7 +756,7 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
      */
     public void setAsynchronous(Asynchronous asynchronous) {
         if (ASYNC_SET == null) {
-            ASYNC_SET = new HashMap<String, Asynchronous>();
+            ASYNC_SET = new HashMap<>();
         }
         if (ASYNC_SET.containsKey(((Object) this).getClass().getName())) {
             ASYNC_SET.remove(((Object) this).getClass().getName());
@@ -767,13 +767,13 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
     /**
      * 相对安全的Handler，所有请求均由BasicFragment中handleMessage(int, Object)接收
      */
-    protected SecurityHandler<BasicFragment> securityHandler = new SecurityHandler<BasicFragment>(this);
+    protected SecurityHandler<BasicFragment> securityHandler = new SecurityHandler<>(this);
 
     protected static class SecurityHandler<T extends BasicFragment> extends Handler {
         WeakReference<T> w;
 
         private SecurityHandler(T t) {
-            w = new WeakReference<T>(t);
+            w = new WeakReference<>(t);
         }
 
         @Override

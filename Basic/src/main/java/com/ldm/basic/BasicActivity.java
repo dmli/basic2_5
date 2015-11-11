@@ -403,9 +403,9 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
 	 */
 	protected void addProtocol(BasicActivityProtocol p) {
 		if (protocol == null) {
-			protocol = new ArrayList<BasicActivityProtocol>();
+			protocol = new ArrayList<>();
 			if (protocolData == null) {
-				protocolData = new HashMap<String, Serializable>();
+				protocolData = new HashMap<>();
 			}
 		}
 		protocol.add(p);
@@ -660,7 +660,7 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
 			timer = new Timer();
 		}
 		if (timerTasks == null) {
-			timerTasks = new HashMap<String, BasicTimerTask>();
+			timerTasks = new HashMap<>();
 		}
 		if (timerTasks.containsKey(task.getTag())) {
 			BasicTimerTask t;
@@ -911,7 +911,15 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
 		}
 	}
 
-	@Override
+    @Override
+    protected void onUserLeaveHint() {
+        if (BasicApplication.globalCacheListener != null) {
+            BasicApplication.globalCacheListener.onUserLeaveHint();
+        }
+        super.onUserLeaveHint();
+    }
+
+    @Override
 	protected void onPause() {
 		// 触发协议的相关函数
 		if (protocol != null) {
@@ -1136,7 +1144,7 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
 	 */
 	public void setAsynchronous(Asynchronous asynchronous) {
 		if (ASYNC_SET == null) {
-			ASYNC_SET = new HashMap<String, Asynchronous>();
+			ASYNC_SET = new HashMap<>();
 		}
 		if (ASYNC_SET.containsKey(((Object) this).getClass().getName())) {
 			ASYNC_SET.remove(((Object) this).getClass().getName());
@@ -1147,13 +1155,13 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
 	/**
 	 * 相对安全的Handler，所有请求均由BasicActivity中handleMessage(int, Object)接收(这个handler允许在协议中使用)
 	 */
-	public SecurityHandler<BasicActivity> securityHandler = new SecurityHandler<BasicActivity>(this);
+	public SecurityHandler<BasicActivity> securityHandler = new SecurityHandler<>(this);
 
 	protected static class SecurityHandler<T extends BasicActivity> extends Handler {
 		WeakReference<T> w;
 
 		private SecurityHandler(T t) {
-			w = new WeakReference<T>(t);
+			w = new WeakReference<>(t);
 		}
 
 		@Override

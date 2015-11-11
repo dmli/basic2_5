@@ -1,22 +1,5 @@
 package com.ldm.basic;
 
-import java.io.Serializable;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Timer;
-import java.util.UUID;
-
-import com.ldm.basic.app.BasicApplication;
-import com.ldm.basic.app.Configuration;
-import com.ldm.basic.intent.IntentUtil;
-import com.ldm.basic.shared.SharedPreferencesHelper;
-import com.ldm.basic.utils.LazyImageDownloader;
-import com.ldm.basic.utils.Log;
-import com.ldm.basic.utils.SystemTool;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -39,6 +22,23 @@ import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.ldm.basic.app.BasicApplication;
+import com.ldm.basic.app.Configuration;
+import com.ldm.basic.intent.IntentUtil;
+import com.ldm.basic.shared.SharedPreferencesHelper;
+import com.ldm.basic.utils.LazyImageDownloader;
+import com.ldm.basic.utils.Log;
+import com.ldm.basic.utils.SystemTool;
+
+import java.io.Serializable;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Timer;
+import java.util.UUID;
 
 /**
  * Created by ldm on 13-11-10. BasicFragmentActivity中提供了全局的Activity记录、BaseReceiver接收 ，FragmentActivity状态及常用了一些方法
@@ -416,9 +416,9 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
 	 */
 	protected void addProtocol(BasicFragmentActivityProtocol p) {
 		if (protocol == null) {
-			protocol = new ArrayList<BasicFragmentActivityProtocol>();
+			protocol = new ArrayList<>();
 			if (protocolData == null) {
-				protocolData = new HashMap<String, Serializable>();
+				protocolData = new HashMap<>();
 			}
 		}
 		protocol.add(p);
@@ -723,7 +723,7 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
 			timer = new Timer();
 		}
 		if (timerTasks == null) {
-			timerTasks = new HashMap<String, BasicTimerTask>();
+			timerTasks = new HashMap<>();
 		}
 		if (timerTasks.containsKey(task.getTag())) {
 			BasicTimerTask t;
@@ -847,6 +847,14 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
 			BasicApplication.setClientCache(savedInstanceState.getSerializable(Configuration.CLIENT_CACHE_KEY));
 		}
 	}
+
+    @Override
+    protected void onUserLeaveHint() {
+        if (BasicApplication.globalCacheListener != null) {
+            BasicApplication.globalCacheListener.onUserLeaveHint();
+        }
+        super.onUserLeaveHint();
+    }
 
 	@Override
 	public void onPause() {
@@ -1088,7 +1096,7 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
 	 */
 	public void setAsynchronous(Asynchronous asynchronous) {
 		if (ASYNC_SET == null) {
-			ASYNC_SET = new HashMap<String, Asynchronous>();
+			ASYNC_SET = new HashMap<>();
 		}
 		if (ASYNC_SET.containsKey(((Object) this).getClass().getName())) {
 			ASYNC_SET.remove(((Object) this).getClass().getName());
@@ -1099,13 +1107,13 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
 	/**
 	 * 相对安全的Handler，所有请求均由BasicFragmentActivity中handleMessage(int, Object)接收
 	 */
-	protected SecurityHandler<BasicFragmentActivity> securityHandler = new SecurityHandler<BasicFragmentActivity>(this);
+	protected SecurityHandler<BasicFragmentActivity> securityHandler = new SecurityHandler<>(this);
 
 	protected static class SecurityHandler<T extends BasicFragmentActivity> extends Handler {
 		WeakReference<T> w;
 
 		private SecurityHandler(T t) {
-			w = new WeakReference<T>(t);
+			w = new WeakReference<>(t);
 		}
 
 		@Override

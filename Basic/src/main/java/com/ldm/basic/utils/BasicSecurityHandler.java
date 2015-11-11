@@ -6,7 +6,7 @@ import android.os.Handler;
 import android.os.Message;
 
 /**
- * Created by ldm on 15/9/8.
+ * Created by ldm on 12/9/8.
  * 相对安全的Handler，使用者需要实现SecurityHandlerInterface接口
  */
 public class BasicSecurityHandler<T extends BasicSecurityHandler.SecurityHandlerInterface> extends Handler {
@@ -14,7 +14,7 @@ public class BasicSecurityHandler<T extends BasicSecurityHandler.SecurityHandler
     WeakReference<T> w;
 
     public BasicSecurityHandler(T t) {
-        w = new WeakReference<T>(t);
+        w = new WeakReference<>(t);
     }
 
     @Override
@@ -29,7 +29,7 @@ public class BasicSecurityHandler<T extends BasicSecurityHandler.SecurityHandler
 
     public interface SecurityHandlerInterface {
 
-        void handleMessage(int tag, Object obj);
+        void handleMessage(int what, Object obj);
     }
 
 }

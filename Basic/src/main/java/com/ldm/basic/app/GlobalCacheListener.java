@@ -18,7 +18,7 @@ public interface GlobalCacheListener {
      * @param activity Activity
      * @param outState Bundle
      */
-    public abstract void onSaveInstanceState(Activity activity, Bundle outState);
+    void onSaveInstanceState(Activity activity, Bundle outState);
 
     /**
      * activity的onRestoreInstanceState方法
@@ -26,5 +26,10 @@ public interface GlobalCacheListener {
      * @param activity           Activity
      * @param savedInstanceState Bundle
      */
-    public abstract void onRestoreInstanceState(Activity activity, Bundle savedInstanceState);
+    void onRestoreInstanceState(Activity activity, Bundle savedInstanceState);
+
+    /**
+     * 用户离开屏幕时的回掉
+     */
+    void onUserLeaveHint();
 }
