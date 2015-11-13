@@ -21,10 +21,10 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.ldm.basic.app.BasicApplication;
 import com.ldm.basic.app.Configuration;
+import com.ldm.basic.dialog.LToast;
 import com.ldm.basic.intent.IntentUtil;
 import com.ldm.basic.shared.SharedPreferencesHelper;
 import com.ldm.basic.utils.LazyImageDownloader;
@@ -379,7 +379,7 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
 	 * @param smg 提示语
 	 */
 	protected void showShort(final String smg) {
-		Toast.makeText(this, smg, Toast.LENGTH_SHORT).show();
+        LToast.showShort(this, smg);
 	}
 
 	/**
@@ -388,7 +388,7 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
 	 * @param smg 提示语
 	 */
 	protected void showLong(final String smg) {
-		Toast.makeText(this, smg, Toast.LENGTH_LONG).show();
+        LToast.showLong(this, smg);
 	}
 
 	/**

@@ -13,9 +13,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.ldm.basic.app.Configuration;
+import com.ldm.basic.dialog.LToast;
 import com.ldm.basic.intent.IntentUtil;
 import com.ldm.basic.shared.SharedPreferencesHelper;
 import com.ldm.basic.utils.Log;
@@ -292,7 +292,7 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
      * @param smg 提示语
      */
     protected void showShort(final String smg) {
-        Toast.makeText(activity, smg, Toast.LENGTH_SHORT).show();
+        LToast.showShort(activity, smg);
     }
 
     /**
@@ -301,7 +301,7 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
      * @param smg 提示语
      */
     protected void showLong(final String smg) {
-        Toast.makeText(activity, smg, Toast.LENGTH_LONG).show();
+        LToast.showLong(activity, smg);
     }
 
     /**

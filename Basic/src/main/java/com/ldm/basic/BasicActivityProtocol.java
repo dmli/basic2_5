@@ -1,14 +1,14 @@
 package com.ldm.basic;
 
-import java.io.Serializable;
-import java.util.Map;
-
-import com.ldm.basic.intent.IntentUtil;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Toast;
+
+import com.ldm.basic.dialog.LToast;
+import com.ldm.basic.intent.IntentUtil;
+
+import java.io.Serializable;
+import java.util.Map;
 
 /**
  * Created by ldm on 15-3-25. BasicActivity中提供的一组协议，这个协议需要在构造BasicActivity时注入。
@@ -208,7 +208,7 @@ public abstract class BasicActivityProtocol {
 	 * @param smg 提示语
 	 */
 	public void showShort(final String smg) {
-		Toast.makeText(activity, smg, Toast.LENGTH_SHORT).show();
+        LToast.showShort(activity, smg);
 	}
 
 	/**
@@ -217,7 +217,7 @@ public abstract class BasicActivityProtocol {
 	 * @param smg 提示语
 	 */
 	public void showLong(final String smg) {
-		Toast.makeText(activity, smg, Toast.LENGTH_LONG).show();
+        LToast.showLong(activity, smg);
 	}
 
 	/**
