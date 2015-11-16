@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 
 /**
  * Created by ldm on 13-12-13.
- * ViewPager适配器
+ * ViewPager适配器,这个PagerAdapter中不会使用复用的View
  */
 public class BasicPagerAdapter extends PagerAdapter {
 
@@ -26,6 +26,10 @@ public class BasicPagerAdapter extends PagerAdapter {
     @Override
     public int getCount() {
         return views.size();
+    }
+
+    public View getItem(int position) {
+        return views.get(position);
     }
 
     @Override
