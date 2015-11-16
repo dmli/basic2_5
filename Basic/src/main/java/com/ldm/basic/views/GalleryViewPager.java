@@ -13,6 +13,10 @@ import com.nineoldandroids.view.ViewHelper;
  */
 public class GalleryViewPager extends LViewPager {
 
+    /**
+     * 这个值用来控制倾斜角度
+     */
+    private float ROTATION_OFF_VALUE = -30f;
 
     public GalleryViewPager(Context context) {
         super(context);
@@ -37,22 +41,20 @@ public class GalleryViewPager extends LViewPager {
      */
     public class Gallery3DPageTransformer implements ViewPager.PageTransformer {
 
-        /**
-         * 这个值用来控制倾斜角度
-         */
-        final float ROTATION_OFF_VALUE = -30f;
-
         public void transformPage(View view, float position) {
 
             /**
              * 计算缩放
              */
-            ViewHelper.setRotationY(view, position * ROTATION_OFF_VALUE);
+
+            final float rot = position * ROTATION_OFF_VALUE;
+            ViewHelper.setRotationY(view, rot > 0 ? Math.min(rot, 70) : Math.max(rot, -70));
 
             /**
              * 计算位移距离
              */
-            final float tran = position * (ROTATION_OFF_VALUE) * 1.45f;
+            final int translationOffValue = (int) (-getWidth() * 0.21f);
+            final float tran = position * translationOffValue;
             ViewHelper.setTranslationX(view, tran);
 
             /**
