@@ -16,7 +16,7 @@ public class GalleryViewPager extends LViewPager {
     /**
      * 这个值用来控制倾斜角度
      */
-    private float ROTATION_OFF_VALUE = -30f;
+    private static final float ROTATION_OFF_VALUE = -30f;
 
     public GalleryViewPager(Context context) {
         super(context);
