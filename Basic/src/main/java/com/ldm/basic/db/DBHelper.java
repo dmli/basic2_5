@@ -1,5 +1,13 @@
 package com.ldm.basic.db;
 
+import android.content.Context;
+import android.database.Cursor;
+import android.database.SQLException;
+import android.database.sqlite.SQLiteDatabase;
+
+import com.ldm.basic.utils.Log;
+import com.ldm.basic.utils.TextUtils;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -9,14 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
-import com.ldm.basic.utils.Log;
-import com.ldm.basic.utils.TextUtils;
-
-import android.content.Context;
-import android.database.Cursor;
-import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase;
 
 /**
  * Created by ldm on 14-2-7. 数据库助手，提供了简单的数据表与实体绑定、自动生成建表语句及sql语句批处理功能
@@ -433,7 +433,6 @@ public class DBHelper {
      * 递归查询给定Class及父类的所有带有@Column注解的属性
      *
      * @param c         Class<?>
-     * @param rules     修饰符过滤规则
      * @param recursion true进行递归查询
      * @return List<ColumnRes>
      */
@@ -516,7 +515,6 @@ public class DBHelper {
      * value = type
      *
      * @param c         Class<?>
-     * @param rules     修饰符过滤规则
      * @param recursion true进行递归查询
      * @return Map
      */
@@ -550,7 +548,7 @@ public class DBHelper {
      * 查询指定数据表中的数据条数
      *
      * @param context   Context
-     * @param tableName 表名
+     * @param ct 表实体
      * @return count
      */
     public static <T extends BasicTable> int queryCount(Context context, final Class<T> ct) {
@@ -633,7 +631,6 @@ public class DBHelper {
     /**
      * 根据给定的规则与类型将obj对象的属性组成一条sql语句
      *
-     * @param rules     规则，可通过getModifierRules()方法获得
      * @param fs        对象所有属性， 可用过getColumnsField2(obj.getClass(), rules, true)方法获得
      * @param tableName 表明
      * @param obj       将要组成sql语句的数据载体,该参数不能为List/map/set等集合
