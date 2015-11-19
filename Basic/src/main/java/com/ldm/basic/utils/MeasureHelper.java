@@ -17,7 +17,7 @@ public class MeasureHelper {
      * @return int
      */
     public static int getHeight(View v, int parentHeightMeasureSpec) {
-        int lph = 0, h = 0;
+        int lph = 0, h;
         if (v.getLayoutParams() != null) {
             lph = v.getLayoutParams().height;
         }
@@ -42,7 +42,7 @@ public class MeasureHelper {
      * @return int
      */
     public static int getHeight(View v) {
-        int lph = 0, h = 0;
+        int lph = 0, h;
         if (v.getLayoutParams() != null) {
             lph = v.getLayoutParams().height;
         }
@@ -68,7 +68,7 @@ public class MeasureHelper {
      * @return int
      */
     public static int getWidth(View v, int parentWidthMeasureSpec) {
-        int lpw = 0, w = 0;
+        int lpw = 0, w;
         if (v.getLayoutParams() != null) {
             lpw = v.getLayoutParams().width;
         }
@@ -93,7 +93,7 @@ public class MeasureHelper {
      * @return int
      */
     public static int getWidth(View v) {
-        int lpw = 0, w = 0;
+        int lpw = 0, w;
         if (v.getLayoutParams() != null) {
             lpw = v.getLayoutParams().width;
         }

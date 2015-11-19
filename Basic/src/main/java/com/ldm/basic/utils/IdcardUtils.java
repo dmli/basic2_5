@@ -451,7 +451,9 @@ public class IdcardUtils {
             case 1:
                 sCode = "0";
                 break;
-            case 0:
+//            case 0:
+//            sCode = "1";
+            default:
                 sCode = "1";
                 break;
         }

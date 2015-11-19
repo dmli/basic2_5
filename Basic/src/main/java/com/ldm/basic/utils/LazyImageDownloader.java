@@ -1599,6 +1599,8 @@ public class LazyImageDownloader {
                 case OnScrollListener.SCROLL_STATE_FLING:
                     LazyImageDownloader.this.scrollState = LazyImageDownloader.SCROLL_STATE_FLING;
                     break;
+                default:
+                    break;
             }
             if (onScrollListener != null) {
                 onScrollListener.onScrollStateChanged(view, scrollState);

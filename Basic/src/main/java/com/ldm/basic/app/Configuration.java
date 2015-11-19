@@ -15,8 +15,8 @@ public class Configuration implements Serializable {
      */
     private static final long serialVersionUID = 1L;
 
-    public static final String IMAGE_CACHE_PATH = Environment.getExternalStorageDirectory() + "/basic/cache/images";
-    public static final String FILE_CACHE_PATH = Environment.getExternalStorageDirectory() + "/basic/cache/file";
+    public static final String IMAGE_CACHE_PATH = Environment.getExternalStorageDirectory().getPath() + "/basic/cache/images";
+    public static final String FILE_CACHE_PATH = Environment.getExternalStorageDirectory().getPath() + "/basic/cache/file";
 
     /**
      * 数据库配置文件名称，全名db.properties 默认的配置文件raw下

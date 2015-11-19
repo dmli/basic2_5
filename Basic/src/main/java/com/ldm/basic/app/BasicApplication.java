@@ -1,16 +1,5 @@
 package com.ldm.basic.app;
 
-import java.io.Serializable;
-import java.lang.ref.WeakReference;
-import java.util.Properties;
-
-import com.ldm.basic.db.BasicSQLiteOpenHelper;
-import com.ldm.basic.properties.PropertiesHelper;
-import com.ldm.basic.shared.SharedPreferencesHelper;
-import com.ldm.basic.utils.AES;
-import com.ldm.basic.utils.Base64;
-import com.ldm.basic.utils.SystemTool;
-
 import android.app.Application;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -19,9 +8,23 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 
+import com.ldm.basic.db.BasicSQLiteOpenHelper;
+import com.ldm.basic.properties.PropertiesHelper;
+import com.ldm.basic.shared.SharedPreferencesHelper;
+import com.ldm.basic.utils.AES;
+import com.ldm.basic.utils.Base64;
+import com.ldm.basic.utils.SystemTool;
+
+import java.io.Serializable;
+import java.lang.ref.WeakReference;
+import java.util.Properties;
+
 /**
  * Created by ldm on 12-11-8. 基础的全局变量且包含了一个可实时缓存的Serializable（CLIENT_CACHE）对象，
  * 设置后将配合BasicActivity与BasicFragmentActivity自动缓存，通过getClientCache()获得缓存的对象
+ * <p/>
+ * -------------------
+ * 如果不能在AndroidManifest.xml中设置这个BasicApplication时，可以直接使用BasicApplication.initGlobalCacheListener(Context)方法初始化
  */
 public abstract class BasicApplication extends Application implements Serializable {
 
@@ -93,6 +96,11 @@ public abstract class BasicApplication extends Application implements Serializab
         initGlobalCacheListener(getApplicationContext());
     }
 
+    /**
+     * 返回全局的Application对象
+     *
+     * @return BasicApplication
+     */
     public static BasicApplication getApp() {
         return app;
     }
@@ -326,7 +334,7 @@ public abstract class BasicApplication extends Application implements Serializab
      * 异步完成结束后的回调函数，SecurityHandler及Asynchronous接口的任务处理
      *
      * @param what 标识，用户可以用该标识来区分任务
-     * @param obj Asynchronous接口中async方法的返回参数
+     * @param obj  Asynchronous接口中async方法的返回参数
      */
     public void handleMessage(int what, Object obj) {
 

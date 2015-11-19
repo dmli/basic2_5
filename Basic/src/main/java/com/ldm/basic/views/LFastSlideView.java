@@ -142,10 +142,10 @@ public class LFastSlideView extends View {
 	/**
 	 * 设置该控件的样式
 	 *
-	 * @param textColor
-	 * @param textSize
-	 * @param normalBackground
-	 * @param pressedBackground
+	 * @param textColor Color
+	 * @param textSize size
+	 * @param normalBackground background color
+	 * @param pressedBackground background color
 	 */
 	public void setTheme(int textColor, int textSize, int normalBackground, int pressedBackground) {
 		this.fontColor = textColor;
@@ -163,11 +163,11 @@ public class LFastSlideView extends View {
 	}
 
 	public interface OnTouchingLetterChangedListener {
-		public void onTouchingLetterChanged(String s);
+		void onTouchingLetterChanged(String s);
 
-		public void onTouchingDown();
+		void onTouchingDown();
 
-		public void onTouchingCenter();
+		void onTouchingCenter();
 	}
 
 }

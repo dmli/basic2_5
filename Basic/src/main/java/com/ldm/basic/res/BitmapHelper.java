@@ -45,10 +45,6 @@ import java.util.Date;
  */
 public class BitmapHelper {
 
-	public static final int CENTER = 1;
-	public static final int TOP = 2;
-	public static final int BOTTOM = 3;
-
 	/**
 	 * 按比例返回图片适合的BitmapFactory.Options，但不强制宽高度
 	 *
@@ -806,6 +802,8 @@ public class BitmapHelper {
 			case ExifInterface.ORIENTATION_ROTATE_270:
 				degree = 270;
 				break;
+            default:
+                break;
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

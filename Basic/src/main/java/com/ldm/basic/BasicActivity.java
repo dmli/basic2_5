@@ -43,7 +43,8 @@ import java.util.Timer;
 import java.util.UUID;
 
 /**
- * Created by ldm on 11-12-10. BasicActivity中提供了全局的Activity记录、BaseReceiver接收，Activity状态及常用了一些方法
+ * Created by ldm on 11-12-10.
+ * BasicActivity中提供了全局的Activity记录、BaseReceiver接收，Activity状态及常用了一些方法
  */
 public class BasicActivity extends Activity implements OnClickListener, ViewTreeObserver.OnGlobalLayoutListener {
 

@@ -227,7 +227,7 @@ public class ResourcesUtils {
 				final String type = split[0];
 
 				if ("primary".equalsIgnoreCase(type)) {
-					return Environment.getExternalStorageDirectory() + "/" + split[1];
+					return Environment.getExternalStorageDirectory().getPath() + "/" + split[1];
 				}
 			} else if (isDownloadsDocument(uri)) {// DownloadsProvider
 
