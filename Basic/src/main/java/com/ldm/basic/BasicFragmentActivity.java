@@ -877,10 +877,8 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
 	protected void onDestroy() {
 		// 触发协议的相关函数
 		clearProtocol();
-		if (isSoftInputStateListener) {
-			// 注销对ViewTreeObserver的监听
-			this.getWindow().getDecorView().getViewTreeObserver().addOnGlobalLayoutListener(null);
-		}
+        //移除OnGlobalLayoutListener事件
+        removeOnGlobalLayoutListener();
 		// 如果设置了异步任务，这里需要清除
 		if (ASYNC_SET != null) {
 			ASYNC_SET.remove(((Object) this).getClass().getName());
@@ -892,6 +890,22 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
 		}
 		super.onDestroy();
 	}
+
+    /**
+     * 移除OnGlobalLayoutListener事件
+     */
+    private void removeOnGlobalLayoutListener() {
+        if (isSoftInputStateListener) {
+            // 注销对ViewTreeObserver的监听
+            if (getWindow().getDecorView().getViewTreeObserver().isAlive()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    getWindow().getDecorView().getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                } else {
+                    getWindow().getDecorView().getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                }
+            }
+        }
+    }
 
 	/**
 	 * 消息响应方法 当Activity需要响应Broadcast时使用
@@ -955,13 +969,7 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
 		if (isSoftInputStateListener) {
 			getWindow().getDecorView().getViewTreeObserver().addOnGlobalLayoutListener(this);
 		} else {
-			if (getWindow().getDecorView().getViewTreeObserver().isAlive()) {
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-					getWindow().getDecorView().getViewTreeObserver().removeOnGlobalLayoutListener(this);
-				} else {
-					getWindow().getDecorView().getViewTreeObserver().removeGlobalOnLayoutListener(this);
-				}
-			}
+            removeOnGlobalLayoutListener();
 		}
 	}
 
