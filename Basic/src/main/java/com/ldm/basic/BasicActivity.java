@@ -519,7 +519,7 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
         /**
          * 界面结束时，清除掉记录中对应的KEY
          */
-        SystemTool.remoreActivity(getActivityKey());
+        SystemTool.removeActivity(getActivityKey());
         super.finish();
     }
 
@@ -1193,9 +1193,9 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
     /**
      * 异步接口
      */
-    public static interface Asynchronous {
+    public interface Asynchronous {
 
-        public Object async(final int tag, Object obj);
+        Object async(final int tag, Object obj);
 
     }
 

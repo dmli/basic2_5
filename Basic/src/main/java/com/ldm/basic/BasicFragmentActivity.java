@@ -527,7 +527,7 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
 		/**
 		 * 界面结束时，清除掉记录中对应的KEY
 		 */
-		SystemTool.remoreActivity(getActivityKey());
+		SystemTool.removeActivity(getActivityKey());
 		super.finish();
 	}
 

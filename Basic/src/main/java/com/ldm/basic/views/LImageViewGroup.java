@@ -31,7 +31,17 @@ public class LImageViewGroup extends ViewGroup {
         for (int i = 0; i < count; i++) {
             View child = getChildAt(i);
             if (child != null) {
-                child.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+                int w = MeasureSpec.UNSPECIFIED, h = MeasureSpec.UNSPECIFIED;
+                LayoutParams lp = child.getLayoutParams();
+                if (lp != null){
+                    if (lp.width > 0){
+                        w = View.MeasureSpec.makeMeasureSpec(lp.width, View.MeasureSpec.EXACTLY);
+                    }
+                    if (lp.height > 0){
+                        h = View.MeasureSpec.makeMeasureSpec(lp.height, View.MeasureSpec.EXACTLY);
+                    }
+                }
+                child.measure(w, h);
             }
         }
     }
@@ -42,25 +52,10 @@ public class LImageViewGroup extends ViewGroup {
         int _left = viewMargin;
         for (int i = 0; i < count; i++) {
             View child = this.getChildAt(i);
-            if (child == null || child.getVisibility() == GONE) continue;
+            if (child.getVisibility() == GONE) continue;
 
-            int width = 0;
-            int height = 0;
-            LayoutParams lp = child.getLayoutParams();
-            if (lp != null) {
-                if (lp.width > 0) {
-                    width = child.getLayoutParams().width;
-                }
-                if (lp.height > 0) {
-                    height = child.getLayoutParams().height;
-                }
-            }
-            if (width == 0) {
-                width = child.getMeasuredWidth();
-            }
-            if (height == 0) {
-                height = child.getMeasuredHeight();
-            }
+            int width = child.getMeasuredWidth();
+            int height = child.getMeasuredHeight();
             if (_left + width + viewMargin > getMeasuredWidth()) {
                 row++;//如果宽度不够就换行
                 _left = viewMargin;
