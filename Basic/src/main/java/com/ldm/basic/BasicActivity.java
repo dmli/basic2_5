@@ -15,8 +15,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Spanned;
-import android.view.MotionEvent;
-import android.view.VelocityTracker;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver;
@@ -47,11 +45,6 @@ import java.util.UUID;
  * BasicActivity中提供了全局的Activity记录、BaseReceiver接收，Activity状态及常用了一些方法
  */
 public class BasicActivity extends Activity implements OnClickListener, ViewTreeObserver.OnGlobalLayoutListener {
-
-    /**
-     * 使用startAsyncTask方法时默认的tag值
-     */
-    public static final int ASYNC_TASK_DEFAULT_TAG = 10001;
 
     /**
      * 发送一个short toast的标记
@@ -91,21 +84,6 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
      * true繁忙状态
      */
     protected boolean isBusy;
-
-    /**
-     * 用户是否开启了右滑返回
-     */
-    private boolean isSlidingBack;
-
-    /**
-     * 上一次的x/y值 vTracker
-     */
-    private float ox, oy;
-
-    /**
-     * 速度检测工具
-     */
-    private VelocityTracker vTracker;
 
     /**
      * 用户执行侧滑时的最小速度
@@ -273,34 +251,6 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
     }
 
     /**
-     * 获取Intent中额外附加的参数
-     *
-     * @param key 附加参数KEY
-     * @return 附加的字符串，null代表没有找到该附加值
-     */
-    protected String getIntentToString(final String key) {
-        String result = null;
-        if (getIntent() != null) {
-            result = getIntent().getStringExtra(key);
-        }
-        return result;
-    }
-
-    /**
-     * 返回Intent中额外附加的参数
-     *
-     * @param key 附加参数KEY
-     * @return 附加的整形值，-1代表没有找到该附加值
-     */
-    protected int getIntentToInt(final String key) {
-        int result = -1;
-        if (getIntent() != null) {
-            result = getIntent().getIntExtra(key, -1);
-        }
-        return result;
-    }
-
-    /**
      * 通过Id查询View
      *
      * @param viewId id
@@ -426,9 +376,9 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
     /**
      * 向protocolData中存储数据
      *
-     * @param key
-     * @param value
-     * @return
+     * @param key   protocol Key
+     * @param value 值
+     * @return Serializable
      */
     protected Serializable saveProtocolData(String key, Serializable value) {
         if (protocolData == null) {
@@ -730,96 +680,6 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
         this.registerReceiver(receiver, localIntentFilter);
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if (isSlidingBack) {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN: {
-                    ox = event.getX();
-                    oy = event.getY();
-                    if (vTracker == null) {
-                        vTracker = VelocityTracker.obtain();
-                        if (vTracker != null) {
-                            vTracker.addMovement(event);
-                        }
-                    } else {
-                        vTracker.clear();
-                    }
-                    break;
-                }
-                case MotionEvent.ACTION_MOVE: {
-                    float x = event.getX();
-                    float y = event.getY();
-                    vTracker.addMovement(event);
-                    vTracker.computeCurrentVelocity(1000);
-                    float velocity = vTracker.getYVelocity();
-                    if (Math.abs(velocity) >= 30) {// 当手指处于悬停状态时 重新设置起点值
-                        if (x > ox) {// 向右
-                            if (x - ox > Math.abs(y - oy) + 10) {
-                                touchSlipRight(velocity);
-                            }
-                        } else {// 向左
-                            if (ox - x > Math.abs(y - oy) + 10) {
-                                touchSlipLeft(velocity);
-                            }
-                        }
-                    }
-                    ox = x;
-                    oy = y;
-                    break;
-                }
-                case MotionEvent.ACTION_UP:
-                case MotionEvent.ACTION_CANCEL: {
-                    if (vTracker != null) {
-                        vTracker.clear();
-                        vTracker = null;
-                    }
-                }
-                break;
-                default:
-                    break;
-            }
-        }
-        return super.onTouchEvent(event) || isSlidingBack;
-    }
-
-    /**
-     * 用户touch操作执行了右滑
-     *
-     * @param velocity 用户速度值
-     */
-    protected void touchSlipRight(final float velocity) {
-        if (Math.abs(velocity) > minVelocity) {
-            finishAnim();
-        }
-    }
-
-    /**
-     * 用户touch操作执行了左滑
-     *
-     * @param velocity 用户速度值
-     */
-    protected void touchSlipLeft(final float velocity) {
-    }
-
-    /**
-     * 设置开启侧滑返回功能是否启动
-     *
-     * @param bool true开启
-     */
-    protected void openSlidingBack(boolean bool) {
-        this.isSlidingBack = bool;
-    }
-
-    /**
-     * 返回当前是否开启了侧滑返回功能
-     *
-     * @return true开启
-     */
-    public boolean isSlidingBack() {
-        return isSlidingBack;
-    }
-
     /**
      * 设置最小的速度，该速度默认500
      *
@@ -948,14 +808,6 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
             ASYNC_SET.remove(((Object) this).getClass().getName());
         }
         stopReceiver();
-        if (vTracker != null) {
-            try {
-                vTracker.recycle();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            vTracker = null;
-        }
         THIS_ACTIVITY_STATE = false;
         if (securityHandler != null) {
             securityHandler.removeCallbacksAndMessages(null);
@@ -1060,28 +912,12 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
     }
 
     /**
-     * 启动异步回调函数 *使用默认标识 ASYNC_TASK_DEFAULT_TAG *
-     */
-    protected void startAsyncTask() {
-        startAsyncTask(ASYNC_TASK_DEFAULT_TAG, null);
-    }
-
-    /**
      * 启动异步回调函数 *使用tag作为标记*
      *
      * @param tag 将被分配到handleMessage(tag, obj)的第一个参数中
      */
     protected void startAsyncTask(final int tag) {
         startAsyncTask(tag, null);
-    }
-
-    /**
-     * 启动异步回调函数 *使用默认标识ASYNC_TASK_DEFAULT_TAG，并传递一个参数*
-     *
-     * @param obj 数据被传送到handleMessage(tag, Object)中的第二个参数
-     */
-    protected void startAsyncTask(final Object obj) {
-        startAsyncTask(ASYNC_TASK_DEFAULT_TAG, obj);
     }
 
     /**
@@ -1217,7 +1053,7 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
          * @param obj 参数2
          */
         public AsyncThread(T w, String key, int tag, Object obj) {
-            this.w = new WeakReference<T>(w);
+            this.w = new WeakReference<>(w);
             this.key = key;
             this.tag = tag;
             this.obj = obj;

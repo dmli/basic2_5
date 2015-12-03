@@ -209,7 +209,6 @@ public abstract class BasicApplication extends Application implements Serializab
         }
         // 当用户数据发生变化时，尝试更新可变化的表
         BasicSQLiteOpenHelper db = BasicSQLiteOpenHelper.getInstance(context);
-        db.createVariableTable(context);
     }
 
     /**
