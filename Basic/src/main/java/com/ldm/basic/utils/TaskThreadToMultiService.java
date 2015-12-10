@@ -14,12 +14,11 @@ import com.ldm.basic.BasicTimerTask;
  */
 public class TaskThreadToMultiService {
 
-    private final List<TaskThread> taskThreads = new ArrayList<TaskThread>();
-    ;
+    private final List<TaskThread> taskThreads = new ArrayList<>();
     /**
-     * 用户任务队列,如果队列中遇到为null的任务，默认视为停止执行的信号 如果该队列本身等于null，将引发不可预料的错误
+     * 用户任务队列, 如果队列中遇到为null的任务，默认视为停止执行的信号 如果该队列本身等于null，将引发不可预料的错误
      */
-    public final Queue<Task> taskQueue = new LinkedList<Task>();
+    public final Queue<Task> taskQueue = new LinkedList<>();
     private int MAX_THREAD_NUMBER;
     private int MAX_RETAIN_FREE_THREAD_NUMBER = 3;// 最大的空闲线程保留数
     private Timer timer;
@@ -27,7 +26,6 @@ public class TaskThreadToMultiService {
     /**
      * 创建一个带有TaskThread功能的service
      *
-     * @param startTask    true启动 false不启动
      * @param threadNumber 任务数量
      */
     public TaskThreadToMultiService(int threadNumber) {
@@ -259,9 +257,6 @@ public class TaskThreadToMultiService {
             /**
              * 这里先检测任务队列是否有任务，仅在没有任务的时候才能进行任务释放
              */
-            if (taskQueue == null) {
-                return;
-            }
             if (taskQueue.size() <= 0) {
                 synchronized (taskQueue) {
 

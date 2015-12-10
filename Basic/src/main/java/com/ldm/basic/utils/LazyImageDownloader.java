@@ -14,10 +14,10 @@ import android.view.animation.Animation;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.ldm.basic.app.BasicRuntimeCache;
 import com.ldm.basic.app.Configuration;
+import com.ldm.basic.dialog.LToast;
 import com.ldm.basic.res.BitmapHelper;
 import com.ldm.basic.res.memory.MemoryCache;
 import com.ldm.basic.res.memory.impl.UsingFreqLimitedMemoryCache;
@@ -94,7 +94,7 @@ public class LazyImageDownloader {
     // public final Map<String, ImageRef> P_IDS = new HashMap<String, ImageRef>();
 
     // public final TaskSet P_TASKS = new TaskSet();
-    public final Map<String, String> P_IDS = new HashMap<String, String>();
+    public final Map<String, String> P_IDS = new HashMap<>();
 
     // class TaskSet {
     // final List<String> P_IDS_KEY = new ArrayList<String>();
@@ -491,6 +491,9 @@ public class LazyImageDownloader {
                     path = BasicRuntimeCache.IMAGE_PATH_CACHE.get(cacheName);
                     if (BasicRuntimeCache.IMAGE_PATH_CACHE.containsKey(cacheName) && path != null && new File(path).exists()) {
                         if (ref.downloadMode) {
+                            if (lHandler != null) {
+                                lHandler.sendMessage(lHandler.obtainMessage(107, ref));// 本地一存在离线任务
+                            }
                             removePid(ref);
                         } else {
                             // 使用缓存任务处理
@@ -782,7 +785,7 @@ public class LazyImageDownloader {
             if (fdt == null) {
                 fdt = new FileDownloadTool();
             }
-            String url = null;
+            String url;
             /**
              * 当进行重试时，如果有备用地址将使用备用地址进行下载
              */
@@ -820,6 +823,13 @@ public class LazyImageDownloader {
                         lHandler.sendMessage(lHandler.obtainMessage(101, _ref));// 发送重新下载消息
                     }
                 }
+            } else {
+                /**
+                 * 离线下载的任务会执行一次end()
+                 */
+                if (lHandler != null) {
+                    lHandler.sendMessage(lHandler.obtainMessage(107, _ref));// 发送重新下载消息
+                }
             }
             // 任务完成后删除
             removePid(_ref);
@@ -831,7 +841,9 @@ public class LazyImageDownloader {
                     /**
                      * 这里放弃任务，不在继续处理
                      */
-                    lHandler.sendMessage(lHandler.obtainMessage(106, _ref));// 发送重新下载消息
+                    if (lHandler != null) {
+                        lHandler.sendMessage(lHandler.obtainMessage(106, _ref));// 发送重新下载消息
+                    }
                 } else {
                     String msg = path.substring(3);
                     if (lHandler != null) {
@@ -839,7 +851,7 @@ public class LazyImageDownloader {
                             lHandler.sendMessage(lHandler.obtainMessage(105));// 内存不足
                         } else {
                             if (TextUtils.isNumber(msg)) {
-                                _ref.errorCode = TextUtils.parseInt(path, 0);
+                                _ref.requestCode = TextUtils.parseInt(path, 0);
                             }
                             lHandler.sendMessage(lHandler.obtainMessage(101, _ref));// 发送重新下载消息
                         }
@@ -890,7 +902,6 @@ public class LazyImageDownloader {
 
     // 用来显示图像的Handler
     protected static class SecurityHandler<T extends LazyImageDownloader> extends Handler {
-        private static long toastTime;// Toast时间，3秒内不重复弹出
         WeakReference<T> w;
 
         private SecurityHandler(T t) {
@@ -923,18 +934,22 @@ public class LazyImageDownloader {
                     }
                     break;
                 case 103:// 内存溢出
-                    if (w.get() != null && w.get().getContext() != null && System.currentTimeMillis() - toastTime > 3000) {
-                        Toast.makeText(w.get().getContext(), "可用内存不足，请释放内存后重试！", Toast.LENGTH_SHORT).show();
-                        toastTime = System.currentTimeMillis();
+                    if (w.get() != null && w.get().getContext() != null) {
+                        LToast.showShort(w.get().getContext(), "可用内存不足，请释放内存后重试！");
+                        SystemTool.killBackgroundProcesses(w.get().getContext().getApplicationContext());
+                        try {
+                            System.gc();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                     break;
                 case 105:
-                    if (w.get() != null && w.get().getContext() != null && System.currentTimeMillis() - toastTime > 3000) {
-                        Toast.makeText(w.get().getContext(), "手机磁盘空间不足！", Toast.LENGTH_SHORT).show();
-                        toastTime = System.currentTimeMillis();
+                    if (w.get() != null && w.get().getContext() != null) {
+                        LToast.showShort(w.get().getContext(), "手机磁盘空间不足！");
                     }
                     break;
-                case 106:
+                case 106: {
                     ImageRef _ref = (ImageRef) msg.obj;
                     if (_ref.view != null && (_ref.pId).equals(String.valueOf(_ref.view.getTag(TAG_ID)))) {
                         if (w.get() != null) {
@@ -943,7 +958,17 @@ public class LazyImageDownloader {
                             _ref.end();
                         }
                     }
-                    break;
+                }
+                break;
+                case 107: {
+                    ImageRef _ref = (ImageRef) msg.obj;
+                    if (_ref.view != null && (_ref.pId).equals(String.valueOf(_ref.view.getTag(TAG_ID)))) {
+                        if (w.get() != null) {
+                            _ref.end();
+                        }
+                    }
+                }
+                break;
                 default:
                     break;
             }
@@ -989,7 +1014,7 @@ public class LazyImageDownloader {
                     if (_ref.progressView != null) {
                         _ref.progressView.setVisibility(View.GONE);
                     }
-                    _ref.error(t.getContext(), _ref.errorCode);
+                    _ref.error(t.getContext(), _ref.requestCode);
                     _ref.end();
                 }
             }
@@ -1197,7 +1222,7 @@ public class LazyImageDownloader {
         public boolean isUnifiedSuffix = true;// 统一后缀，默认true
         public String cacheName;// 缓存名字
         public int retryCount;// 重试次数，大于等于1时将不继续重试
-        public int errorCode;
+        public int requestCode;
         public int position;// 仅当这个控件需要控制动画时才会使用这个属性
         public boolean isAnim;
         public boolean localImage;

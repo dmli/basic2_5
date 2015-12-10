@@ -1,14 +1,13 @@
 package com.ldm.basic.utils;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.ref.WeakReference;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
+import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
+import android.view.View;
+
+import com.ldm.basic.dialog.LToast;
+import com.ldm.basic.utils.LazyImageDownloader.ImageRef;
+import com.ldm.basic.utils.TaskThreadToMultiService.Task;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -29,14 +28,15 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
 
-import com.ldm.basic.utils.LazyImageDownloader.ImageRef;
-import com.ldm.basic.utils.TaskThreadToMultiService.Task;
-
-import android.content.Context;
-import android.os.Handler;
-import android.os.Message;
-import android.view.View;
-import android.widget.Toast;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
 
 /**
  * Created by ldm on 15-1-17. 下载文件，提供的下载进度
@@ -55,7 +55,7 @@ public class LazyFileDownloader {
     // 图片保存路径
     public String FILE_CACHE_PATH;
 
-    public Map<String, FileRef> P_IDS = new HashMap<String, FileRef>();
+    public Map<String, FileRef> P_IDS = new HashMap<>();
 
     /**
      * 下载过程中用来与PID匹配的value值存储的KEY
@@ -246,7 +246,6 @@ public class LazyFileDownloader {
 
     // 用来显示图像的Handler
     protected static class SecurityHandler<T extends LazyFileDownloader> extends Handler {
-        private static long toastTime;// Toast时间，3秒内不重复弹出
         WeakReference<T> w;
 
         private SecurityHandler(T t) {
@@ -280,15 +279,19 @@ public class LazyFileDownloader {
                     break;
                 }
                 case 103:// 内存溢出
-                    if (w.get() != null && w.get().context.get() != null && System.currentTimeMillis() - toastTime > 3000) {
-                        Toast.makeText(w.get().context.get(), "可用内存不足，请释放内存后重试！", Toast.LENGTH_SHORT).show();
-                        toastTime = System.currentTimeMillis();
+                    if (w.get() != null && w.get().context.get() != null) {
+                        LToast.showShort(w.get().context.get(), "可用内存不足，请释放内存后重试！");
+                        SystemTool.killBackgroundProcesses(w.get().context.get().getApplicationContext());
+                        try {
+                            System.gc();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                     break;
                 case 105:// 磁盘空间
-                    if (w.get() != null && w.get().context.get() != null && System.currentTimeMillis() - toastTime > 3000) {
-                        Toast.makeText(w.get().context.get(), "手机磁盘空间不足！", Toast.LENGTH_SHORT).show();
-                        toastTime = System.currentTimeMillis();
+                    if (w.get() != null && w.get().context.get() != null) {
+                        LToast.showShort(w.get().context.get(), "手机磁盘空间不足！");
                     }
                     break;
                 default:

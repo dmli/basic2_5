@@ -55,6 +55,15 @@ public class MultiThreadDownTool {
     public static final String DOWNLOAD_RECORD_SUFFIX = ".fdr";
 
     /**
+     * 返回当前下载任务的下载记录
+     *
+     * @return FileDownloadRecord
+     */
+    public FileDownloadRecord getFileRecord() {
+        return fdr;
+    }
+
+    /**
      * 创建一个MultiThreadDownTool
      */
     public MultiThreadDownTool() {
@@ -581,7 +590,7 @@ public class MultiThreadDownTool {
         WeakReference<MultiThreadDownTool> mtd;
 
         private SecurityHandler(MultiThreadDownTool multiThreadDownTool) {
-            this.mtd = new WeakReference<MultiThreadDownTool>(multiThreadDownTool);
+            this.mtd = new WeakReference<>(multiThreadDownTool);
         }
 
         @Override
@@ -671,8 +680,8 @@ public class MultiThreadDownTool {
 
         @Override
         public void run() {
-        	//降低这个线程的优先级
-        	android.os.Process.setThreadPriority(10);
+            //降低这个线程的优先级
+            android.os.Process.setThreadPriority(10);
             try {
                 //每次都将初始化一个FileDownloadRecord
                 fdr = checkFileDownloadComplete(filePath);

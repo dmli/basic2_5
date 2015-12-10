@@ -213,7 +213,7 @@ public class FileDownloadTool {
              } else {
                  //文件没有下载完成，执行一次删除
                  FileTool.delete(filePath);
-                 return "2::" + HttpStatus.SC_NOT_FOUND;
+                 return "2::" + code;
              }
          } catch (Exception e) {
              e.printStackTrace();
