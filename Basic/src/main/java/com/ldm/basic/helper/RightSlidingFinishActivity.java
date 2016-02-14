@@ -1,7 +1,7 @@
 package com.ldm.basic.helper;
 
 import com.ldm.basic.BasicActivity;
-import com.ldm.basic.views.DropRightLayoutView;
+import com.ldm.basic.views.LDropRightLayoutView;
 
 import android.content.Intent;
 import android.view.View;
@@ -9,14 +9,14 @@ import android.view.View;
 /**
  * Created by ldm on 15/9/30. 右滑删除功能
  */
-public class RightSlidingFinishActivity implements DropRightLayoutView.OnStateListener {
+public class RightSlidingFinishActivity implements LDropRightLayoutView.OnStateListener {
 
-	public DropRightLayoutView rootView;
+	public LDropRightLayoutView rootView;
     BasicActivity activity;
 
     public RightSlidingFinishActivity(BasicActivity activity) {
         this.activity = activity;
-        rootView = new DropRightLayoutView(activity);
+        rootView = new LDropRightLayoutView(activity);
         rootView.setOnStateListener(this);
     }
 
@@ -33,7 +33,7 @@ public class RightSlidingFinishActivity implements DropRightLayoutView.OnStateLi
 
     @Override
     public void onStateListener(int state) {
-        if (activity != null && activity.THIS_ACTIVITY_STATE && state == DropRightLayoutView.STATE_OPEN) {
+        if (activity != null && activity.THIS_ACTIVITY_STATE && state == LDropRightLayoutView.STATE_OPEN) {
             Intent intent = activity.getIntent();
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
             activity.overridePendingTransition(0, 0);

@@ -1,23 +1,24 @@
 package com.ldm.basic.adapter;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.ldm.basic.utils.LazyImageDownloader;
-
 import android.content.Context;
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.BaseAdapter;
+
+import com.ldm.basic.utils.LazyImageDownloader;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by ldm on 14-3-5.
  * 基础的适配器模版BasicAdapter的共享版，使用外界的List<T>结果集地址，可以达到多适配器共享结果集的效果
  */
-public abstract class BasicAdapter<T> extends BaseAdapter {
+public abstract class BasicMultiTypeAdapter<T extends BasicMultiTypeAdapter.BasicMultiTypeBean> extends BaseAdapter {
 
     protected List<T> data;
     protected LayoutInflater layoutInflater;
@@ -26,12 +27,14 @@ public abstract class BasicAdapter<T> extends BaseAdapter {
     private boolean startTwoWayAnimation;
     private Handler handler;
     private int failCount;
+    private BasicAdapterCacheManager cacheViewManager;
 
-    public BasicAdapter(Context context, List<T> data) {
+    public BasicMultiTypeAdapter(Context context, List<T> data) {
         this.layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.data = data;
         notPlayAnimation();// 第一次初始化不开始动画
         this.oldCount = data.size();
+        this.cacheViewManager = new BasicAdapterCacheManager();
     }
 
     /**
@@ -58,6 +61,29 @@ public abstract class BasicAdapter<T> extends BaseAdapter {
         }
         return handler;
     }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        /**
+         * 查询是否有缓存View可用
+         */
+        T f = getItem(position);
+        View v = cacheViewManager.findCacheView(convertView, String.valueOf(f.getViewType()));
+        /**
+         * 编译View
+         */
+        return buildView(position, v, parent);
+    }
+
+    /**
+     * 这个View代替了getView(...)方法
+     *
+     * @param position 位置
+     * @param v        Convert View
+     * @param parent   ViewGroup
+     */
+    protected abstract View buildView(int position, View v, ViewGroup parent);
+
 
     @Override
     public void notifyDataSetChanged() {
@@ -244,6 +270,9 @@ public abstract class BasicAdapter<T> extends BaseAdapter {
         return animPosition;
     }
 
+    /**
+     * 动画
+     */
     public class MyAnimationListener implements Animation.AnimationListener {
 
         View v;
@@ -270,6 +299,27 @@ public abstract class BasicAdapter<T> extends BaseAdapter {
         }
     }
 
+    /**
+     * ViewHolder
+     */
+    public abstract class BasicViewHolder {
+
+        public abstract View buildView(int position, T t, ViewGroup parent, View convertView);
+    }
+
+    /**
+     * 使用这个适配器
+     */
+    public abstract static class BasicMultiTypeBean {
+
+        public String viewType;
+
+        public abstract String getViewType();
+    }
+
+    /**
+     * 刷新数据是用来控制动画的Runnable
+     */
     public class RefreshRunnable implements Runnable {
         boolean close;
 

@@ -14,9 +14,10 @@ import android.view.animation.Animation;
 import android.view.animation.Transformation;
 
 /**
- * Created by ldm on 15/5/29. 支持右滑的布局，滑动时仅滑动控件内部的最后一个child（最上层的）
+ * Created by ldm on 15/5/29.
+ * 支持右滑的布局，滑动时仅滑动控件内部的最后一个child（最上层的）
  */
-public class DropRightLayoutView extends ViewGroup {
+public class LDropRightLayoutView extends ViewGroup {
 
 	private int LEFT_VALUE = 30;// 底部忽略距离
 	public static final int STATE_DEFAULT = 0;
@@ -30,15 +31,15 @@ public class DropRightLayoutView extends ViewGroup {
 	int state = STATE_DEFAULT, oldState = STATE_DEFAULT;
 	OnStateListener onStateListener;
 
-	public DropRightLayoutView(Context context) {
+	public LDropRightLayoutView(Context context) {
 		super(context);
 	}
 
-	public DropRightLayoutView(Context context, AttributeSet attrs) {
+	public LDropRightLayoutView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 	}
 
-	public DropRightLayoutView(Context context, AttributeSet attrs, int defStyle) {
+	public LDropRightLayoutView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 	}
 

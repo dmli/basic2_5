@@ -34,7 +34,8 @@ import java.util.UUID;
 import pl.droidsonroids.gif.GifDrawable;
 
 /**
- * Created by ldm on 14-1-22. 开启<N>个线程下载图片, 可以通过sizeLimit设置内存大小 LazyImageDownloader的简洁版，不含有进度条处理能力，适合列表页使用
+ * Created by ldm on 14-1-22.
+ * 开启<N>个线程下载图片, 可以通过sizeLimit设置内存大小 LazyImageDownloader的简洁版，不含有进度条处理能力，适合列表页使用
  */
 public class LazyImageDownloader {
 
@@ -362,6 +363,8 @@ public class LazyImageDownloader {
 
             // 同步pid
             ref.syncPid();
+            //记录当前任务对应的本地缓存路径
+            ref.filePath = getFilePath(ref);
             /**
              * 如果处于任务导入时这里要将任务存储到缓存中，等待任务导入结束后
              */
@@ -476,9 +479,9 @@ public class LazyImageDownloader {
                 // 验证图像是否已经下载过，如果下载过使用addCacheTask(ImageRef, String)方法创建任务
                 String cacheName = getCacheName(ref);
                 if (!BasicRuntimeCache.IMAGE_PATH_CACHE.containsKey(cacheName)) {// 检查本地是否有文件
-                    File f = new File(getFilePath(ref));
+                    File f = new File(ref.filePath);
                     if (f.exists()) {
-                        BasicRuntimeCache.IMAGE_PATH_CACHE.put(cacheName, getFilePath(ref));
+                        BasicRuntimeCache.IMAGE_PATH_CACHE.put(cacheName, ref.filePath);
                     }
                 }
                 // 检查本地是否有缓存
@@ -774,7 +777,7 @@ public class LazyImageDownloader {
     private void createDownloadTask(ImageRef _ref) {
         String path = null;
         String cacheName = getCacheName(_ref);
-        String filePath = getFilePath(_ref);
+        String filePath = _ref.filePath;
         File f = new File(filePath);
         /**
          * 如果文件存在切任务于1分钟内创建，将忽略这个下载任务， 直接返回文件地址，这样可以过滤掉网络不稳定时导致文件重复下载的问题
@@ -851,7 +854,7 @@ public class LazyImageDownloader {
                             lHandler.sendMessage(lHandler.obtainMessage(105));// 内存不足
                         } else {
                             if (TextUtils.isNumber(msg)) {
-                                _ref.requestCode = TextUtils.parseInt(path, 0);
+                                _ref.responseCode = TextUtils.parseInt(path, 0);
                             }
                             lHandler.sendMessage(lHandler.obtainMessage(101, _ref));// 发送重新下载消息
                         }
@@ -964,6 +967,7 @@ public class LazyImageDownloader {
                     ImageRef _ref = (ImageRef) msg.obj;
                     if (_ref.view != null && (_ref.pId).equals(String.valueOf(_ref.view.getTag(TAG_ID)))) {
                         if (w.get() != null) {
+                            _ref.responseCode = 200;
                             _ref.end();
                         }
                     }
@@ -1014,7 +1018,7 @@ public class LazyImageDownloader {
                     if (_ref.progressView != null) {
                         _ref.progressView.setVisibility(View.GONE);
                     }
-                    _ref.error(t.getContext(), _ref.requestCode);
+                    _ref.error(t.getContext(), _ref.responseCode);
                     _ref.end();
                 }
             }
@@ -1222,7 +1226,7 @@ public class LazyImageDownloader {
         public boolean isUnifiedSuffix = true;// 统一后缀，默认true
         public String cacheName;// 缓存名字
         public int retryCount;// 重试次数，大于等于1时将不继续重试
-        public int requestCode;
+        public int responseCode;
         public int position;// 仅当这个控件需要控制动画时才会使用这个属性
         public boolean isAnim;
         public boolean localImage;
@@ -1231,6 +1235,7 @@ public class LazyImageDownloader {
         public boolean useMinWidth;// 使用较小的宽度，设置true后将会使用原图的宽度及给定的width做比较，使用较小的宽度作为读取图片的标准
         public int maxIgnoreTime = 60000;// 最大的忽略时间
         public String localDirectory;// 如果这个值不等于null将表示强制将图片下载到某路径下面
+        public String filePath;//下载完成后的文件路径
         public String UUID;
 
         /**
@@ -1524,8 +1529,8 @@ public class LazyImageDownloader {
                             gif.recycle();
                         }
                     }
-                    ((ImageView) view).setImageDrawable(defDrawable);
                 }
+                ((ImageView) view).setImageDrawable(defDrawable);
             } else {
                 if (SystemTool.DENSITY_DPI >= Build.VERSION_CODES.JELLY_BEAN) {
                     view.setBackground(defDrawable);

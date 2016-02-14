@@ -11,19 +11,19 @@ import com.nineoldandroids.view.ViewHelper;
  * Created by ldm on 15/11/12.
  * 画廊，这里默认使用了Gallery3DPageTransformer动画控制器
  */
-public class GalleryViewPager extends LViewPager {
+public class LGalleryViewPager extends LViewPager {
 
     /**
      * 这个值用来控制倾斜角度
      */
     private static final float ROTATION_OFF_VALUE = -30f;
 
-    public GalleryViewPager(Context context) {
+    public LGalleryViewPager(Context context) {
         super(context);
         init();
     }
 
-    public GalleryViewPager(Context context, AttributeSet attrs) {
+    public LGalleryViewPager(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }

@@ -4,7 +4,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.ldm.basic.views.PullToRefreshView;
+import com.ldm.basic.views.LPullToRefreshView;
 import com.miyou.basic.R;
 import com.nineoldandroids.view.ViewHelper;
 
@@ -12,7 +12,7 @@ import com.nineoldandroids.view.ViewHelper;
  * Created by ldm on 12/11/14.
  * 下拉刷新的动画处理《圆环旋转》
  */
-public class SimpleHeadRotatingCircle implements PullToRefreshView.BasicHeadAnimation {
+public class SimpleHeadRotatingCircle implements LPullToRefreshView.BasicHeadAnimation {
 
     private int nowState;
     private TextView lPullToRefreshText;
@@ -20,7 +20,7 @@ public class SimpleHeadRotatingCircle implements PullToRefreshView.BasicHeadAnim
     private View lPullToRefreshProgress;
 
     public SimpleHeadRotatingCircle() {
-        nowState = PullToRefreshView.DONE;
+        nowState = LPullToRefreshView.DONE;
     }
 
     @Override
@@ -50,7 +50,7 @@ public class SimpleHeadRotatingCircle implements PullToRefreshView.BasicHeadAnim
             initView(headNode);
         }
         lPullToRefreshText.setVisibility(View.VISIBLE);
-        lPullToRefreshText.setText(R.string.down_push_to_rrefresh_text);
+        lPullToRefreshText.setText(R.string.down_push_to_refresh_text);
         lPullToRefreshProgress.setVisibility(View.GONE);
         lPullToRefreshImage.setVisibility(View.VISIBLE);
     }
@@ -74,7 +74,7 @@ public class SimpleHeadRotatingCircle implements PullToRefreshView.BasicHeadAnim
 
     @Override
     public void pullDone() {
-        nowState = PullToRefreshView.DONE;
+        nowState = LPullToRefreshView.DONE;
     }
 
     @Override

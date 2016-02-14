@@ -40,13 +40,13 @@ import android.widget.ImageView;
 /**
  * 代码来源于http://www.itlanbao.com网友提供
  */
-public class ExplosionFieldView extends View {
+public class LExplosionFieldView extends View {
 
 	private List<ExplosionAnimator> mExplosions = new ArrayList<>();
 	private int[] mExpandInset = new int[2];
 	private Animator.AnimatorListener animatorListener;
 
-	public ExplosionFieldView(Context context) {
+	public LExplosionFieldView(Context context) {
 		super(context);
 		init();
 	}
@@ -55,12 +55,12 @@ public class ExplosionFieldView extends View {
 		this.animatorListener = animatorListener;
 	}
 
-	public ExplosionFieldView(Context context, AttributeSet attrs) {
+	public LExplosionFieldView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		init();
 	}
 
-	public ExplosionFieldView(Context context, AttributeSet attrs, int defStyleAttr) {
+	public LExplosionFieldView(Context context, AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
 		init();
 	}
@@ -120,8 +120,8 @@ public class ExplosionFieldView extends View {
 
 			@Override
 			public void onAnimationUpdate(ValueAnimator animation) {
-				ViewHelper.setTranslationX(ExplosionFieldView.this, (random.nextFloat() - 0.5f) * view.getWidth() * 0.05f);
-				ViewHelper.setTranslationY(ExplosionFieldView.this, (random.nextFloat() - 0.5f) * view.getHeight() * 0.05f);
+				ViewHelper.setTranslationX(LExplosionFieldView.this, (random.nextFloat() - 0.5f) * view.getWidth() * 0.05f);
+				ViewHelper.setTranslationY(LExplosionFieldView.this, (random.nextFloat() - 0.5f) * view.getHeight() * 0.05f);
 			}
 		});
 		animator.start();

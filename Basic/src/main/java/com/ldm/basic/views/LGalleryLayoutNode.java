@@ -33,27 +33,27 @@ import com.ldm.basic.utils.MeasureHelper;
  *
  *
  */
-public class GalleryLayoutNode extends RelativeLayout implements ViewPager.OnPageChangeListener {
+public class LGalleryLayoutNode extends RelativeLayout implements ViewPager.OnPageChangeListener {
 
 
-    private GalleryViewPager viewPager;
+    private LGalleryViewPager viewPager;
     private ImageView floatView;
     private int viewPagerWidth = 0, heightPagerHeight = 0;
 
 
-    public GalleryLayoutNode(Context context) {
+    public LGalleryLayoutNode(Context context) {
         super(context);
     }
 
-    public GalleryLayoutNode(Context context, AttributeSet attrs) {
+    public LGalleryLayoutNode(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public GalleryLayoutNode(Context context, AttributeSet attrs, int defStyleAttr) {
+    public LGalleryLayoutNode(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
-    public GalleryViewPager getViewPager() {
+    public LGalleryViewPager getViewPager() {
         return viewPager;
     }
 
@@ -63,7 +63,7 @@ public class GalleryLayoutNode extends RelativeLayout implements ViewPager.OnPag
      * @param context Context
      */
     private void createViewPager(Context context) {
-        viewPager = new GalleryViewPager(context);
+        viewPager = new LGalleryViewPager(context);
         LayoutParams lp = new LayoutParams(viewPagerWidth, heightPagerHeight);
         lp.addRule(RelativeLayout.CENTER_HORIZONTAL);
         viewPager.setLayoutParams(lp);

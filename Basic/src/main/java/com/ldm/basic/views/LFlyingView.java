@@ -13,23 +13,23 @@ import android.widget.ImageView;
  * Created by ldm on 15/7/14.
  * 给定一个View，指定一个起始点及终点图标将根据贝塞尔曲线做一个移动
  */
-public class FlyingView extends ImageView {
+public class LFlyingView extends ImageView {
 
 
     private Point startPoint, endPoint;
     public boolean isRuning;
 
-    public FlyingView(Context context) {
+    public LFlyingView(Context context) {
         super(context);
         init();
     }
 
-    public FlyingView(Context context, AttributeSet attrs) {
+    public LFlyingView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
-    public FlyingView(Context context, AttributeSet attrs, int defStyle) {
+    public LFlyingView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init();
     }
@@ -95,8 +95,8 @@ public class FlyingView extends ImageView {
             long x = calcBezier(interpolatedTime, startPoint.x, controlPoint.x, endPoint.x);
             long y = calcBezier(interpolatedTime, startPoint.y, controlPoint.y, endPoint.y);
 
-            FlyingView.this.setTranslationX(x);
-            FlyingView.this.setTranslationY(y);
+            LFlyingView.this.setTranslationX(x);
+            LFlyingView.this.setTranslationY(y);
 
         }
     }

@@ -1,11 +1,11 @@
 
 package com.ldm.basic.views;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Rect;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,23 +14,25 @@ import android.view.animation.Animation;
 import android.view.animation.AnticipateOvershootInterpolator;
 import android.view.animation.Transformation;
 import android.widget.AbsListView;
-import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
-import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.Scroller;
 
-import com.ldm.basic.adapter.BasicAdapter;
 import com.ldm.basic.utils.MeasureHelper;
-import com.ldm.basic.utils.SystemTool;
 
 /**
  * Created by ldm on 12/11/12.
  * 分页内部可以嵌套一个GridView，并为它提供一个分页功能，使用者需要使用setOnLoadingListener方法来设置分页监听
  * <p/>
  * 当用户使用这个ViewGroup时，用户至少需要开启一个功能，如果分页及刷新都没有被开启则PullToRefreshView是不可用的
+ * <p/>
+ * 注：
+ * 这是一个删减版，原版可以支持
+ * extends AbsListView
+ * RecyclerView
+ * PLA_AbsListView
  */
-public class PullToRefreshView extends ViewGroup {
+public class LPullToRefreshViewLite extends ViewGroup {
 
     public static final int RELEASE_TO_REFRESH = 0;// 松开刷新状态
     public static final int PULL_TO_REFRESH = 1;// 下拉刷新状态
@@ -42,12 +44,8 @@ public class PullToRefreshView extends ViewGroup {
     private int lState = DONE;
     private Rect rect;
     private AbsListView listView1;
-    private RecyclerView recyclerView;
     private View loadingView, headView, listViewHeadView;
     private int originalTop;
-    private BasicAdapter<?> adapter;
-    private RecyclerView.Adapter<?> recyclerAdapter;
-    private BaseExpandableListAdapter baseExpandableListAdapter;
     private boolean effective;
     private boolean loadPaging;// 是否处于刷新中
     private boolean isNext;// 是否有下一页数据
@@ -56,7 +54,7 @@ public class PullToRefreshView extends ViewGroup {
     //    private float scaledTouchSlop;//最大忽略范围
     //本次动画将要移动的长度    方向1向上  -1向下 0原地停留
     private static final float REDUCTION_RATIO = 0.35f;//减速比例
-    private static final int DURATION_TIME = 350;// 放手时自动移动的持续时间
+    private static final int DURATION_TIME = 650;// 放手时自动移动的持续时间
 
     private Scroller scroller;
     private AbsListView.OnScrollListener onScrollListener;
@@ -68,49 +66,22 @@ public class PullToRefreshView extends ViewGroup {
     /**
      * 当设置了回掉之后这两个属性将跟随变成false
      */
-    private boolean openLoadPagingFc, openRefreshAllListFc, isRefreshAllTouchPause;//isRefreshAllTouchPause true将暂停下拉手势
+    private boolean openRefreshAllListFc, isRefreshAllTouchPause;//isRefreshAllTouchPause true将暂停下拉手势
 
 
-    public PullToRefreshView(Context context) {
+    public LPullToRefreshViewLite(Context context) {
         super(context);
         init(context);
     }
 
-    public PullToRefreshView(Context context, AttributeSet attrs) {
+    public LPullToRefreshViewLite(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(context);
     }
 
-    public PullToRefreshView(Context context, AttributeSet attrs, int defStyle) {
+    public LPullToRefreshViewLite(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init(context);
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        isRefreshAllTouchPause = false;
-        if (openRefreshAllListFc) {
-            headView = getChildAt(0);
-        }
-        View v1 = getChildAt(openRefreshAllListFc ? 1 : 0);
-        if (v1 instanceof AbsListView) {
-            listView1 = (AbsListView) v1;
-            listView1.setOnScrollListener(new MyAbsOnScrollListener());
-        } else if (v1 instanceof RecyclerView) {
-            recyclerView = (RecyclerView) v1;
-            recyclerView.setOnScrollListener(new RecyclerViewOnScrollListener());
-        }
-        if (openLoadPagingFc) {//用户开启了分页功能
-            this.loadingView = getChildAt(openRefreshAllListFc ? 2 : 1);
-        } else {
-            openLoadPagingFunc();
-        }
-        a1.setDuration(DURATION_TIME);
-        a1.setInterpolator(new AnticipateOvershootInterpolator());
-        a2.setDuration(DURATION_TIME);
-        a2.setInterpolator(new AccelerateInterpolator());
-
     }
 
     @Override
@@ -123,8 +94,11 @@ public class PullToRefreshView extends ViewGroup {
         this.isNext = true;
         this.effective = true;
         this.originalTop = 0;
+        isRefreshAllTouchPause = false;
         this.scroller = new Scroller(context);
-        MAX_MOVE_HEIGHT = (int) (85 * SystemTool.DENSITY);
+        DisplayMetrics dm = new DisplayMetrics();
+        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(dm);
+        MAX_MOVE_HEIGHT = (int) (85 * dm.density);
     }
 
     @Override
@@ -132,10 +106,12 @@ public class PullToRefreshView extends ViewGroup {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         if (openRefreshAllListFc) {
             View v0 = getChildAt(0), v1 = getChildAt(1);
-            int height = MeasureHelper.getHeight(v0, heightMeasureSpec);
-            v0.measure(widthMeasureSpec, height);
+            v0.measure(widthMeasureSpec, MeasureHelper.getHeight(v0, heightMeasureSpec));
             v1.measure(widthMeasureSpec, heightMeasureSpec);
-            if (openLoadPagingFc) {
+            /**
+             * 这个给GridView类型的控件使用的
+             */
+            if (getChildCount() == 3) {
                 View v2 = getChildAt(2);
                 v2.measure(widthMeasureSpec, MeasureHelper.getHeight(v2, heightMeasureSpec));
             }
@@ -183,10 +159,10 @@ public class PullToRefreshView extends ViewGroup {
     private void onLayoutOpenRefreshAllFc(boolean changed) {
         View v0 = getChildAt(0), v1 = getChildAt(1);
         v0.layout(0, -v0.getMeasuredHeight(), v0.getMeasuredWidth(), 0);
-        PULL_TO_REFRESH_HEIGHT = (int) (v0.getMeasuredHeight() * 1.20f);//记录这个头部的高度，后面做动画时作为参数
-        MAX_TO_REFRESH_HEIGHT = (int) (v0.getMeasuredHeight() * 1.15f);
+        PULL_TO_REFRESH_HEIGHT = v0.getMeasuredHeight();//记录这个头部的高度，后面做动画时作为参数
+        MAX_TO_REFRESH_HEIGHT = v0.getMeasuredHeight();
         v1.layout(0, 0, v1.getMeasuredWidth(), v1.getMeasuredHeight());
-        if (openLoadPagingFc) {
+        if (getChildCount() == 3) {
             View v2 = getChildAt(2);
             if (rect == null || rect.top <= 0 || changed) {
                 v2.layout(0, v1.getMeasuredHeight(), v2.getMeasuredWidth(), v1.getMeasuredHeight() + v2.getMeasuredHeight());
@@ -197,56 +173,6 @@ public class PullToRefreshView extends ViewGroup {
             }
             if (getWidth() > 0 || changed) {
                 originalTop = v2.getTop();
-            }
-        }
-    }
-
-    /**
-     * 为ListView设置适配器
-     * (如果可以的话建议在activity中进行对listView设置适配器, 因为在这里将会有一定的延时问题)
-     *
-     * @param adapter BasicAdapter<?>
-     */
-    public void setAdapter(BasicAdapter<?> adapter) {
-        if (listView1 != null) {
-            if (listView1 instanceof ListView) {
-                ListView lv = (ListView) listView1;
-                lv.setAdapter(adapter);
-            } else if (listView1 instanceof GridView) {
-                GridView lv = (GridView) listView1;
-                lv.setAdapter(adapter);
-            }
-        } else {
-            this.adapter = adapter;
-            if (effective) {
-                postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        setAdapter(PullToRefreshView.this.adapter);
-                    }
-                }, 300);
-            }
-        }
-    }
-
-    /**
-     * 为RecyclerView设置适配器
-     * (如果可以的话建议在activity中进行对listView设置适配器, 因为在这里将会有一定的延时问题)
-     *
-     * @param adapter RecyclerView.Adapter<?>
-     */
-    public void setAdapter(RecyclerView.Adapter<?> adapter) {
-        if (recyclerView != null) {
-            recyclerView.setAdapter(adapter);
-        } else {
-            this.recyclerAdapter = adapter;
-            if (effective) {
-                postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        setAdapter(PullToRefreshView.this.recyclerAdapter);
-                    }
-                }, 300);
             }
         }
     }
@@ -272,7 +198,7 @@ public class PullToRefreshView extends ViewGroup {
                 postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        addHeaderView(PullToRefreshView.this.listViewHeadView);
+                        addHeaderView(LPullToRefreshViewLite.this.listViewHeadView);
                     }
                 }, 300);
             }
@@ -280,24 +206,7 @@ public class PullToRefreshView extends ViewGroup {
     }
 
     public ViewGroup getListView() {
-        return listView1 == null ? recyclerView : listView1;
-    }
-
-    public void setAdapter(BaseExpandableListAdapter adapter) {
-        if (listView1 != null) {
-            ExpandableListView el = ((ExpandableListView) listView1);
-            el.setAdapter(adapter);
-        } else {
-            this.baseExpandableListAdapter = adapter;
-            if (effective) {
-                postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        setAdapter(baseExpandableListAdapter);
-                    }
-                }, 500);
-            }
-        }
+        return listView1;
     }
 
     @Override
@@ -360,7 +269,7 @@ public class PullToRefreshView extends ViewGroup {
                 touchDown(event);
                 break;
             case MotionEvent.ACTION_MOVE:
-                touchMove(event.getX(), event.getY());
+                touchMove(event.getY());
                 touchMoveX = event.getX();
                 touchMoveY = event.getY();
                 break;
@@ -412,17 +321,16 @@ public class PullToRefreshView extends ViewGroup {
     private void refreshAll() {
         //触发刷新全部回调功能
         if (onRefreshAllListener != null) {
-            onRefreshAllListener.onBeginLoadPagingListener();
+            onRefreshAllListener.onRefreshComplete();
         }
     }
 
     /**
      * 处理用户移动手势的事件
      *
-     * @param x 新的y坐标
      * @param y 新的x坐标
      */
-    private void touchMove(float x, float y) {
+    private void touchMove(float y) {
         if (Math.abs(getScrollY()) > MAX_TO_REFRESH_HEIGHT) {
             lState = RELEASE_TO_REFRESH;
             if (headAnimation != null && headAnimation.getState() != lState) {
@@ -477,13 +385,6 @@ public class PullToRefreshView extends ViewGroup {
         boolean state = false;
         if (listView1 != null) {
             state = listView1.getChildCount() <= 0 || (listView1.getFirstVisiblePosition() == 0 && listView1.getChildAt(0).getTop() == listView1.getPaddingTop());
-        } else if (recyclerView != null) {
-            if (recyclerView.getChildCount() <= 0) {
-                state = true;
-            } else {
-                LinearLayoutManager lm = (LinearLayoutManager) recyclerView.getLayoutManager();
-                state = (lm.findFirstCompletelyVisibleItemPosition() == 0);
-            }
         }
         return state;
     }
@@ -537,9 +438,6 @@ public class PullToRefreshView extends ViewGroup {
         if (listView1 != null) {
             listView1.setSelection(position);
         }
-        if (recyclerView != null) {
-            recyclerView.getLayoutManager().scrollToPosition(position);
-        }
     }
 
     @Override
@@ -574,10 +472,6 @@ public class PullToRefreshView extends ViewGroup {
 
     public AbsListView getAbsListView() {
         return listView1;
-    }
-
-    public RecyclerView getRecyclerView() {
-        return recyclerView;
     }
 
     /**
@@ -636,6 +530,18 @@ public class PullToRefreshView extends ViewGroup {
             loadPaging = false;
             onEnd();
         }
+        if (loadingView != null && (listView1 instanceof ListView)) {
+            ListView lv = ((ListView) listView1);
+            if (keep) {
+                loadingView.setVisibility(VISIBLE);
+                if (lv.getFooterViewsCount() == 0) {
+                    lv.addFooterView(loadingView, null, false);
+                }
+            } else {
+                loadingView.setVisibility(INVISIBLE);
+                lv.removeFooterView(loadingView);
+            }
+        }
     }
 
     /**
@@ -646,7 +552,7 @@ public class PullToRefreshView extends ViewGroup {
             loadPaging = true;
             showLoadView();
             if (this.onLoadPagingListener != null) {
-                this.onLoadPagingListener.onBeginLoadPagingListener();
+                this.onLoadPagingListener.onLoadComplete();
             }
         } else {//这里主要为onCreate中调用onBegin时做的延时处理
             postDelayed(new Runnable() {
@@ -654,7 +560,7 @@ public class PullToRefreshView extends ViewGroup {
                 public void run() {
                     beginLoadPaging();
                 }
-            }, 500);
+            }, 300);
         }
     }
 
@@ -663,6 +569,10 @@ public class PullToRefreshView extends ViewGroup {
      */
     public void beginRefreshAll() {
         if (headView != null) {
+            if (loadingView != null && (listView1 instanceof ListView)) {
+                ListView lv = ((ListView) listView1);
+                lv.removeFooterView(loadingView);
+            }
             lState = REFRESHING;
             if (headAnimation != null && headAnimation.getState() != lState) {
                 headAnimation.refresh(headView);
@@ -670,16 +580,23 @@ public class PullToRefreshView extends ViewGroup {
                 headAnimation.setState(lState);
             }
             scroller.startScroll(0, getScrollY(), 0, -MAX_TO_REFRESH_HEIGHT, DURATION_TIME);
-            if (this.onRefreshAllListener != null) {
-                this.onRefreshAllListener.onBeginLoadPagingListener();
-            }
+            postInvalidate();
+            postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (onRefreshAllListener != null) {
+                        onRefreshAllListener.onRefreshComplete();
+                    }
+                }
+            }, DURATION_TIME);
+
         } else {//这里主要为onCreate中调用onBegin时做的延时处理
             postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     beginRefreshAll();
                 }
-            }, 500);
+            }, 300);
         }
     }
 
@@ -687,10 +604,12 @@ public class PullToRefreshView extends ViewGroup {
      * 开始显示加载动画
      */
     public void showLoadView() {
-        if (loadingView.getAnimation() != null) {
-            loadingView.clearAnimation();
+        if (!(listView1 instanceof ListView)) {
+            if (loadingView.getAnimation() != null) {
+                loadingView.clearAnimation();
+            }
+            loadingView.startAnimation(a1);
         }
-        loadingView.startAnimation(a1);
     }
 
     /**
@@ -704,10 +623,12 @@ public class PullToRefreshView extends ViewGroup {
      * 开始隐藏加载动画
      */
     public void hideLoadView() {
-        if (loadingView.getAnimation() != null) {
-            loadingView.clearAnimation();
+        if (!(listView1 instanceof ListView)) {
+            if (loadingView.getAnimation() != null) {
+                loadingView.clearAnimation();
+            }
+            loadingView.startAnimation(a2);
         }
-        loadingView.startAnimation(a2);
     }
 
     public void setOnScrollListener(AbsListView.OnScrollListener onScrollListener) {
@@ -724,12 +645,33 @@ public class PullToRefreshView extends ViewGroup {
     /**
      * 设置分页监听
      *
+     * @param layoutId             moreViewID
      * @param onLoadPagingListener OnLoadPagingListener
      */
-    public void setOnLoadPagingListener(OnLoadPagingListener onLoadPagingListener) {
+    public void setOnLoadPagingListener(int layoutId, OnLoadPagingListener onLoadPagingListener) {
         if (onLoadPagingListener != null) {
             this.onLoadPagingListener = onLoadPagingListener;
-            openLoadPagingFc = true;
+            openLoadPagingFunc();
+            View v1 = getChildAt(openRefreshAllListFc ? 1 : 0);
+            if (v1 instanceof AbsListView) {
+                listView1 = (AbsListView) v1;
+                listView1.setOnScrollListener(new MyAbsOnScrollListener());
+            }
+
+            if (listView1 instanceof ListView) {
+                loadingView = View.inflate(getContext(), layoutId, null);
+                loadingView.setVisibility(INVISIBLE);
+                ((ListView) listView1).addFooterView(loadingView);
+            } else {
+                /**
+                 * 除ListView外都用弹出式动画
+                 */
+                this.loadingView = getChildAt(openRefreshAllListFc ? 2 : 1);
+                a1.setDuration(DURATION_TIME);
+                a1.setInterpolator(new AnticipateOvershootInterpolator());
+                a2.setDuration(DURATION_TIME);
+                a2.setInterpolator(new AccelerateInterpolator());
+            }
         }
     }
 
@@ -742,6 +684,7 @@ public class PullToRefreshView extends ViewGroup {
         if (onRefreshAllListener != null) {
             this.onRefreshAllListener = onRefreshAllListener;
             openRefreshAllListFc = true;
+            headView = getChildAt(0);
         }
     }
 
@@ -764,12 +707,12 @@ public class PullToRefreshView extends ViewGroup {
      * 设置分页监听
      */
     public interface OnLoadPagingListener {
-        void onBeginLoadPagingListener();
+        void onLoadComplete();
     }
 
 
     public interface OnRefreshAllListener {
-        void onBeginLoadPagingListener();
+        void onRefreshComplete();
     }
 
     /**
@@ -779,30 +722,6 @@ public class PullToRefreshView extends ViewGroup {
      */
     public void setHeadAnimation(BasicHeadAnimation headAnimation) {
         this.headAnimation = headAnimation;
-    }
-
-    /**
-     * PLA控件的滑动监听
-     */
-    private class RecyclerViewOnScrollListener extends RecyclerView.OnScrollListener {
-
-        @Override
-        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-            if (lState == DONE && isNext && !loadPaging && onLoadPagingListener != null && newState == RecyclerView.SCROLL_STATE_IDLE) {
-                LinearLayoutManager llm = (LinearLayoutManager) recyclerView.getLayoutManager();
-                if (llm.findLastCompletelyVisibleItemPosition() == recyclerView.getAdapter().getItemCount() - 1) {// 滚动到底部
-                    loadPaging = true;
-                    beginLoadPaging();
-                }
-            }
-            if (onScrollListener != null) {
-                onScrollListener.onScrollStateChanged(null, newState);
-            }
-        }
-
-        @Override
-        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-        }
     }
 
     /**

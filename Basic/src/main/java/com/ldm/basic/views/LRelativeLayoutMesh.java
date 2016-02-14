@@ -12,7 +12,7 @@ import android.widget.RelativeLayout;
  * Created by ldm on 14-8-22.
  * 指定Mesh后，可以将内部的布局映射成图片进行Mesh动画回执
  */
-public class RelativeLayoutMesh extends RelativeLayout {
+public class LRelativeLayoutMesh extends RelativeLayout {
 
     private Mesh mesh;
     public boolean isStartImage;//是否开启影像功能
@@ -20,15 +20,15 @@ public class RelativeLayoutMesh extends RelativeLayout {
     private Bitmap _bitmapCache;//缓存备份
     private long destroyTime;//记录时间戳，如果销毁创建时间与销毁时间相差在1秒内时 不重新创建bitmap（异步创建时无效）
 
-    public RelativeLayoutMesh(Context context) {
+    public LRelativeLayoutMesh(Context context) {
         super(context);
     }
 
-    public RelativeLayoutMesh(Context context, AttributeSet attrs) {
+    public LRelativeLayoutMesh(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public RelativeLayoutMesh(Context context, AttributeSet attrs, int defStyle) {
+    public LRelativeLayoutMesh(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
 

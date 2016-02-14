@@ -18,7 +18,7 @@ import android.util.AttributeSet;
 /**
  * Created by ldm on 15/9/24. copy汪洋的代码实现
  */
-public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.Renderer {
+public class LFilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.Renderer {
 
 	private int width = 0;
 	private int height = 0;
@@ -49,12 +49,12 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 		this.bitmap = bitmap;
 	}
 
-	public FilterGLSurfaceView(Context context) {
+	public LFilterGLSurfaceView(Context context) {
 		super(context);
 		init(context);
 	}
 
-	public FilterGLSurfaceView(Context context, AttributeSet attrs) {
+	public LFilterGLSurfaceView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		init(context);
 	}
@@ -103,8 +103,8 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
 	private void calcViewport() {
 		drawViewport = new FrameRenderer.Viewport();
-		drawViewport.width = FilterGLSurfaceView.this.width;
-		drawViewport.height = FilterGLSurfaceView.this.height;
+		drawViewport.width = LFilterGLSurfaceView.this.width;
+		drawViewport.height = LFilterGLSurfaceView.this.height;
 		drawViewport.x = 0;
 		drawViewport.y = 0;
 	}
@@ -157,8 +157,8 @@ public class FilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 		}
 		GLES20.glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 
-		FilterGLSurfaceView.this.width = width;
-		FilterGLSurfaceView.this.height = height;
+		LFilterGLSurfaceView.this.width = width;
+		LFilterGLSurfaceView.this.height = height;
 
 		calcViewport();
 	}
