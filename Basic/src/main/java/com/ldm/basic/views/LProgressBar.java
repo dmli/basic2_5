@@ -9,7 +9,7 @@ import android.widget.ImageView;
 
 /**
  * Created by ldm on 13-6-5.
- * LProgressBar
+ * 使用AnimationDrawable做动画
  */
 public class LProgressBar extends ImageView {
 
