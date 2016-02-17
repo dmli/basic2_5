@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -693,6 +694,17 @@ public class SystemTool {
     public static void toggleSoftInput(final Activity activity) {
         InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
+    }
+
+    /**
+     * 返回设备是否为手机，这里通过SIM类型区分
+     *
+     * @param context Context
+     * @return true/false
+     */
+    public static boolean isPhone(Context context) {
+        TelephonyManager telephony = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        return telephony.getPhoneType() != TelephonyManager.PHONE_TYPE_NONE;
     }
 
     /**

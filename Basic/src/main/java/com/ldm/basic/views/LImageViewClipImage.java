@@ -134,7 +134,8 @@ public class LImageViewClipImage extends ImageView {
     }
 
     public interface OnDrawListener {
-        public void onFirstDraw();
+        void onFirstDraw();
     }
+
 
 }

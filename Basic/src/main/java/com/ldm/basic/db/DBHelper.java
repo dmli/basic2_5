@@ -49,7 +49,7 @@ public class DBHelper {
             return false;
         }
         boolean result = false;
-        Cursor cursor = null;
+        Cursor cursor;
         try {
             String sql = "select count(*) as c from sqlite_master where type = ? and name = ?";
             cursor = db.rawQuery(sql, new String[]{"table", tableName.trim()});
@@ -59,6 +59,7 @@ public class DBHelper {
                     result = true;
                 }
             }
+            cursor.close();
         } catch (Exception e) {
             Log.e("DBHelper.isTableExist", "not find " + tableName);
         }
@@ -99,12 +100,12 @@ public class DBHelper {
                 key += "," + columnRe.getName();
             }
         }
-        boolean notTheFirst = false;
+        boolean isFirst = true;
         for (ColumnRes columnRe : columnRes) {
-            if (notTheFirst) {// 第一次不加逗号
-                sql.append(", ");
-            } else {
+            if (isFirst) {// 第一次不加逗号
                 sql.append(" ");
+            } else {
+                sql.append(", ");
             }
             sql.append(columnRe.getName());
             sql.append(" ");
@@ -124,10 +125,12 @@ public class DBHelper {
                     }
                 }
             }
-            notTheFirst = true;
+            isFirst = false;
         }
         if (primaryKey > 1) {
-            sql.append(", PRIMARY KEY(" + (key.substring(1, key.length())) + ")");
+            sql.append(", PRIMARY KEY(");
+            sql.append(key.substring(1, key.length()));
+            sql.append(")");
         }
         sql.append(") ");
         return sql.toString();
@@ -154,7 +157,7 @@ public class DBHelper {
             c.close();
             return null;
         }
-        List<T> result = new ArrayList<T>();
+        List<T> result = new ArrayList<>();
         do {
             int len = c.getColumnCount();
             Map<String, Class<?>> columnRes = getColumnsField2(ct, true);// 获取Class<?>及父类的所有满足条件的属性
@@ -210,7 +213,7 @@ public class DBHelper {
         Cursor c = db.rawQuery("select " + columnName + " from " + tableName + (where == null ? "" : "where " + where), param);
         if (c != null) {
             if (c.getCount() > 0 && c.moveToFirst()) {
-                List<String> cs = new ArrayList<String>();
+                List<String> cs = new ArrayList<>();
                 int columnIndex = c.getColumnIndex(columnName);
                 do {
                     cs.add(c.getString(columnIndex));
@@ -233,7 +236,7 @@ public class DBHelper {
     public static List<String> queryOnlyColumn(Cursor c, String columnName) {
         if (c != null) {
             if (c.getCount() > 0 && c.moveToFirst()) {
-                List<String> cs = new ArrayList<String>();
+                List<String> cs = new ArrayList<>();
                 int columnIndex = c.getColumnIndex(columnName);
                 do {
                     cs.add(c.getString(columnIndex));
@@ -391,7 +394,7 @@ public class DBHelper {
      */
     public static <T extends BasicTable> List<T> queryToClass(final Context context, final String tableName, final Class<T> ct, final String where, final String[] param, final String order, int[] pager) throws Exception {
         BasicSQLiteOpenHelper db = BasicSQLiteOpenHelper.getInstance(context);
-        List<String> params = new ArrayList<String>();
+        List<String> params = new ArrayList<>();
         if (param != null) {
             Collections.addAll(params, param);
         }
@@ -437,7 +440,7 @@ public class DBHelper {
      * @return List<ColumnRes>
      */
     public static List<ColumnRes> getColumnsField(final Class<?> c, final boolean recursion) {
-        List<ColumnRes> field = new ArrayList<ColumnRes>();
+        List<ColumnRes> field = new ArrayList<>();
         if (c.getSuperclass() != null) {
             Column col = c.getAnnotation(Column.class);
             for (Field f : c.getDeclaredFields()) {
@@ -484,7 +487,7 @@ public class DBHelper {
         Class<?> ct = ((Object) t).getClass();
         String sql = "UPDATE " + (TextUtils.isNull(tableName) ? ct.getSimpleName() : tableName).toUpperCase(Locale.CHINA) + " SET ";
         String w = "";
-        List<String> param = new ArrayList<String>();
+        List<String> param = new ArrayList<>();
         for (String s : columnRes.keySet()) {
             if (s.equals("_id"))
                 continue;
@@ -519,7 +522,7 @@ public class DBHelper {
      * @return Map
      */
     public static Map<String, Class<?>> getColumnsField2(final Class<?> c, final boolean recursion) {
-        Map<String, Class<?>> field = new HashMap<String, Class<?>>();
+        Map<String, Class<?>> field = new HashMap<>();
         if (c.getSuperclass() != null) {
             for (Field f : c.getDeclaredFields()) {
                 if (f.getAnnotation(Column.class) == null)
@@ -547,8 +550,8 @@ public class DBHelper {
     /**
      * 查询指定数据表中的数据条数
      *
-     * @param context   Context
-     * @param ct 表实体
+     * @param context Context
+     * @param ct      表实体
      * @return count
      */
     public static <T extends BasicTable> int queryCount(Context context, final Class<T> ct) {
@@ -650,7 +653,7 @@ public class DBHelper {
         // ------------------------------------------------------
         StringBuilder s2 = new StringBuilder();
         s2.append(" VALUES ( ");
-        List<String> param = new ArrayList<String>();
+        List<String> param = new ArrayList<>();
         for (String name : fs.keySet()) {
             try {
                 Method m = obj.getClass().getMethod("get" + TextUtils.upperFirst(name));
@@ -679,7 +682,7 @@ public class DBHelper {
         sql1 += ") ";
         sql2 += ") ";
         if (param.size() > 0) {
-            result = new HashMap<String, String[]>();
+            result = new HashMap<>();
             String[] pa = param.toArray(new String[param.size()]);
             result.put(sql1 + sql2, pa);
         }
@@ -710,8 +713,8 @@ public class DBHelper {
         boolean result = false;
         if (obj != null && obj.length > 0) {
             Map<String, Class<?>> fs = getColumnsField2(((Object) obj[0]).getClass(), true);// 不获取Class<?>及父类的所有满足条件的属性
-            List<String> sql = new ArrayList<String>();
-            List<String[]> param = new ArrayList<String[]>();
+            List<String> sql = new ArrayList<>();
+            List<String[]> param = new ArrayList<>();
             for (Object o : obj) {
                 Map<String, String[]> r;
                 if (TextUtils.isNull(tableName)) {
@@ -749,8 +752,8 @@ public class DBHelper {
     public static synchronized <T extends BasicTable> boolean saveClassToDB(final SQLiteDatabase db, final T... obj) {
         boolean result = false;
         if (obj != null && obj.length > 0) {
-            List<String> sql = new ArrayList<String>();
-            List<String[]> param = new ArrayList<String[]>();
+            List<String> sql = new ArrayList<>();
+            List<String[]> param = new ArrayList<>();
             for (Object o : obj) {
                 Map<String, String[]> r = getInsertSql(o);
                 if (r == null)
