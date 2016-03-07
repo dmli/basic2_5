@@ -1,10 +1,5 @@
 package com.ldm.basic.adapter;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.ldm.basic.utils.LazyImageDownloader;
-
 import android.content.Context;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -12,6 +7,11 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.BaseAdapter;
+
+import com.ldm.basic.utils.LazyImageDownloader;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by ldm on 14-3-5.
@@ -198,10 +198,6 @@ public abstract class BasicAdapter<T> extends BaseAdapter {
      */
     public void setStartTwoWayAnimation(boolean startTwoWayAnimation) {
         this.startTwoWayAnimation = startTwoWayAnimation;
-    }
-
-    public void stop() {
-
     }
 
     /**

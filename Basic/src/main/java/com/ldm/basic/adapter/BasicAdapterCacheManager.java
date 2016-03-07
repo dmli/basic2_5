@@ -22,7 +22,7 @@ public class BasicAdapterCacheManager {
     /**
      * 缓存容器
      */
-    Map<String, List<View>> caches = new HashMap<String, List<View>>();
+    Map<String, List<View>> caches = new HashMap<>();
 
     /**
      * 向容器中添加缓存
@@ -33,7 +33,7 @@ public class BasicAdapterCacheManager {
     private void putView(String tag, View view) {
         List<View> vs = caches.get(tag);
         if (vs == null) {
-            vs = new ArrayList<View>();
+            vs = new ArrayList<>();
         }
         vs.add(view);
     }

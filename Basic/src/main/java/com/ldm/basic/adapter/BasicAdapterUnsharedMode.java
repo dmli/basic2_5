@@ -1,10 +1,5 @@
 package com.ldm.basic.adapter;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.ldm.basic.utils.LazyImageDownloader;
-
 import android.content.Context;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -12,6 +7,11 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.BaseAdapter;
+
+import com.ldm.basic.utils.LazyImageDownloader;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by ldm on 14-3-5. 
@@ -30,7 +30,7 @@ public abstract class BasicAdapterUnsharedMode<T> extends BaseAdapter {
 
 	public BasicAdapterUnsharedMode(Context context, List<? extends T> data) {
 		this.layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		this.data = new ArrayList<T>();
+		this.data = new ArrayList<>();
 		this.data.addAll(data);
 		notPlayAnimation();// 第一次初始化不开始动画
 		this.oldCount = data.size();
@@ -138,7 +138,7 @@ public abstract class BasicAdapterUnsharedMode<T> extends BaseAdapter {
 	 */
 	public void add(T data) {
 		if (this.data == null) {
-			this.data = new ArrayList<T>();
+			this.data = new ArrayList<>();
 		}
 		this.data.add(data);
 	}
@@ -152,7 +152,7 @@ public abstract class BasicAdapterUnsharedMode<T> extends BaseAdapter {
 		if (data == null)
 			return;
 		if (this.data == null) {
-			this.data = new ArrayList<T>();
+			this.data = new ArrayList<>();
 		}
 		failCount = getCount();
 		this.data.addAll(data);
@@ -224,10 +224,6 @@ public abstract class BasicAdapterUnsharedMode<T> extends BaseAdapter {
 	 */
 	public void setStartTwoWayAnimation(boolean startTwoWayAnimation) {
 		this.startTwoWayAnimation = startTwoWayAnimation;
-	}
-
-	public void stop() {
-
 	}
 
 	/**

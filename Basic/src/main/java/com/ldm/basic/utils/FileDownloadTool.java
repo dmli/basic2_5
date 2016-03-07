@@ -1,18 +1,13 @@
 package com.ldm.basic.utils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import android.content.Context;
+import android.content.Intent;
+
+import com.ldm.basic.app.Configuration;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.HttpVersion;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.ClientConnectionManager;
@@ -29,10 +24,13 @@ import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
-import com.ldm.basic.app.Configuration;
-
-import android.content.Context;
-import android.content.Intent;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by ldm on 13-12-14.
@@ -173,12 +171,6 @@ public class FileDownloadTool {
             if (code == HttpStatus.SC_OK && response.getEntity() != null) {
                 return fileTool.save(response.getEntity().getContent(), cachePath, cacheName);
             }
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (IllegalStateException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -256,12 +248,6 @@ public class FileDownloadTool {
             if (code == HttpStatus.SC_OK && response.getEntity() != null) {
                 return response.getEntity().getContent();
             }
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (IllegalStateException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -306,12 +292,6 @@ public class FileDownloadTool {
                     }
                 }
             }
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (IllegalStateException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -337,12 +317,6 @@ public class FileDownloadTool {
             if (code == HttpStatus.SC_OK) {
                 return EntityUtils.toString(response.getEntity(), HTTP.UTF_8);
             }
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (IllegalStateException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

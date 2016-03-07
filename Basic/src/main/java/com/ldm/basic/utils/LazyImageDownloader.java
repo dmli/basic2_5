@@ -50,13 +50,9 @@ public class LazyImageDownloader {
      * 如果用户设置了OnScrollListener当滑动状态处于SCROLL_STATE_IDLE/SCROLL_STATE_TOUCH_SCROLL时任务添加正常， 仅当SCROLL_STATE_FLING状态时做任务暂停
      */
     public static int SCROLL_STATE_IDLE = 0;
-    public static int SCROLL_STATE_TOUCH_SCROLL = 0;
-    public static int SCROLL_STATE_BUSY = 1;// 当前处于忙碌中，这是进入的任务 全部进入临时任务池
-    public static int SCROLL_STATE_FLING = 2;
-
-    public static final int TASK_STATE_IDLE = 0;
-    public static final int TASK_STATE_DOWNLOAD = 1;
-    public static final int TASK_STATE_SUCCESS = 2;
+    public static int SCROLL_STATE_TOUCH_SCROLL = 1;
+    public static int SCROLL_STATE_BUSY = 2;// 当前处于忙碌中，这是进入的任务 全部进入临时任务池
+    public static int SCROLL_STATE_FLING = 3;
 
     /**
      * 当前滑动状态
@@ -89,55 +85,7 @@ public class LazyImageDownloader {
     public String IMAGE_CACHE_PATH;
     public static String DEFAULT_IMAGE_CACHE_PATH;
 
-    /**
-     * 任务列表
-     */
-    // public final Map<String, ImageRef> P_IDS = new HashMap<String, ImageRef>();
-
-    // public final TaskSet P_TASKS = new TaskSet();
     public final Map<String, String> P_IDS = new HashMap<>();
-
-    // class TaskSet {
-    // final List<String> P_IDS_KEY = new ArrayList<String>();
-    // final List<String> P_IDS_UUID = new ArrayList<String>();
-    // final List<ImageRef> P_IDS_VALUE = new ArrayList<ImageRef>();
-    //
-    // public boolean isExist(String key) {
-    // return P_IDS_KEY.contains(key);
-    // }
-    //
-    // public void put(String key, ImageRef ref) {
-    // P_IDS_KEY.add(key);
-    // P_IDS_UUID.add(ref.UUID);
-    // P_IDS_VALUE.add(ref);
-    // }
-    //
-    // public ImageRef remove(String key) {
-    // ImageRef ref = null;
-    // int index = P_IDS_KEY.indexOf(key);
-    // if (index >= 0) {
-    // P_IDS_KEY.remove(index);
-    // ref = P_IDS_VALUE.remove(index);
-    // P_IDS_UUID.remove(index);
-    // }
-    // return ref;
-    // }
-    //
-    // public ImageRef get(String key) {
-    // ImageRef ref = null;
-    // int index = P_IDS_KEY.indexOf(key);
-    // if (index >= 0) {
-    // ref = P_IDS_VALUE.get(index);
-    // }
-    // return ref;
-    // }
-    //
-    // public void clear() {
-    // P_IDS_KEY.clear();
-    // P_IDS_VALUE.clear();
-    // P_IDS_UUID.clear();
-    // }
-    // }
 
     /**
      * 滑动处于阻尼时的任务列表， 当LazyImageOnScrollListener状态处于SCROLL_STATE_IDLE时
@@ -908,7 +856,7 @@ public class LazyImageDownloader {
         WeakReference<T> w;
 
         private SecurityHandler(T t) {
-            w = new WeakReference<T>(t);
+            w = new WeakReference<>(t);
         }
 
         @Override
@@ -1207,8 +1155,6 @@ public class LazyImageDownloader {
 
     @SuppressLint("NewApi")
     public static class ImageRef {
-        public float floatObj;
-        public int intObj;
         public String strObj;
         public Object obj;
         public String pId = "-1";// 队列ID 模块内将用此变量来控制ImageRef的重复
@@ -1262,17 +1208,7 @@ public class LazyImageDownloader {
         }
 
         /**
-         * 设置忽略后将不对这个View进行过滤
-         *
-         * @param bool true/false
-         * @return ImageRef
-         */
-        public ImageRef setIgnoreTaskFilter(boolean bool) {
-            return this;
-        }
-
-        /**
-         * 设置后可以强制这样图片的缓存路径
+         * 设置后可以强制这张图片的缓存路径
          *
          * @param directory 本地目录
          * @return ImageRef
@@ -1303,6 +1239,7 @@ public class LazyImageDownloader {
         // 初始化
         private void init(String id, String url, View view, String cn, int position) {
             this.cacheName = cn == null ? TextUtils.getCacheNameForUrl(url, unifiedSuffix) : cn;
+            this.position = position;
             this.pId = id == null ? this.cacheName : id;
             this.url = url;
             this.imageToSrc = true;
@@ -1322,91 +1259,6 @@ public class LazyImageDownloader {
             this.view.setTag(TAG_ID, pId + "");
         }
 
-        /**
-         * 最大的忽略时间
-         *
-         * @param time 毫秒
-         * @return ImageRef
-         */
-        public ImageRef setMaxIgnoreTime(int time) {
-            maxIgnoreTime = time;
-            return this;
-        }
-
-        /**
-         * 调用后将开启下载模式，这个模式下仅下载不显示图像
-         *
-         * @return ImageRef
-         */
-        public ImageRef openDownloadMode() {
-            downloadMode = true;
-            return this;
-        }
-
-        /**
-         * 设置备注URL地址
-         *
-         * @param backupUrl 地址
-         * @return ImageRef
-         */
-        public ImageRef setBackupUrl(String backupUrl) {
-            this.backupUrl = backupUrl;
-            return this;
-        }
-
-        /**
-         * 开启忽略defaultImage功能
-         *
-         * @param bool 取值范围 true/false
-         * @return ImageRef
-         */
-        public ImageRef setIgnoreDefaultImage(boolean bool) {
-            this.ignoreDefaultImage = bool;
-            return this;
-        }
-
-        /**
-         * 开启校验文件类型功能
-         *
-         * @return ImageRef
-         */
-        public ImageRef openAutoVerifyFileType() {
-            autoVerifyFileType = true;
-            return this;
-        }
-
-        /**
-         * 设置true后将使用较小的宽度作为读图的标准
-         *
-         * @param bool true/false
-         * @return ImageRef
-         */
-        public ImageRef setUseMinWidth(boolean bool) {
-            this.useMinWidth = bool;
-            return this;
-        }
-
-        /**
-         * 设置是否
-         *
-         * @param isMovie GIF图片
-         * @return ImageRef
-         */
-        public ImageRef isMovie(boolean isMovie) {
-            this.isMovie = isMovie;
-            return this;
-        }
-
-        /**
-         * 设置false后将填充Background属性
-         *
-         * @param bool 默认true
-         * @return ImageRef
-         */
-        public ImageRef setImageToSrc(boolean bool) {
-            this.imageToSrc = bool;
-            return this;
-        }
 
         /**
          * 设置true后将会在结束时执行一个特定的动画
@@ -1441,41 +1293,6 @@ public class LazyImageDownloader {
             return localImage;
         }
 
-        /**
-         * 设置是否先检查本地
-         *
-         * @param localImage 设置true后有限检查本地
-         * @return ImageRef
-         */
-        public ImageRef setLocalImage(boolean localImage) {
-            this.localImage = localImage;
-            return this;
-        }
-
-        public ImageRef setWidth(int width) {
-            this.width = width;
-            return this;
-        }
-
-        public ImageRef setHeight(int height) {
-            this.height = height;
-            return this;
-        }
-
-        public ImageRef setUnifiedSuffix(boolean isUnifiedSuffix) {
-            this.isUnifiedSuffix = isUnifiedSuffix;
-            return this;
-        }
-
-        public ImageRef setPosition(int position) {
-            this.position = position;
-            return this;
-        }
-
-        public ImageRef setProgressView(View pv) {
-            this.progressView = pv;
-            return this;
-        }
 
         @SuppressWarnings("deprecation")
         public void onDrawBitmap(Context context) {
@@ -1566,21 +1383,6 @@ public class LazyImageDownloader {
             if (bitmap != null && !bitmap.isRecycled()) {
                 bitmap.recycle();
             }
-        }
-
-        public ImageRef setFloatObj(float floatObj) {
-            this.floatObj = floatObj;
-            return this;
-        }
-
-        public ImageRef setIntObj(int intObj) {
-            this.intObj = intObj;
-            return this;
-        }
-
-        public ImageRef setStrObj(String strObj) {
-            this.strObj = strObj;
-            return this;
         }
 
         public ImageRef setObj(Object obj) {
