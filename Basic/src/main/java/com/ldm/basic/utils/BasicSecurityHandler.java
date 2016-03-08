@@ -1,9 +1,9 @@
 package com.ldm.basic.utils;
 
-import java.lang.ref.WeakReference;
-
 import android.os.Handler;
 import android.os.Message;
+
+import java.lang.ref.WeakReference;
 
 /**
  * Created by ldm on 12/9/8.
@@ -22,14 +22,14 @@ public class BasicSecurityHandler<T extends BasicSecurityHandler.SecurityHandler
         if (w != null) {
             SecurityHandlerInterface t = w.get();
             if (t != null) {
-                t.handleMessage(msg.what, msg.obj);
+                t.handleMessage(msg.what, msg.arg1, msg.obj);
             }
         }
     }
 
     public interface SecurityHandlerInterface {
 
-        void handleMessage(int what, Object obj);
+        void handleMessage(int what, int arg1, Object obj);
     }
 
 }

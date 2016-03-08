@@ -1,8 +1,11 @@
 package com.ldm.basic;
 
-import java.lang.ref.WeakReference;
-import java.util.HashMap;
-import java.util.Map;
+import android.app.Service;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
 
 import com.ldm.basic.app.BasicApplication;
 import com.ldm.basic.conn.BasicGetHelper;
@@ -11,12 +14,9 @@ import com.ldm.basic.dialog.Dialog;
 import com.ldm.basic.utils.SystemTool;
 import com.ldm.basic.utils.TaskThreadToMultiService;
 
-import android.app.Service;
-import android.content.Context;
-import android.content.Intent;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
+import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by ldm on 14-1-3. Service在SystemTool初始化信息时被初始化，提供了一些基础的常用方法
@@ -28,7 +28,7 @@ public class BasicService extends Service {
     /**
      * 异步任务的唯一标识将会被存储到该队列中
      */
-    public static Map<String, AsyncTaskCallback> ASYNC_TASK_QUEUE;
+    public static final Map<String, AsyncTaskCallback> ASYNC_TASK_QUEUE = new HashMap<>();
 
     /**
      * 异步任务
@@ -75,9 +75,7 @@ public class BasicService extends Service {
 
     @Override
     public void onDestroy() {
-        if (ASYNC_TASK_QUEUE != null) {
             ASYNC_TASK_QUEUE.clear();
-        }
         super.onDestroy();
     }
 
@@ -107,10 +105,6 @@ public class BasicService extends Service {
      */
     public static boolean createAsyncTask(final Context context, final String tag, final AsyncTaskCallback task) {
         boolean result = false;
-        if (ASYNC_TASK_QUEUE == null) {
-            // 初始化任务队列
-            ASYNC_TASK_QUEUE = new HashMap<String, AsyncTaskCallback>();
-        }
         if (!ASYNC_TASK_QUEUE.containsKey(tag) && task != null) {
             task._tag = tag;
             ASYNC_TASK_QUEUE.put(tag, task);
@@ -142,10 +136,6 @@ public class BasicService extends Service {
      */
     public static boolean createAsyncDelayedTask(final Context context, final String tag, int delayedTime, final AsyncTaskCallback task) {
         boolean result = false;
-        if (ASYNC_TASK_QUEUE == null) {
-            // 初始化任务队列
-            ASYNC_TASK_QUEUE = new HashMap<String, AsyncTaskCallback>();
-        }
         if (!ASYNC_TASK_QUEUE.containsKey(tag) && task != null) {
             task._tag = tag;
             ASYNC_TASK_QUEUE.put(tag, task);
@@ -196,9 +186,6 @@ public class BasicService extends Service {
             taskThreadToMultiService = new TaskThreadToMultiService(10);
             taskThreadToMultiService.setMaxRetainFreeThreadNumber(0);//设置最大空闲线程保留数量为0
         }
-        if (ASYNC_TASK_QUEUE == null) {
-            ASYNC_TASK_QUEUE = new HashMap<String, AsyncTaskCallback>();
-        }
         if (!ASYNC_TASK_QUEUE.containsKey(tag) && task != null) {
             task._tag = tag;
             ASYNC_TASK_QUEUE.put(tag, task);
@@ -220,21 +207,22 @@ public class BasicService extends Service {
     /**
      * 处理异步任务的各种回调方法
      */
-    private static Handler handler = new Handler() {
+    private static Handler handler = new BasicSecurityHandler();
+    private static class BasicSecurityHandler extends Handler{
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case RESULT_CHILD_ENTER: {
                     if (msg.obj != null && ASYNC_TASK_QUEUE.containsKey(msg.obj.toString())) {
-                    		ASYNC_TASK_QUEUE.get(msg.obj.toString()).enter(BasicService.getInstance());	
+                        ASYNC_TASK_QUEUE.get(msg.obj.toString()).enter(BasicService.getInstance());
                     }
                 }
                 break;
                 case RESULT_CHILD_EXIT: {
                     if (msg.obj != null && ASYNC_TASK_QUEUE.containsKey(msg.obj.toString())) {
-                    	synchronized (ASYNC_TASK_QUEUE) {
-                    		ASYNC_TASK_QUEUE.remove(msg.obj.toString()).exit(BasicService.getInstance(), msg.arg1);	
-                    	}
+                        synchronized (ASYNC_TASK_QUEUE) {
+                            ASYNC_TASK_QUEUE.remove(msg.obj.toString()).exit(BasicService.getInstance(), msg.arg1);
+                        }
                     }
                 }
                 break;
@@ -268,7 +256,7 @@ public class BasicService extends Service {
                 @Override
                 public void taskStart(Object... obj) {
                     handler.sendMessage(handler.obtainMessage(RESULT_CHILD_ENTER, obj[0]));
-                    AsyncTaskCallback _task = ASYNC_TASK_QUEUE.get(obj[0]);
+                    AsyncTaskCallback _task = ASYNC_TASK_QUEUE.get(String.valueOf(obj[0]));
                     if (_task != null) {
                         handler.sendMessage(handler.obtainMessage(RESULT_CHILD_EXIT, _task.asynchronous(BasicService.getInstance()), -1, obj[0]));
                     }
@@ -293,7 +281,7 @@ public class BasicService extends Service {
                 }
             }.start();
         }
-    };
+    }
 
     /**
      * 异步任务

@@ -54,31 +54,6 @@ public abstract class BasicApplication extends Application implements Serializab
     public static Serializable CLIENT_CACHE;
 
     /**
-     * ACTIVITY间参数传递统一KEY
-     */
-    public static final String INTENT_PARAMETER_KEY = "intent_cmd";
-
-    /**
-     * ACTIVITY间参数传递DATA数据时使用
-     */
-    public static final String INTENT_PARAMETER_DATA = "data";
-
-    /**
-     * ACTIVITY间数据返回统一KEY
-     */
-    public static final String INTENT_RESULT_KEY = "intent_result";
-
-    /**
-     * ACTIVITY间启动的标准code
-     */
-    public static final int INTENT_REQUEST_CODE = 100001;
-
-    /**
-     * ACTIVITY间返回的标准code
-     */
-    public static final int INTENT_RESULT_CODE = 100002;
-
-    /**
      * 常量字符串
      */
     public static final ConstantPool CONSTANTS = new ConstantPool();
@@ -155,7 +130,7 @@ public abstract class BasicApplication extends Application implements Serializab
      * @param key AndroidManifest
      * @return value
      */
-    public Object getMetaData(String key) {
+    public Object getApplicationMetaData(String key) {
         Object result = null;
         try {
             ApplicationInfo ai = this.getPackageManager().getApplicationInfo(this.getPackageName(), PackageManager.GET_META_DATA);

@@ -5,15 +5,12 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.net.ConnectivityManager;
@@ -21,7 +18,6 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
-import android.provider.MediaStore;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
@@ -37,7 +33,6 @@ import com.google.gson.Gson;
 import com.ldm.basic.BasicService;
 import com.ldm.basic.app.BasicApplication;
 import com.ldm.basic.db.BasicSQLiteOpenHelper;
-import com.ldm.basic.res.ResourcesUtils;
 
 import java.io.DataOutputStream;
 import java.io.File;
@@ -444,37 +439,6 @@ public class SystemTool {
         intent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString());
         intent.putExtra("return-data", true);
         activity.startActivityForResult(intent, requestCode);
-    }
-
-    /**
-     * 将图库返回的Uri转换成可用的绝对路径
-     *
-     * @param context Context
-     * @param uri     Uri
-     * @return 绝对地址
-     */
-    public static String imageUriToPath(final Context context, Uri uri) {
-        String path = null;
-        try {
-            if (SystemTool.SYS_SDK_INT >= 19) {
-                path = ResourcesUtils.getPath(context, uri);
-            } else {
-                ContentResolver resolver = context.getContentResolver();
-                if (uri != null) {
-                    Cursor cursor = resolver.query(uri, new String[]{MediaStore.Images.Media.DATA}, null, null, null);
-                    if (cursor != null) {
-                        int column_index = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
-                        if (cursor.moveToFirst()) {
-                            path = cursor.getString(column_index);
-                        }
-                        cursor.close();
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return path;
     }
 
     /**

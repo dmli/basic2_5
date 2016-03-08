@@ -23,7 +23,6 @@ import com.ldm.basic.utils.Log;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Timer;
 
 /**
  * Created by ldm on 14-2-21. 基于Fragment增加了一些常用的功能, 用户调用initView(LayoutInflater,
@@ -35,10 +34,6 @@ import java.util.Timer;
  */
 public class BasicFragment extends Fragment implements View.OnClickListener {
 
-    /**
-     * 使用startAsyncTask方法时默认的tag值
-     */
-    public static final int ASYNC_TASK_DEFAULT_TAG = 10001;
     protected View rootView;
     protected LayoutInflater inflater;
     protected BasicFragmentActivity activity;
@@ -51,26 +46,9 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
     public boolean THIS_FRAGMENT_STATE;
 
     /**
-     * true繁忙状态
-     */
-    protected boolean isBusy;
-
-    /**
-     * 网络监听器的唯一标识
-     */
-    protected String networkListenerTag;
-
-    /**
      * 简易的异步线程接口，为了脱离asynchronous内部方法影响finish()而设计的
      */
     private static Map<String, Asynchronous> ASYNC_SET;
-
-    /**
-     * 用来获取当前播放进度的定时器
-     */
-    private Timer timer;
-
-    private Map<String, BasicTimerTask> timerTasks;
 
     /**
      * 界面按钮控制器，可以通过设置间隔时间开启点击事件监听
@@ -120,18 +98,6 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    public void onPause() {
-        // 界面暂停时将取消所有的定时任务
-        cancelAllSchedule();
-        super.onPause();
-    }
-
-    @Override
     public void onDestroyView() {
         // 如果设置了异步任务，这里需要清除
         if (ASYNC_SET != null) {
@@ -158,34 +124,6 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
             Log.e("inflater 没有初始化，可以考虑在onCreateView中使用initView(LayoutInflater, ViewGroup, int)方法或自行设置inflater");
         }
         return inflater == null ? null : inflater.inflate(resource, root, attachToRoot);
-    }
-
-    /**
-     * 获取Intent中额外附加的参数
-     *
-     * @param key 附加参数KEY
-     * @return 附加的字符串，null代表没有找到该附加值
-     */
-    protected String getIntentToString(final String key) {
-        String result = null;
-        if (activity != null && activity.getIntent() != null) {
-            result = activity.getIntent().getStringExtra(key);
-        }
-        return result;
-    }
-
-    /**
-     * 返回Intent中额外附加的参数
-     *
-     * @param key 附加参数KEY
-     * @return 附加的整形值，-1代表没有找到该附加值
-     */
-    protected int getIntentToInt(final String key) {
-        int result = -1;
-        if (activity != null && activity.getIntent() != null) {
-            result = activity.getIntent().getIntExtra(key, -1);
-        }
-        return result;
     }
 
     /**
@@ -310,7 +248,9 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
      * @param smg 提示语
      */
     protected void postShowShort(final String smg) {
-        securityHandler.sendMessage(securityHandler.obtainMessage(BasicActivity.POST_SHOW_SHORT, smg));
+        if (securityHandler != null){
+            securityHandler.sendMessage(securityHandler.obtainMessage(BasicActivity.POST_SHOW_SHORT, smg));
+        }
     }
 
     /**
@@ -319,7 +259,9 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
      * @param smg 提示语
      */
     protected void postShowLong(final String smg) {
-        securityHandler.sendMessage(securityHandler.obtainMessage(BasicActivity.POST_SHOW_LONG, smg));
+        if (securityHandler != null){
+            securityHandler.sendMessage(securityHandler.obtainMessage(BasicActivity.POST_SHOW_LONG, smg));
+        }
     }
 
     /**
@@ -524,74 +466,6 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
     }
 
     /**
-     * 开启一个定时器，无限循环（*所有的定时器将会在activity暂停时自动取消*）
-     *
-     * @param task   BasicTimerTask
-     * @param delay  延时
-     * @param period 周期的间隔时间
-     */
-    protected void scheduleAtFixedRate(final BasicTimerTask task, long delay, long period) {
-        if (timer == null) {
-            timer = new Timer();
-        }
-        if (timerTasks == null) {
-            timerTasks = new HashMap<>();
-        }
-        if (timerTasks.containsKey(task.getTag())) {
-            BasicTimerTask t;
-            if ((t = timerTasks.remove(task.getTag())) != null) {
-                // 如果有相同的新的将替换旧的
-                t.cancel();
-            }
-        }
-        // 启动一个新的循环定时任务
-        timer.scheduleAtFixedRate(task, delay, period);
-    }
-
-    /**
-     * 根据标识取消定时任务
-     *
-     * @param tag 创建BasicTimerTask时的唯一标识
-     */
-    protected void cancelSchedule(final String tag) {
-        if (timerTasks != null) {
-            if (timerTasks.containsKey(tag)) {
-                BasicTimerTask t;
-                if ((t = timerTasks.remove(tag)) != null) {
-                    // 如果有相同的新的将替换旧的
-                    t.cancel();
-                }
-            }
-            if (timerTasks.size() <= 0) {
-                timerTasks = null;
-                timer.cancel();
-                timer = null;
-            }
-        }
-    }
-
-    /**
-     * 取消掉所有任务
-     */
-    protected void cancelAllSchedule() {
-        if (timerTasks != null) {
-            for (String s : timerTasks.keySet()) {
-                BasicTimerTask t;
-                if ((t = timerTasks.remove(s)) != null) {
-                    // 如果有相同的新的将替换旧的
-                    t.cancel();
-                }
-            }
-            timerTasks.clear();
-            timerTasks = null;
-        }
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
-        }
-    }
-
-    /**
      * 启动接收器
      *
      * @param actions 动作
@@ -697,28 +571,12 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
     }
 
     /**
-     * 启动异步回调函数 *使用默认标识 ASYNC_TASK_DEFAULT_TAG *
-     */
-    protected void startAsyncTask() {
-        startAsyncTask(ASYNC_TASK_DEFAULT_TAG, null);
-    }
-
-    /**
      * 启动异步回调函数 *使用tag作为标记*
      *
      * @param tag 将被分配到handleMessage(tag, obj)的第一个参数中
      */
     protected void startAsyncTask(final int tag) {
         startAsyncTask(tag, null);
-    }
-
-    /**
-     * 启动异步回调函数 *使用默认标识ASYNC_TASK_DEFAULT_TAG，并传递一个参数*
-     *
-     * @param obj 数据被传送到handleMessage(tag, Object)中的第二个参数
-     */
-    protected void startAsyncTask(final Object obj) {
-        startAsyncTask(ASYNC_TASK_DEFAULT_TAG, obj);
     }
 
     /**
@@ -796,9 +654,9 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
     /**
      * 异步接口
      */
-    public static interface Asynchronous {
+    public interface Asynchronous {
 
-        public Object async(final int tag, Object obj);
+        Object async(final int tag, Object obj);
 
     }
 

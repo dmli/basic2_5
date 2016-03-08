@@ -17,6 +17,7 @@ import android.os.Message;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.text.Spanned;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver;
@@ -31,13 +32,9 @@ import com.ldm.basic.utils.LazyImageDownloader;
 import com.ldm.basic.utils.Log;
 import com.ldm.basic.utils.SystemTool;
 
-import java.io.Serializable;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Timer;
 import java.util.UUID;
 
 /**
@@ -55,11 +52,6 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
     public boolean THIS_ACTIVITY_STATE;
 
     /**
-     * true繁忙状态
-     */
-    protected boolean isBusy;
-
-    /**
      * 窗口集合
      */
     protected BasicFragment[] fragments;
@@ -70,21 +62,9 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
     protected int currentPosition;
 
     /**
-     * 网络监听器的唯一标识
-     */
-    protected String networkListenerTag;
-
-    /**
      * 简易的异步线程接口，为了脱离asynchronous内部方法影响finish()而设计的
      */
     private static Map<String, Asynchronous> ASYNC_SET;
-
-    /**
-     * 用来获取当前播放进度的定时器
-     */
-    private Timer timer;
-
-    private Map<String, BasicTimerTask> timerTasks;
 
     /**
      * 界面按钮控制器，可以通过设置间隔时间开启点击事件监听
@@ -113,19 +93,22 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
     protected int softInputHeight;
 
     /**
-     * 附加的协议接口，使用时需要在构造方法中调用
-     */
-    private List<BasicFragmentActivityProtocol> protocol;
-
-    /**
-     * 协议用来去参数的map值
-     */
-    Map<String, Serializable> protocolData;
-
-    /**
      * 这里保存了这个activity生成时所带的uuid值
      */
     private String THIS_ACTIVITY_KEY;
+
+    /**
+     * 这个标识可以在调用setContentView(View)时 是否使用 『右滑 finish Activity』
+     */
+    protected boolean ignoreRightSlidingFinishActivity = false;
+
+    /**
+     * 忽略右滑finish Activity功能
+     * 注：这个方法需要在super.onCreate(...)方法之前调用
+     */
+    public void ignoreRightSlidingFinishActivity() {
+        this.ignoreRightSlidingFinishActivity = true;
+    }
 
     /**
      * 注册每一个启动的Activity, 用于退出时结束程序
@@ -136,6 +119,8 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        checkRightSlidingFinishActivity();
+        //super
         super.onCreate(savedInstanceState);
 
         /** 不重复注册receiver **/
@@ -143,18 +128,25 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
             startReceiver();
         }
 
-        // 触发协议的相关函数
-        if (protocol != null) {
-            synchronized (protocol) {
-                for (BasicFragmentActivityProtocol p : protocol) {
-                    if (p != null) {
-                        p.onCreate(savedInstanceState);
-                    }
-                }
-            }
-        }
-
         getSupportFragmentManager().getFragments();
+    }
+
+    /**
+     * 检查是否处于透明背景状态
+     */
+    private void checkRightSlidingFinishActivity() {
+        /**
+         * 解析是否可以使用右滑 finish activity功能
+         */
+        if (!this.ignoreRightSlidingFinishActivity) {
+            String windowIsTranslucent, windowBackground;
+            TypedValue outValue = new TypedValue();
+            getTheme().resolveAttribute(android.R.attr.windowIsTranslucent, outValue, true);
+            windowIsTranslucent = String.valueOf(outValue.coerceToString());
+            getTheme().resolveAttribute(android.R.attr.windowBackground, outValue, true);
+            windowBackground = String.valueOf(outValue.coerceToString());
+            this.ignoreRightSlidingFinishActivity = !("true".equals(windowIsTranslucent) && "#0".equals(windowBackground));
+        }
     }
 
     @Override
@@ -162,17 +154,6 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
         super.onStart();
         // 返回按钮添加事件，如果存在
         setOnClickListener(getResources().getIdentifier("back", "id", getPackageName()));
-
-        // 触发协议的相关函数
-        if (protocol != null) {
-            synchronized (protocol) {
-                for (BasicFragmentActivityProtocol p : protocol) {
-                    if (p != null) {
-                        p.onStart();
-                    }
-                }
-            }
-        }
     }
 
     @Override
@@ -217,16 +198,6 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // 触发协议的相关函数
-        if (protocol != null) {
-            synchronized (protocol) {
-                for (BasicFragmentActivityProtocol p : protocol) {
-                    if (p != null) {
-                        p.onActivityResult(requestCode, resultCode, data);
-                    }
-                }
-            }
-        }
     }
 
     /**
@@ -364,7 +335,9 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
      * @param smg 提示语
      */
     protected void postShowShort(final String smg) {
-        securityHandler.sendMessage(securityHandler.obtainMessage(BasicActivity.POST_SHOW_SHORT, smg));
+        if (securityHandler != null){
+            securityHandler.sendMessage(securityHandler.obtainMessage(BasicActivity.POST_SHOW_SHORT, smg));
+        }
     }
 
     /**
@@ -373,66 +346,8 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
      * @param smg 提示语
      */
     protected void postShowLong(final String smg) {
-        securityHandler.sendMessage(securityHandler.obtainMessage(BasicActivity.POST_SHOW_LONG, smg));
-    }
-
-    /**
-     * 添加一个协议
-     *
-     * @param p BasicFragmentActivityProtocol
-     */
-    protected void addProtocol(BasicFragmentActivityProtocol p) {
-        if (protocol == null) {
-            protocol = new ArrayList<>();
-            if (protocolData == null) {
-                protocolData = new HashMap<>();
-            }
-        }
-        protocol.add(p);
-    }
-
-    /**
-     * 可以通过这个方法调用协议中对应的任务
-     *
-     * @param task 任务ID
-     */
-    protected void startProtocolTask(int task) {
-        if (protocol != null || securityHandler != null) {
-            securityHandler.sendMessage(securityHandler.obtainMessage(task));
-        }
-    }
-
-    /**
-     * 向protocolData中存储数据
-     *
-     * @param key   protocol KEY
-     * @param value 值
-     * @return Serializable
-     */
-    protected Serializable saveProtocolData(String key, Serializable value) {
-        if (protocolData == null) {
-            throw new NullPointerException("protocolData没有被初始化，不能使用这个方法...");
-        }
-        return protocolData.put(key, value);
-    }
-
-    /**
-     * 释放掉所有协议，释放时将会触发协议的onDestroy()方法
-     */
-    public void clearProtocol() {
-        if (protocol == null) {
-            return;
-        }
-        synchronized (protocol) {
-            for (BasicFragmentActivityProtocol p : protocol) {
-                if (p != null) {
-                    p.onDestroy();
-                }
-            }
-            protocol.clear();
-        }
-        if (protocolData != null) {
-            protocolData.clear();
+        if (securityHandler != null){
+            securityHandler.sendMessage(securityHandler.obtainMessage(BasicActivity.POST_SHOW_LONG, smg));
         }
     }
 
@@ -611,10 +526,11 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
      * @param key           key
      * @return Object
      */
-    protected Object getMetaData(ComponentName componentName, String key) {
+    protected Object getActivityMetaData(ComponentName componentName, String key) {
         Object result = null;
         try {
-            ActivityInfo ai = this.getPackageManager().getActivityInfo(componentName == null ? this.getComponentName() : componentName, PackageManager.GET_ACTIVITIES | PackageManager.GET_META_DATA);
+            ComponentName cn = componentName == null ? this.getComponentName() : componentName;
+            ActivityInfo ai = this.getPackageManager().getActivityInfo(cn, PackageManager.GET_META_DATA);
             if (ai != null && ai.metaData != null && ai.metaData.containsKey(key)) {
                 result = ai.metaData.get(key);
             }
@@ -679,74 +595,6 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
     }
 
     /**
-     * 开启一个定时器，无限循环（*所有的定时器将会在activity暂停时自动取消*）
-     *
-     * @param task   BasicTimerTask
-     * @param delay  延时
-     * @param period 周期的间隔时间
-     */
-    protected void scheduleAtFixedRate(final BasicTimerTask task, long delay, long period) {
-        if (timer == null) {
-            timer = new Timer();
-        }
-        if (timerTasks == null) {
-            timerTasks = new HashMap<>();
-        }
-        if (timerTasks.containsKey(task.getTag())) {
-            BasicTimerTask t;
-            if ((t = timerTasks.remove(task.getTag())) != null) {
-                // 如果有相同的新的将替换旧的
-                t.cancel();
-            }
-        }
-        // 启动一个新的循环定时任务
-        timer.scheduleAtFixedRate(task, delay, period);
-    }
-
-    /**
-     * 根据标识取消定时任务
-     *
-     * @param tag 创建BasicTimerTask时的唯一标识
-     */
-    protected void cancelSchedule(final String tag) {
-        if (timerTasks != null) {
-            if (timerTasks.containsKey(tag)) {
-                BasicTimerTask t;
-                if ((t = timerTasks.remove(tag)) != null) {
-                    // 如果有相同的新的将替换旧的
-                    t.cancel();
-                }
-            }
-            if (timerTasks.size() <= 0) {
-                timerTasks = null;
-                timer.cancel();
-                timer = null;
-            }
-        }
-    }
-
-    /**
-     * 取消掉所有任务
-     */
-    protected void cancelAllSchedule() {
-        if (timerTasks != null) {
-            for (String s : timerTasks.keySet()) {
-                BasicTimerTask t;
-                if ((t = timerTasks.remove(s)) != null) {
-                    // 如果有相同的新的将替换旧的
-                    t.cancel();
-                }
-            }
-            timerTasks.clear();
-            timerTasks = null;
-        }
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
-        }
-    }
-
-    /**
      * 启动接收器
      */
     private void startReceiver() {
@@ -769,16 +617,6 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        // 触发协议的相关函数
-        if (protocol != null) {
-            synchronized (protocol) {
-                for (BasicFragmentActivityProtocol p : protocol) {
-                    if (p != null) {
-                        p.onSaveInstanceState(outState);
-                    }
-                }
-            }
-        }
         BasicApplication.getBundle(outState);
         BasicApplication.initGlobalCacheListener(this);// 尝试初始化GlobalCacheListener
         if (BasicApplication.globalCacheListener != null) {
@@ -794,16 +632,6 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        // 触发协议的相关函数
-        if (protocol != null) {
-            synchronized (protocol) {
-                for (BasicFragmentActivityProtocol p : protocol) {
-                    if (p != null) {
-                        p.onRestoreInstanceState(savedInstanceState);
-                    }
-                }
-            }
-        }
         BasicApplication.initGlobalCacheListener(this);// 尝试初始化GlobalCacheListener
         if (BasicApplication.globalCacheListener != null) {
             BasicApplication.globalCacheListener.onRestoreInstanceState(this, savedInstanceState);
@@ -824,26 +652,7 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
     }
 
     @Override
-    public void onPause() {
-        // 触发协议的相关函数
-        if (protocol != null) {
-            synchronized (protocol) {
-                for (BasicFragmentActivityProtocol p : protocol) {
-                    if (p != null) {
-                        p.onPause();
-                    }
-                }
-            }
-        }
-        // 界面暂停时将取消所有的定时任务
-        cancelAllSchedule();
-        super.onPause();
-    }
-
-    @Override
     protected void onDestroy() {
-        // 触发协议的相关函数
-        clearProtocol();
         //移除OnGlobalLayoutListener事件
         removeOnGlobalLayoutListener();
         // 如果设置了异步任务，这里需要清除
@@ -878,16 +687,6 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
      * 消息响应方法 当Activity需要响应Broadcast时使用
      */
     protected synchronized void receiver(Context context, Intent intent) {
-        // 触发协议的相关函数
-        if (protocol != null) {
-            synchronized (protocol) {
-                for (BasicFragmentActivityProtocol p : protocol) {
-                    if (p != null) {
-                        p.receiver(context, intent);
-                    }
-                }
-            }
-        }
     }
 
     @Override
@@ -974,16 +773,6 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
      * @param obj Asynchronous接口中async方法的返回参数
      */
     protected void handleMessage(int tag, Object obj) {
-        // 触发协议的相关函数
-        if (protocol != null) {
-            synchronized (protocol) {
-                for (BasicFragmentActivityProtocol p : protocol) {
-                    if (p != null) {
-                        p.handleMessage(tag, obj);
-                    }
-                }
-            }
-        }
     }
 
 

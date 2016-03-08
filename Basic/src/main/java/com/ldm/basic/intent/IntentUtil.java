@@ -1,11 +1,11 @@
 package com.ldm.basic.intent;
 
+import android.app.Activity;
+import android.content.Intent;
+
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
-
-import android.app.Activity;
-import android.content.Intent;
 
 /**
  * Created by ldm on 11-12-11. intent请求工具，提供了默认的进出动画及自定义动画等
@@ -15,14 +15,14 @@ public class IntentUtil {
     /**
      * IntentUtil默认的跳转动画 使用前需要预先设置
      */
-    public static int INTENT_DEFAULT_ENTER_ANIM;
-    public static int INTENT_DEFAULT_EXIT_ANIM;
+    public static int INTENT_DEFAULT_ENTER_ANIM = 0;
+    public static int INTENT_DEFAULT_EXIT_ANIM = 0;
 
     /**
      * 设置返回键触发时的动画效果 使用前需要预先设置
      */
-    public static int FINISH_DEFAULT_ENTER_ANIM;
-    public static int FINISH_DEFAULT_EXIT_ANIM;
+    public static int FINISH_DEFAULT_ENTER_ANIM = 0;
+    public static int FINISH_DEFAULT_EXIT_ANIM = 0;
 
     private static Intent intent;
 

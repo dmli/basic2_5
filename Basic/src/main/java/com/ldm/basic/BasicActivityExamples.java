@@ -33,7 +33,6 @@ public class BasicActivityExamples extends BasicActivity {
          */
         startAsyncTask(2, null);
 
-
     }
 
 
