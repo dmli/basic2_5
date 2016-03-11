@@ -32,7 +32,7 @@ public class FileTool {
      * @return 如果保存成功将返回全路径，失败返回null
      * @throws IOException
      */
-    public String save(InputStream is, final String path, final String cacheName) throws IOException {
+    public static String save(InputStream is, final String path, final String cacheName) throws IOException {
         return save(is, path + "/" + cacheName);
     }
 
@@ -44,7 +44,7 @@ public class FileTool {
      * @return 如果保存成功将返回全路径，失败返回null
      * @throws IOException
      */
-    public String save(InputStream is, final String filePath) throws IOException {
+    public static String save(InputStream is, final String filePath) throws IOException {
         // 测试此缓存目录是否存在
         File f = new File(filePath.substring(0, filePath.lastIndexOf("/")));
         boolean bool = true;
@@ -69,7 +69,7 @@ public class FileTool {
      * @return 如果成功将返回全地址
      * @throws IOException
      */
-    public String save(final String data, final String path, final String cacheName) throws IOException {
+    public static String save(final String data, final String path, final String cacheName) throws IOException {
         return save(data, path + "/" + cacheName);
     }
 
@@ -81,7 +81,7 @@ public class FileTool {
      * @return 如果成功将返回全地址
      * @throws IOException
      */
-    public String save(final String data, final String filePath) throws IOException {
+    public static String save(final String data, final String filePath) throws IOException {
         // 测试此缓存目录是否存在
         File f = new File(filePath.substring(0, filePath.lastIndexOf("/")));
         boolean bool = true;
@@ -103,7 +103,7 @@ public class FileTool {
      * @param path 路径
      * @return InputStream
      */
-    public InputStream openFile(final String path) {
+    public static InputStream openFile(final String path) {
         return openFile(new File(path));
     }
 
@@ -113,8 +113,8 @@ public class FileTool {
      * @param f0 文件
      * @return List<String>
      */
-    public List<String> fileToLines(File f0) {
-        return fileToLines(openFile(f0));
+    public static List<String> fileToLines(File f0) {
+        return inputStreamToLines(openFile(f0));
     }
 
     /**
@@ -123,8 +123,8 @@ public class FileTool {
      * @param filePath 文件地址
      * @return List<String>
      */
-    public List<String> fileToLines(final String filePath) {
-        return fileToLines(openFile(filePath));
+    public static List<String> fileToLines(final String filePath) {
+        return inputStreamToLines(openFile(filePath));
     }
 
     /**
@@ -133,10 +133,10 @@ public class FileTool {
      * @param is InputStream
      * @return List<String>
      */
-    public List<String> fileToLines(InputStream is) {
+    public static List<String> inputStreamToLines(InputStream is) {
         List<String> result = null;
         if (is != null) {
-            result = new ArrayList<String>();
+            result = new ArrayList<>();
             InputStreamReader inReader = new InputStreamReader(is);
             BufferedReader buffReader = new BufferedReader(inReader);
             String data;
@@ -162,7 +162,7 @@ public class FileTool {
      * @param file 文件
      * @return InputStream
      */
-    public InputStream openFile(File file) {
+    public static InputStream openFile(File file) {
         if (file.exists()) {
             try {
                 return new FileInputStream(file);
@@ -180,7 +180,7 @@ public class FileTool {
      * @param out OutputStream
      * @throws IOException
      */
-    public synchronized void write(InputStream is, OutputStream out) throws IOException {
+    public static void write(InputStream is, OutputStream out) throws IOException {
         int len;
         byte[] bytes = new byte[4096];
         while ((len = is.read(bytes)) != -1) {
@@ -198,7 +198,7 @@ public class FileTool {
      * @param out  OutputStream
      * @throws IOException
      */
-    public void write(final String data, OutputStream out) throws IOException {
+    public static void write(final String data, OutputStream out) throws IOException {
         out.write(data.getBytes(), 0, data.getBytes().length);
     }
 
@@ -209,11 +209,11 @@ public class FileTool {
      * @return byte[]
      * @throws IOException
      */
-    public byte[] input2byte(InputStream inStream) throws IOException {
+    public static byte[] input2byte(InputStream inStream) throws IOException {
         ByteArrayOutputStream swapStream = new ByteArrayOutputStream();
-        byte[] buff = new byte[100];
+        byte[] buff = new byte[1020];
         int rc;
-        while ((rc = inStream.read(buff, 0, 100)) > 0) {
+        while ((rc = inStream.read(buff, 0, buff.length)) > 0) {
             swapStream.write(buff, 0, rc);
         }
         return swapStream.toByteArray();
@@ -280,7 +280,7 @@ public class FileTool {
     public static List<String> getFilePaths(final File directory, boolean recursive) {
         if (!directory.isDirectory())
             return null;
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         File[] fs = directory.listFiles();
         if (fs == null)
             return null;
@@ -324,12 +324,11 @@ public class FileTool {
      *
      * @param path 文件File
      */
-    public static void deleteAllFiles(File path) {
+    public static boolean deleteAllFiles(File path) {
         if (!path.exists())
-            return;
+            return false;
         if (path.isFile()) {
-            path.delete();
-            return;
+            return path.delete();
         }
         File[] files = path.listFiles();
         if (files != null && files.length > 0) {
@@ -337,7 +336,7 @@ public class FileTool {
                 deleteAllFiles(file);
             }
         }
-        path.delete();
+        return path.delete();
     }
 
     /**

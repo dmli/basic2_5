@@ -48,6 +48,16 @@ public class FileDownloadTool {
     public static final String FILE_ID = "fId";// 在广播中通告该KEY获取fId
     public static final String FILE_PATH = "filePath";// 在广播中通告该KEY获取绝对路径
 
+    /**
+     * 连接超时时间
+     */
+    public static int TIME_OUT = 1000 * 7;
+
+    /**
+     * 读取超时时间
+     */
+    public static int SO_TIME_OUT = 1000 * 60;
+
     private WeakReference<Context> context;
     private FileTool fileTool;
     private TaskThreadService lService;
