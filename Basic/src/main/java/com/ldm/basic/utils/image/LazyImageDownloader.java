@@ -253,7 +253,7 @@ public class LazyImageDownloader {
             if (!P_IDS.containsKey(ref.pId)) {
                 // 同步pid
                 ref.syncPid();
-
+                //创建一个解析任务的线程
                 createAssignTask(ref);
             }
         } else {
