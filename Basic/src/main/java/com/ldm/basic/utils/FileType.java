@@ -119,14 +119,17 @@ public class FileType {
 		try {
 			is = new FileInputStream(filePath);
 			byte[] b = new byte[3];
-			is.read(b, 0, b.length);
-			value = bytesToHexString(b);
+			if (is.read(b, 0, b.length) > 0){
+			    value = bytesToHexString(b);
+            }
 		} catch (Exception e) {
+            e.printStackTrace();
 		} finally {
 			if (null != is) {
 				try {
 					is.close();
 				} catch (IOException e) {
+                    e.printStackTrace();
 				}
 			}
 		}
@@ -139,13 +142,13 @@ public class FileType {
 			return null;
 		}
 		String hv;
-		for (int i = 0; i < src.length; i++) {
-			hv = Integer.toHexString(src[i] & 0xFF).toUpperCase(Locale.CHINESE);
-			if (hv.length() < 2) {
-				builder.append(0);
-			}
-			builder.append(hv);
-		}
+        for (byte b : src) {
+            hv = Integer.toHexString(b & 0xFF).toUpperCase(Locale.CHINESE);
+            if (hv.length() < 2) {
+                builder.append(0);
+            }
+            builder.append(hv);
+        }
 		return builder.toString();
 	}
 }

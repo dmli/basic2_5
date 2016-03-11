@@ -1,7 +1,5 @@
 package com.ldm.basic.utils;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -96,80 +94,11 @@ public class TextUtils {
     }
 
     /**
-     * 获取URL指向文件的名称
-     *
-     * @param url 地址
-     * @return name
-     */
-    public static String getFileName(String url) {
-        return url.substring(url.lastIndexOf("/") + 1, url.length());
-    }
-
-    /**
-     * 将url转换为可用的名称，带后缀名
-     *
-     * @param url 地址
-     * @return newName
-     */
-    public static String urlToName(String url) {
-        if (url == null || url.length() <= 0) {
-            return null;
-        }
-        if (url.contains("http://")) {
-            url = (url.substring(7));
-            url = url.substring(url.indexOf("/") + 1).replace("/", "-");
-        } else {
-            if (url.indexOf("/") == 0) {
-                url = url.substring(url.indexOf("/") + 1).replace("/", "-");
-            } else {
-                url = url.replace("/", "-");
-            }
-        }
-        if (url.contains(".") && url.contains("?")) {
-            String suffix = url.substring(url.lastIndexOf("."), url.length());
-            url = url.substring(0, url.lastIndexOf(".")) + suffix.substring(0, suffix.indexOf("?"));
-        }
-        return url.replace("&", "_");
-    }
-
-    /**
-     * 将url转换为可用的名称，不带后缀名
-     *
-     * @param url 地址
-     * @return newName
-     */
-    public static String urlToNameNoSuffix(String url) {
-        if (url == null || url.length() <= 0) {
-            return null;
-        }
-        if (url.contains("http://")) {
-            url = (url.substring(7));
-            url = url.substring(url.indexOf("/") + 1).replace("/", "-");
-        } else {
-            if (url.indexOf("/") == 0) {
-                url = url.substring(url.indexOf("/") + 1).replace("/", "-");
-            } else {
-                url = url.replace("/", "-");
-            }
-        }
-        if (url.contains("&")) {
-            url = url.replace("&", "-");
-        }
-        if (url.contains("?")) {
-            url = url.replace("?", "-");
-        }
-        if (url.contains(".")) {
-            url = url.substring(0, url.lastIndexOf("."));
-        }
-        return url;
-    }
-
-    /**
      * 根据给定的URL，使用MD5加密后拼接后缀名返回
      *
      * @param url           地址
      * @param unifiedSuffix 后缀
-     * @return
+     * @return cacheName
      */
     public static String getCacheNameForUrl(String url, String unifiedSuffix) {
         if (url == null || url.length() <= 0) {
@@ -285,35 +214,5 @@ public class TextUtils {
         if (toStr == null || "".equals(toStr) || !source.contains(toStr))
             return source.substring(source.indexOf(fromStr) + 1, source.length());
         return source.substring(source.indexOf(fromStr) + 1, source.indexOf(toStr));
-    }
-
-    /**
-     * 返回text对应的MD5值
-     *
-     * @param input 源文本
-     * @return null获取失败
-     */
-    public static String textToMD5(byte[] input) {
-        String re_md5 = null;
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update(input);
-            byte b[] = md.digest();
-
-            StringBuilder buf = new StringBuilder("");
-            for (int i : b) {
-                if (i < 0) {
-                    i += 256;
-                }
-                if (i < 16) {
-                    buf.append("0");
-                }
-                buf.append(Integer.toHexString(i));
-            }
-            re_md5 = buf.toString();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        return re_md5;
     }
 }

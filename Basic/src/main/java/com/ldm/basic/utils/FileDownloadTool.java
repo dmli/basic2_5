@@ -59,10 +59,13 @@ public class FileDownloadTool {
     public static int SO_TIME_OUT = 1000 * 60;
 
     private WeakReference<Context> context;
-    private FileTool fileTool;
     private TaskThreadService lService;
 
     private boolean async;// 异步任务是否开启
+
+
+    public FileDownloadTool() {
+    }
 
     /**
      * 可以使用addTask方法
@@ -72,17 +75,9 @@ public class FileDownloadTool {
      */
     public FileDownloadTool(Context context, boolean isStartAsync) {
         this.context = new WeakReference<Context>(context);
-        this.fileTool = new FileTool();
         if (async = isStartAsync) {
             this.lService = new TaskThreadService(true);
         }
-    }
-
-    /**
-     * 这个构造函数将不会启用异步操作
-     */
-    public FileDownloadTool() {
-        this.fileTool = new FileTool();
     }
 
     /**
@@ -179,7 +174,7 @@ public class FileDownloadTool {
             HttpResponse response = client.execute(get);
             int code = response.getStatusLine().getStatusCode();
             if (code == HttpStatus.SC_OK && response.getEntity() != null) {
-                return fileTool.save(response.getEntity().getContent(), cachePath, cacheName);
+                return FileTool.save(response.getEntity().getContent(), cachePath, cacheName);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -211,7 +206,7 @@ public class FileDownloadTool {
              int code = response.getStatusLine().getStatusCode();
              Log.e("code = " + code);
              if (code == HttpStatus.SC_OK && response.getEntity() != null) {
-                 return "0::" + fileTool.save(response.getEntity().getContent(), filePath);
+                 return "0::" + FileTool.save(response.getEntity().getContent(), filePath);
              } else {
                  //文件没有下载完成，执行一次删除
                  FileTool.delete(filePath);

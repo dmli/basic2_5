@@ -8,7 +8,7 @@ import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.BaseAdapter;
 
-import com.ldm.basic.utils.LazyImageDownloader;
+import com.ldm.basic.utils.image.LazyImageDownloader;
 
 import java.util.ArrayList;
 import java.util.List;

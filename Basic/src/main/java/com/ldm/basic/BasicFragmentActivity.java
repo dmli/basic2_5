@@ -28,7 +28,7 @@ import com.ldm.basic.app.Configuration;
 import com.ldm.basic.dialog.LToast;
 import com.ldm.basic.intent.IntentUtil;
 import com.ldm.basic.shared.SharedPreferencesHelper;
-import com.ldm.basic.utils.LazyImageDownloader;
+import com.ldm.basic.utils.image.LazyImageDownloader;
 import com.ldm.basic.utils.Log;
 import com.ldm.basic.utils.SystemTool;
 
