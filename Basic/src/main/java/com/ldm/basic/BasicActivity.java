@@ -356,7 +356,6 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
      */
     public void finishAnim() {
         if (getDownloader() != null) {
-            getDownloader().clearCache();
             getDownloader().stopAllTask();
         }
         IntentUtil.finishDIY(this);
@@ -383,7 +382,6 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
      */
     public void finishAnim(final int enterAnim, final int exitAnim) {
         if (getDownloader() != null) {
-            getDownloader().clearCache();
             getDownloader().stopAllTask();
         }
         IntentUtil.finishDIY(this, enterAnim, exitAnim);

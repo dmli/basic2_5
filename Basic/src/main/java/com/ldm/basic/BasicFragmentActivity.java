@@ -398,7 +398,6 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
      */
     public void finishAnim() {
         if (getDownloader() != null) {
-            getDownloader().clearCache();
             getDownloader().stopAllTask();
         }
         IntentUtil.finishDIY(this);
