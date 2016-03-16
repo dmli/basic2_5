@@ -1,6 +1,5 @@
 package com.ldm.basic.res;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -12,7 +11,9 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
+import android.graphics.Path;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
@@ -718,12 +719,71 @@ public class BitmapHelper {
         canvas.drawRoundRect(rectF, pixels, pixels, paint);
 
         paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN)); // Mode.SRC_IN
-        // 用前面画的“圆角矩形”对bitmap进行裁剪。
         canvas.drawBitmap(bitmap, rect, rect, paint);
         if (bitmap != output && !bitmap.isRecycled()) {
             bitmap.recycle();
         }
         return output;
+    }
+
+    /**
+     * 返回一个六边形的图片
+     *
+     * @param src          Bitmap
+     * @param targetWidth  目标宽度
+     * @param targetHeight 目标高度
+     * @return Bitmap
+     */
+    public static Bitmap getHexagonBitmap(Bitmap src, int targetWidth, int targetHeight) {
+        if (src == null || src.isRecycled()) {
+            return null;
+        }
+        final int radius = targetWidth / 2;
+        final double radian30 = 30 * Math.PI / 180;
+        final float a = (float) (radius * Math.sin(radian30));
+        final float b = (float) (radius * Math.cos(radian30));
+        final float c = (targetHeight - 2 * b) / 2;
+        Path path = new Path();
+        path.reset();
+        path.moveTo(targetWidth, targetHeight / 2);
+        path.lineTo(targetWidth - a, targetHeight - c);
+        path.lineTo(targetWidth - a - radius, targetHeight - c);
+        path.lineTo(0, targetHeight / 2);
+        path.lineTo(a, c);
+        path.lineTo(targetWidth - a, c);
+        path.close();
+        return clipBitmap(src, targetWidth, targetHeight, path);
+    }
+
+    /**
+     * 根据给定的Path裁剪图片
+     *
+     * @param src          Bitmap 使用完成后将被触发recycle
+     * @param targetWidth  目标宽度
+     * @param targetHeight 目标高度
+     * @param path         用来切个图片的路径
+     * @return Bitmap
+     */
+    public static Bitmap clipBitmap(Bitmap src, int targetWidth, int targetHeight, Path path) {
+        //创建一个空的画布，用来存储切割后的图片
+        Bitmap result = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(result);
+        //清空画布
+        c.drawARGB(0, 0, 0, 0);
+        //初始化画笔
+        final Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(Color.parseColor("#FFFFFF"));
+        //绘制路径
+        c.drawPath(path, paint);
+        //使用SRC_IN模式绘制Bitmap
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN)); // Mode.SRC_IN
+        c.drawBitmap(src, 0, 0, paint);
+        if (!src.isRecycled()) {
+            src.recycle();
+        }
+        return result;
     }
 
     /**
@@ -856,7 +916,7 @@ public class BitmapHelper {
      */
     public static String imageToBase64Str(Bitmap bitmap) {
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bao);// 得到输出流
+        bitmap.compress(CompressFormat.JPEG, 100, bao);// 得到输出流
         BASE64Encoder encoder = new BASE64Encoder();// 对字节数组Base64编码
         return encoder.encode(bao.toByteArray());// 返回Base64编码过的字节数组字符串
     }
@@ -890,50 +950,23 @@ public class BitmapHelper {
      * @param bitmap    Bitmap
      * @return 路径
      */
-    public static String saveToJpeg(String directory, Bitmap bitmap) {
+    public static String saveBitmap(String directory, Bitmap bitmap, CompressFormat format) {
         FileTool.createDirectory(directory);
-        String _path = directory + "/" + new Date().getTime() + ".jpg";
-        try {
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, new FileOutputStream(new File(_path)));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            _path = null;
+        String suffix;
+        switch (format) {
+            case PNG:
+                suffix = ".png";
+                break;
+            case WEBP:
+                suffix = ".webp";
+                break;
+            default:
+                suffix = ".jpg";
+                break;
         }
-        return _path;
-    }
-
-    /**
-     * 将bitmap转存到指定目录下 PNG格式
-     *
-     * @param directory 目录
-     * @param bitmap    Bitmap
-     * @return 路径
-     */
-    public static String saveToPng(String directory, Bitmap bitmap) {
-        FileTool.createDirectory(directory);
-        String _path = directory + "/" + new Date().getTime() + ".png";
+        String _path = directory + "/" + new Date().getTime() + suffix;
         try {
-            bitmap.compress(Bitmap.CompressFormat.PNG, 90, new FileOutputStream(new File(_path)));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            _path = null;
-        }
-        return _path;
-    }
-
-    /**
-     * 将bitmap转存到指定目录下 WEBP格式（仅4.0以后手机可以调用这个方法）
-     *
-     * @param directory 目录
-     * @param bitmap    Bitmap
-     * @return 路径
-     */
-    @SuppressLint("NewApi")
-    public static String saveToWebp(String directory, Bitmap bitmap) {
-        FileTool.createDirectory(directory);
-        String _path = directory + "/" + new Date().getTime() + ".webp";
-        try {
-            bitmap.compress(Bitmap.CompressFormat.WEBP, 85, new FileOutputStream(new File(_path)));
+            bitmap.compress(format, 90, new FileOutputStream(new File(_path)));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             _path = null;
