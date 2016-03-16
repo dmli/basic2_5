@@ -1,7 +1,6 @@
 package com.ldm.basic.views;
 
 import android.content.Context;
-import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -17,7 +16,7 @@ import android.view.View;
  *
  * @author Chris Banes
  */
-public class LViewPager extends ViewPager {
+public class LViewPager extends LBasicViewPager {
 
 	/**
 	 * 忽略的view，当用户touch在这个View区域内部时事件传递给child处理

@@ -8,8 +8,8 @@ import android.os.IBinder;
 import android.os.Message;
 
 import com.ldm.basic.app.BasicApplication;
-import com.ldm.basic.conn.BasicGetHelper;
-import com.ldm.basic.conn.BasicPostHelper;
+import com.ldm.basic.conn.BasicHttpGet;
+import com.ldm.basic.conn.BasicHttpPost;
 import com.ldm.basic.dialog.Dialog;
 import com.ldm.basic.utils.SystemTool;
 import com.ldm.basic.utils.TaskThreadToMultiService;
@@ -75,7 +75,7 @@ public class BasicService extends Service {
 
     @Override
     public void onDestroy() {
-            ASYNC_TASK_QUEUE.clear();
+        ASYNC_TASK_QUEUE.clear();
         super.onDestroy();
     }
 
@@ -88,9 +88,9 @@ public class BasicService extends Service {
      */
     public void sendContent(String url, String type, String content) {
         if ("0".equals(type)) {
-            new BasicPostHelper().sendPostRequest(url, content);
+            new BasicHttpPost(url).execute(content);
         } else {
-            new BasicGetHelper().sendGetRequest(url);
+            new BasicHttpGet(url).execute(content);
         }
     }
 
@@ -208,7 +208,8 @@ public class BasicService extends Service {
      * 处理异步任务的各种回调方法
      */
     private static Handler handler = new BasicSecurityHandler();
-    private static class BasicSecurityHandler extends Handler{
+
+    private static class BasicSecurityHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {

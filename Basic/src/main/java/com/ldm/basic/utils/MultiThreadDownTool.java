@@ -1,25 +1,23 @@
 package com.ldm.basic.utils;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import android.os.Handler;
+import android.os.Message;
 
 import com.google.gson.JsonParseException;
 import com.ldm.basic.bean.FileDownloadRecord;
 import com.ldm.basic.bean.MultiThreadTaskRef;
 
-import android.os.Handler;
-import android.os.Message;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
+import java.lang.ref.WeakReference;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by ldm on 12-11-15.
@@ -427,15 +425,14 @@ public class MultiThreadDownTool {
 
         @Override
         public void run() {
+            HttpURLConnection urlConnection = null;
             try {
-                HttpClient c = new DefaultHttpClient();
-                HttpGet get = new HttpGet(ref.getUrl());
-                get.addHeader("Range", "bytes=" + (ref.getStartPosition() + ref.getCompleteSize()) + "-" + ref.getEndPosition());//设置要下载该文件的起始位置
-                HttpResponse response = c.execute(get);
-                int statusCode = response.getStatusLine().getStatusCode();
-                if (statusCode == 200 || statusCode == 206) {
-                    HttpEntity entity = response.getEntity();
-                    download = new Download(entity.getContent(), (ref.getStartPosition() + ref.getCompleteSize()), ref.getIndex());
+                //创建连接
+                urlConnection = createConnection(ref.getUrl());
+                urlConnection.setRequestProperty("Range", "bytes=" + (ref.getStartPosition() + ref.getCompleteSize()) + "-" + ref.getEndPosition());//设置要下载该文件的起始位置
+                int responseCode = urlConnection.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_PARTIAL) {
+                    download = new Download(urlConnection.getInputStream(), (ref.getStartPosition() + ref.getCompleteSize()), ref.getIndex());
                     downloads[ref.getIndex()] = download;
                     if (!download.down()) {
                         //下载失败
@@ -449,10 +446,17 @@ public class MultiThreadDownTool {
                     //下载失败
                     securityHandler.sendMessage(securityHandler.obtainMessage(PROGRESS_CALLBACK_ERROR, new MultiThreadTaskRef(ref)));
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 //下载失败
                 securityHandler.sendMessage(securityHandler.obtainMessage(PROGRESS_CALLBACK_ERROR, new MultiThreadTaskRef(ref)));
-                e.printStackTrace();
+            } finally {
+                if (urlConnection != null) {
+                    try {
+                        urlConnection.disconnect();
+                    } catch (Exception e1) {
+                        e1.printStackTrace();
+                    }
+                }
             }
         }
     }
@@ -522,9 +526,6 @@ public class MultiThreadDownTool {
          */
         public String tag;
 
-        protected ProgressCallback() {
-        }
-
         protected ProgressCallback(String tag) {
             this.tag = tag;
         }
@@ -582,6 +583,23 @@ public class MultiThreadDownTool {
     }
 
     /**
+     * 创建一个HttpURLConnection
+     *
+     * @param url 网络地址
+     * @return HttpURLConnection
+     * @throws IOException
+     */
+    private HttpURLConnection createConnection(String url) throws IOException {
+        URL httpUrl = new URL(URLEncoder.encode(url, "UTF-8"));
+        HttpURLConnection urlConnection = (HttpURLConnection) httpUrl.openConnection();
+        urlConnection.setConnectTimeout(10000);
+        urlConnection.setReadTimeout(600 * 1000);//最大等待时间10分钟
+        urlConnection.setInstanceFollowRedirects(true);
+        urlConnection.setRequestMethod("GET");
+        return urlConnection;
+    }
+
+    /**
      * 配合下载线程更新进度相关信息
      */
     private SecurityHandler securityHandler = new SecurityHandler(this);
@@ -630,38 +648,6 @@ public class MultiThreadDownTool {
         }
     }
 
-    public static void main(String[] args) {
-
-        MultiThreadDownTool mtdt = new MultiThreadDownTool();
-        mtdt.start("http://www.bjoil.com/bjoil/shouji/beijing_petroleum_membership.apk",
-                "/Users/ldm/Downloads",
-                "zwjs.dmg",
-                new ProgressCallback() {
-
-                    @Override
-                    public void success(String path) {
-                        System.out.println(path);
-                    }
-
-                    @Override
-                    public void stagesToComplete(int tCount, int index) {
-                        System.out.println(tCount + " - " + index);
-                    }
-
-                    @Override
-                    public void progress(int index, long count, long current) {
-                        System.out.println("线程编号【" + index + "】, " + count + "-" + current);
-                    }
-
-                    @Override
-                    public void error(String error) {
-                        System.out.println(error);
-                    }
-                },
-                5
-        );
-    }
-
     /**
      * 这个线程包含了分析任务状态及创建新任务的流程
      */
@@ -708,13 +694,12 @@ public class MultiThreadDownTool {
                     fdr.setUrl(url);
                     fdr.setFileName(fileName);
                     fdr.setFilePath(filePath);//用来区分任务使用
-                    HttpClient c = new DefaultHttpClient();
-                    HttpGet get = new HttpGet(url);
-                    HttpResponse response = c.execute(get);
-                    if (response.getStatusLine().getStatusCode() == 200) {
+                    //创建连接
+                    HttpURLConnection urlConnection = createConnection(url);
+                    int responseCode = urlConnection.getResponseCode();
+                    if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_PARTIAL) {
                         /** 获取文件大小 */
-                        HttpEntity entity = response.getEntity();
-                        fileSize = entity.getContentLength();
+                        fileSize = urlConnection.getContentLength();
                         boolean b = false;
                         if (fileSize > 0) {//当无法获取size时忽略本次
                             //本地创建一个一样大小的文件
@@ -743,7 +728,7 @@ public class MultiThreadDownTool {
                              ***********************************/
                             fdr.setThreadTotal(1);//记录线程总数，用来计算文件下载是否完成
                             downloads = new Download[1];
-                            Download download = new Download(entity.getContent(), 0, 0);
+                            Download download = new Download(urlConnection.getInputStream(), 0, 0);
                             downloads[0] = download;
 
                             //记录线程信息
@@ -764,10 +749,9 @@ public class MultiThreadDownTool {
                              *          执行多线程下载           *
                              ***********************************/
                             try {
-                                //断开连接
-                                c.getConnectionManager().shutdown();
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                                urlConnection.disconnect();
+                            } catch (Exception e1) {
+                                e1.printStackTrace();
                             }
                             fdr.setThreadTotal(threadCount);//记录线程总数，用来计算文件下载是否完成
                             downloads = new Download[threadCount];
@@ -786,5 +770,37 @@ public class MultiThreadDownTool {
                 securityHandler.sendMessage(securityHandler.obtainMessage(PROGRESS_CALLBACK_IO_ERROR, e.getMessage()));
             }
         }
+    }
+
+    public static void main(String[] args) {
+
+        MultiThreadDownTool mtdt = new MultiThreadDownTool();
+        mtdt.start("http://www.bjoil.com/bjoil/shouji/beijing_petroleum_membership.apk",
+                "/Users/ldm/Downloads",
+                "zwjs.dmg",
+                new ProgressCallback(UUID.randomUUID().toString()) {
+
+                    @Override
+                    public void success(String path) {
+                        System.out.println(path);
+                    }
+
+                    @Override
+                    public void stagesToComplete(int tCount, int index) {
+                        System.out.println(tCount + " - " + index);
+                    }
+
+                    @Override
+                    public void progress(int index, long count, long current) {
+                        System.out.println("线程编号【" + index + "】, " + count + "-" + current);
+                    }
+
+                    @Override
+                    public void error(String error) {
+                        System.out.println(error);
+                    }
+                },
+                5
+        );
     }
 }

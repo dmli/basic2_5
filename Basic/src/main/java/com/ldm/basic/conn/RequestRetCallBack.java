@@ -1,8 +1,8 @@
 package com.ldm.basic.conn;
 
-import com.ldm.basic.utils.SystemTool;
-
 import android.content.Context;
+
+import com.ldm.basic.utils.SystemTool;
 
 /**
  * Created by ldm on 15-9-25.
@@ -15,7 +15,7 @@ public abstract class RequestRetCallBack {
 	public String[] _obj;// 提前存储的数据，可以在各个方法中使用的参数，通过构造方法传入
 	public Object data;
 	public int code;
-	public int requestType = BasicPostHelper.REQUEST_HTTP;
+	public int requestType = BasicHttpPost.REQUEST_HTTP;
 
 	/**
 	 * 创建回掉
@@ -23,12 +23,12 @@ public abstract class RequestRetCallBack {
 	 * @param requestType 请求类型
 	 * @param obj 参数
 	 */
-	public RequestRetCallBack(int requestType, String... obj) {
+	public RequestRetCallBack(int requestType, String[] obj) {
 		this._obj = obj;
 		this.requestType = requestType;
 	}
 
-	public RequestRetCallBack(String... obj) {
+	public RequestRetCallBack(String[] obj) {
 		this._obj = obj;
 	}
 

@@ -5,30 +5,10 @@ import android.content.Intent;
 
 import com.ldm.basic.app.Configuration;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.HttpVersion;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.params.ConnManagerParams;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.params.HttpProtocolParams;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
-
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.UUID;
 
@@ -56,7 +36,7 @@ public class FileDownloadTool {
     /**
      * 读取超时时间
      */
-    public static int SO_TIME_OUT = 1000 * 60;
+    public static int SO_TIME_OUT = 1000 * 80;
 
     private WeakReference<Context> context;
     private TaskThreadService lService;
@@ -74,7 +54,7 @@ public class FileDownloadTool {
      * @param isStartAsync 是否开启异步任务（开启后将可以使用addTask等方法）
      */
     public FileDownloadTool(Context context, boolean isStartAsync) {
-        this.context = new WeakReference<Context>(context);
+        this.context = new WeakReference<>(context);
         if (async = isStartAsync) {
             this.lService = new TaskThreadService(true);
         }
@@ -168,19 +148,28 @@ public class FileDownloadTool {
         if (TextUtils.isNull(url)) {
             return null;
         }
-        HttpClient client = getThreadSafeHttpClient();
-        HttpGet get = new HttpGet(url);
+        FileTool.createDirectory(cachePath);
+        HttpURLConnection urlConnection = null;
         try {
-            HttpResponse response = client.execute(get);
-            int code = response.getStatusLine().getStatusCode();
-            if (code == HttpStatus.SC_OK && response.getEntity() != null) {
-                return FileTool.save(response.getEntity().getContent(), cachePath, cacheName);
+            URL httpUrl = new URL(URLEncoder.encode(url, "UTF-8"));
+            urlConnection = (HttpURLConnection) httpUrl.openConnection();
+            urlConnection.setConnectTimeout(TIME_OUT);
+            urlConnection.setReadTimeout(SO_TIME_OUT);
+            urlConnection.setInstanceFollowRedirects(true);
+            urlConnection.setRequestMethod("GET");
+            int responseCode = urlConnection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                return FileTool.save(urlConnection.getInputStream(), cachePath, cacheName);
             }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (client != null && client.getConnectionManager() != null) {
-                client.getConnectionManager().shutdown();
+            if (urlConnection != null) {
+                try {
+                    urlConnection.disconnect();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
         return null;
@@ -190,39 +179,46 @@ public class FileDownloadTool {
      * 通过HttpClient下载文件并保存在 默认的缓存路径下（CACHE_IMAGES_PATH）
      * 处理失败时将返回异常代码，成功时增加标识【0::】成功 【1::】失败
      *
-     * @param url       文件属性
+     * @param url      文件属性
      * @param filePath 文件路径
      * @return 保存后返回 状态::路径
      */
     public String httpToFile2(final String url, final String filePath) {
-    	 if (TextUtils.isNull(url)) {
-             return "1::url is null";
-         }
-         String result = "";
-         HttpClient client = getThreadSafeHttpClient();
-         HttpGet get = new HttpGet(url);
-         try {
-             HttpResponse response = client.execute(get);
-             int code = response.getStatusLine().getStatusCode();
-             Log.e("code = " + code);
-             if (code == HttpStatus.SC_OK && response.getEntity() != null) {
-                 return "0::" + FileTool.save(response.getEntity().getContent(), filePath);
-             } else {
-                 //文件没有下载完成，执行一次删除
-                 FileTool.delete(filePath);
-                 return "2::" + code;
-             }
-         } catch (Exception e) {
-             e.printStackTrace();
-             //文件没有下载完成，执行一次删除
-             FileTool.delete(filePath);
-             result = "1::" + e.getMessage();
-         } finally {
-             if (client != null && client.getConnectionManager() != null) {
-                 client.getConnectionManager().shutdown();
-             }
-         }
-         return result;
+        if (TextUtils.isNull(url)) {
+            return "1::url is null";
+        }
+        String result = "1::err";
+        if (FileTool.createDirectory(filePath)) {
+            HttpURLConnection urlConnection = null;
+            try {
+                URL httpUrl = new URL(URLEncoder.encode(url, "UTF-8"));
+                urlConnection = (HttpURLConnection) httpUrl.openConnection();
+                urlConnection.setConnectTimeout(TIME_OUT);
+                urlConnection.setReadTimeout(SO_TIME_OUT);
+                urlConnection.setInstanceFollowRedirects(true);
+                urlConnection.setRequestMethod("GET");
+                int responseCode = urlConnection.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    return "0::" + FileTool.save(urlConnection.getInputStream(), filePath);
+                } else {
+                    //文件没有下载完成，执行一次删除
+                    FileTool.delete(filePath);
+                    return "2::" + responseCode;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                result = "1::" + e.getMessage();
+            } finally {
+                if (urlConnection != null) {
+                    try {
+                        urlConnection.disconnect();
+                    } catch (Exception e1) {
+                        e1.printStackTrace();
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     /**
@@ -239,94 +235,72 @@ public class FileDownloadTool {
     }
 
     /**
-     * 返回URL的数据流
+     * 使用HttpURLConnection下载网络文件并转成List<String>
      *
-     * @param url 地址
-     * @return InputStream
+     * @param serviceUrl 网络URL
+     * @return data
      */
-    public InputStream httpToInputStream(final String url) {
-        HttpClient client = getThreadSafeHttpClient();
-        HttpGet get = new HttpGet(url);
+    public static List<String> httpToLines(String serviceUrl) {
+        HttpURLConnection urlConnection = null;
         try {
-            HttpResponse response = client.execute(get);
-            int code = response.getStatusLine().getStatusCode();
-            if (code == HttpStatus.SC_OK && response.getEntity() != null) {
-                return response.getEntity().getContent();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (client != null && client.getConnectionManager() != null) {
-                client.getConnectionManager().shutdown();
-            }
-        }
-        return null;
-    }
-
-    /**
-     * 根据指定的URL，将内容对应行数转换成List<String>
-     *
-     * @param url URL
-     * @return List<String>
-     */
-    public static List<String> httpToLines(String url) {
-        HttpClient client = getThreadSafeHttpClient();
-        HttpGet get = new HttpGet(url);
-        try {
-            HttpResponse response = client.execute(get);
-            int code = response.getStatusLine().getStatusCode();
-            if (code == HttpStatus.SC_OK) {
-                InputStream is = response.getEntity().getContent();
-                if (is != null) {
-                    List<String> result = new ArrayList<String>();
-                    InputStreamReader inReader = new InputStreamReader(is);
-                    BufferedReader buffReader = new BufferedReader(inReader);
-                    String data;
-                    try {
-                        while ((data = buffReader.readLine()) != null) {
-                            if (!"".equals(data.trim())) {
-                                result.add(data.trim());
-                            }
-                        }
-                        is.close();
-                        inReader.close();
-                        buffReader.close();
-                        return result;
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+            URL url = new URL(URLEncoder.encode(serviceUrl, "UTF-8"));
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setConnectTimeout(TIME_OUT);
+            urlConnection.setReadTimeout(SO_TIME_OUT);
+            urlConnection.setInstanceFollowRedirects(true);
+            urlConnection.setRequestMethod("GET");
+            int responseCode = urlConnection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                List<String> result = FileTool.inputStreamToLines(urlConnection.getInputStream());
+                if (result != null && result.size() > 0) {
+                    return result;
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (client != null && client.getConnectionManager() != null) {
-                client.getConnectionManager().shutdown();
+            if (urlConnection != null) {
+                try {
+                    urlConnection.disconnect();
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
             }
         }
         return null;
     }
 
     /**
-     * 将给定的地址对应的文件中的内容以字符串的形式返回
+     * 使用HttpURLConnection下载网络文件并转成String
      *
-     * @param url 地址
-     * @return String
+     * @param serviceUrl 网络URL
+     * @return data
      */
-    public static String httpToString(String url) {
-        HttpClient client = getThreadSafeHttpClient();
-        HttpGet get = new HttpGet(url);
+    public static String httpToString(String serviceUrl) {
+        HttpURLConnection urlConnection = null;
         try {
-            HttpResponse response = client.execute(get);
-            int code = response.getStatusLine().getStatusCode();
-            if (code == HttpStatus.SC_OK) {
-                return EntityUtils.toString(response.getEntity(), HTTP.UTF_8);
+            URL url = new URL(URLEncoder.encode(serviceUrl, "UTF-8"));
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setConnectTimeout(TIME_OUT);
+            urlConnection.setReadTimeout(SO_TIME_OUT);
+            urlConnection.setInstanceFollowRedirects(true);
+            urlConnection.setRequestMethod("GET");
+            int responseCode = urlConnection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                List<String> result = FileTool.inputStreamToLines(urlConnection.getInputStream());
+                if (result != null && result.size() > 0) {
+                    return result.get(0);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (client != null && client.getConnectionManager() != null) {
-                client.getConnectionManager().shutdown();
+            if (urlConnection != null) {
+                try {
+                    urlConnection.disconnect();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
         return null;
@@ -348,32 +322,6 @@ public class FileDownloadTool {
                 _context.sendBroadcast(broadcast);
             }
         }
-    }
-
-    /**
-     * 创建支持多线程的HttpClient
-     *
-     * @return HttpClient
-     */
-    protected static HttpClient getThreadSafeHttpClient() {
-        HttpParams params = new BasicHttpParams();
-        // 版本
-        HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
-        // 编码
-        HttpProtocolParams.setContentCharset(params, HTTP.UTF_8);
-        // Activates 'Expect: 100-continue' handshake for the entity enclosing
-        // methods.
-        HttpProtocolParams.setUseExpectContinue(params, true);
-        // 最大连接数
-        ConnManagerParams.setMaxTotalConnections(params, 100);
-        // 超时
-        HttpConnectionParams.setConnectionTimeout(params, 20 * 1000);
-        HttpConnectionParams.setSoTimeout(params, 20 * 1000);
-        // 计划注册,可以注册多个计划
-        SchemeRegistry schReg = new SchemeRegistry();
-        schReg.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-        ClientConnectionManager conMgr = new ThreadSafeClientConnManager(params, schReg);
-        return new DefaultHttpClient(conMgr, params);
     }
 
     /**

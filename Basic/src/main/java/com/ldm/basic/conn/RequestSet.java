@@ -1,16 +1,17 @@
 package com.ldm.basic.conn;
 
-import java.util.List;
 
+import java.util.List;
 
 /**
  * ldm 2012-4-16  
  * 下午12:50:55 RequestSet.java 批量网络请求集合
  */
 public class RequestSet {
-	List<HttpPostChild> _cs;
 
-	public RequestSet(List<HttpPostChild> child) {
+	List<HttpRequestClient> _cs;
+
+	public RequestSet(List<HttpRequestClient> child) {
 		this._cs = child;
 	}
 
@@ -35,9 +36,9 @@ public class RequestSet {
 	/**
 	 * 获取用户的所有请求
 	 *
-	 * @return HttpPostChild[]
+	 * @return HttpRequestChild[]
 	 */
-	public List<HttpPostChild> getChild() {
+	public List<HttpRequestClient> getChild() {
 		return _cs;
 	}
 }
