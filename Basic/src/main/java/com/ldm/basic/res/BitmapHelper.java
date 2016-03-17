@@ -734,7 +734,7 @@ public class BitmapHelper {
      * @param targetHeight 目标高度
      * @return Bitmap
      */
-    public static Bitmap getHexagonBitmap(Bitmap src, int targetWidth, int targetHeight) {
+    public static Bitmap getHexagonBitmap(Bitmap src, int targetWidth, int targetHeight) throws OutOfMemoryError {
         if (src == null || src.isRecycled()) {
             return null;
         }
@@ -764,7 +764,7 @@ public class BitmapHelper {
      * @param path         用来切个图片的路径
      * @return Bitmap
      */
-    public static Bitmap clipBitmap(Bitmap src, int targetWidth, int targetHeight, Path path) {
+    public static Bitmap clipBitmap(Bitmap src, int targetWidth, int targetHeight, Path path) throws OutOfMemoryError {
         //创建一个空的画布，用来存储切割后的图片
         Bitmap result = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.ARGB_8888);
         Canvas c = new Canvas(result);
@@ -779,6 +779,67 @@ public class BitmapHelper {
         c.drawPath(path, paint);
         //使用SRC_IN模式绘制Bitmap
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN)); // Mode.SRC_IN
+        c.drawBitmap(src, 0, 0, paint);
+        if (!src.isRecycled()) {
+            src.recycle();
+        }
+        return result;
+    }
+
+    /**
+     * 根据给定的Path裁剪图片
+     *
+     * @param src  Bitmap 使用完成后将被触发recycle
+     * @param mask Bitmap 用来做扣图的蒙版
+     * @return Bitmap
+     */
+    public static Bitmap clipBitmap(Bitmap src, Bitmap mask) {
+        return clipBitmap(src, mask, src.getWidth(), src.getHeight());
+    }
+
+    /**
+     * 根据给定的Path裁剪图片
+     *
+     * @param src          Bitmap 使用完成后将被触发recycle
+     * @param mask         Bitmap 用来做扣图的蒙版
+     * @param targetWidth  目标宽度
+     * @param targetHeight 目标高度
+     * @return Bitmap
+     */
+    public static Bitmap clipBitmap(Bitmap src, Bitmap mask, int targetWidth, int targetHeight) throws OutOfMemoryError {
+        if (src == null || src.isRecycled() || mask == null || mask.isRecycled()) {
+            return null;
+        }
+        Bitmap result = null;
+        //创建一个空的画布，用来存储切割后的图片
+        result = Bitmap.createBitmap(targetWidth, targetHeight, Config.ARGB_8888);
+        Canvas c = new Canvas(result);
+        //清空画布
+        c.drawARGB(0, 0, 0, 0);
+        //初始化画笔
+        final Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setStyle(Style.FILL);
+        paint.setColor(Color.parseColor("#FFFFFF"));
+
+        /**
+         * 绘制模板，宽度相同
+         */
+        Bitmap maskNew;
+        if (mask.getWidth() != targetWidth) {
+            Matrix m = new Matrix();
+            m.reset();
+            float s = targetWidth * 1.0f / mask.getWidth();
+            m.postScale(s, s);
+            c.drawBitmap(mask, m, paint);
+            maskNew = Bitmap.createBitmap(mask, 0, 0, mask.getWidth(), mask.getHeight(), m, true);
+        } else {
+            maskNew = mask;
+        }
+        int offTop = (targetHeight - mask.getHeight()) / 2;
+        c.drawBitmap(maskNew, 0, offTop, paint);
+        //使用SRC_IN模式绘制Bitmap
+        paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN)); // Mode.SRC_IN
         c.drawBitmap(src, 0, 0, paint);
         if (!src.isRecycled()) {
             src.recycle();

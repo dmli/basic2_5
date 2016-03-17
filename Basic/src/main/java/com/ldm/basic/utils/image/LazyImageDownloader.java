@@ -14,7 +14,6 @@ import android.view.animation.Animation;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.ldm.basic.app.BasicRuntimeCache;
 import com.ldm.basic.app.Configuration;
@@ -830,7 +829,6 @@ public class LazyImageDownloader {
                     break;
                 case 103:// 内存溢出
                     if (w.get() != null && w.get().getContext() != null && System.currentTimeMillis() - toastTime > 3000) {
-                        Toast.makeText(w.get().getContext(), "可用内存不足，请释放内存后重试！", Toast.LENGTH_SHORT).show();
                         SystemTool.killBackgroundProcesses(w.get().getContext().getApplicationContext());
                         try {
                             System.gc();
@@ -842,7 +840,6 @@ public class LazyImageDownloader {
                     break;
                 case 105:
                     if (w.get() != null && w.get().getContext() != null && System.currentTimeMillis() - toastTime > 3000) {
-                        Toast.makeText(w.get().getContext(), "手机磁盘空间不足！", Toast.LENGTH_SHORT).show();
                         toastTime = System.currentTimeMillis();
                     }
                     break;
