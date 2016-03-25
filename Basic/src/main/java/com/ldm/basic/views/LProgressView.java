@@ -3,18 +3,17 @@ package com.ldm.basic.views;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
-import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
-import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
+
+import com.nineoldandroids.animation.ObjectAnimator;
+import com.nineoldandroids.animation.ValueAnimator;
 
 /**
  * Created by ldm on 16/2/16.
  * 旋转的进度条，使用RotateAnimation动画
  */
 public class LProgressView extends ImageView {
-
-    private RotateAnimation ra;
 
     public LProgressView(Context context) {
         super(context);
@@ -31,28 +30,51 @@ public class LProgressView extends ImageView {
         init();
     }
 
+    ObjectAnimator animator;
+
     private void init() {
-        ra = new RotateAnimation(0, 3600, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-        ra.setInterpolator(new LinearInterpolator());
-        ra.setRepeatCount(-1);
-        ra.setDuration(8000);
+        animator = ObjectAnimator.ofFloat(this, "rotation", 0, 360);
+        animator.setInterpolator(new LinearInterpolator());
+        animator.setDuration(700);
+        animator.setRepeatCount(ValueAnimator.INFINITE);
+        animator.setRepeatMode(ValueAnimator.RESTART);
     }
+
 
     @Override
     protected void onDetachedFromWindow() {
         if (getAnimation() != null) {
             getAnimation().cancel();
         }
+        clearAnimation();
+        if (animator != null && animator.isStarted()) {
+            animator.cancel();
+        }
         super.onDetachedFromWindow();
     }
+
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (getAnimation() == null) {
-            startAnimation(ra);
+        if (animator != null) {
+            if (!animator.isStarted()) {
+                animator.start();
+            }
         }
+
     }
 
+    @Override
+    public void setVisibility(int visibility) {
+        if (visibility != getVisibility()) {
+            if (visibility != VISIBLE) {
+                if (animator != null && (animator.isStarted() || animator.isRunning())) {
+                    animator.cancel();
+                }
+            }
+            super.setVisibility(visibility);
+        }
+    }
 
 }

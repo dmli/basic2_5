@@ -16,21 +16,19 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
-import android.text.Spanned;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver;
-import android.widget.TextView;
 
 import com.ldm.basic.app.BasicApplication;
 import com.ldm.basic.app.Configuration;
 import com.ldm.basic.dialog.LToast;
 import com.ldm.basic.intent.IntentUtil;
 import com.ldm.basic.shared.SharedPreferencesHelper;
-import com.ldm.basic.utils.image.LazyImageDownloader;
 import com.ldm.basic.utils.Log;
 import com.ldm.basic.utils.SystemTool;
+import com.ldm.basic.utils.image.LazyImageDownloader;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
@@ -153,7 +151,10 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
     protected void onStart() {
         super.onStart();
         // 返回按钮添加事件，如果存在
-        setOnClickListener(getResources().getIdentifier("back", "id", getPackageName()));
+        View v = findViewById(getResources().getIdentifier("back", "id", getPackageName()));
+        if (v != null) {
+            v.setOnClickListener(this);
+        }
     }
 
     @Override
@@ -258,57 +259,6 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
      */
     protected View getView(final int viewId) {
         return findViewById(viewId);
-    }
-
-    /**
-     * 通过Id给对应的TextView或其所有子类设置text
-     *
-     * @param viewId id
-     * @param str    s
-     */
-    protected void setText(final int viewId, final String str) {
-        TextView tv = (TextView) getView(viewId);
-        if (tv != null) {
-            tv.setText(str);
-        } else {
-            Log.e("没有找到 id" + viewId + "所对应的View");
-        }
-    }
-
-    /**
-     * 通过Id给对应的TextView或其所有子类设置text
-     *
-     * @param viewId id
-     * @param html   s
-     */
-    protected void setText(final int viewId, final Spanned html) {
-        ((TextView) getView(viewId)).setText(html);
-        TextView tv = (TextView) getView(viewId);
-        if (tv != null) {
-            tv.setText(html);
-        } else {
-            Log.e("没有找到 id" + viewId + "所对应的View");
-        }
-    }
-
-    /**
-     * 获取TextView的text属性, TextView == null时 返回null
-     *
-     * @param viewId TextView ID
-     * @return text
-     */
-    protected String getViewText(final int viewId) {
-        return getViewText((TextView) getView(viewId));
-    }
-
-    /**
-     * 获取TextView的text属性, TextView == null时 返回null
-     *
-     * @param tv TextView
-     * @return text
-     */
-    protected String getViewText(final TextView tv) {
-        return tv == null ? null : tv.getText() == null ? null : tv.getText().toString();
     }
 
     /**
@@ -427,20 +377,6 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
     }
 
     /**
-     * 查询并添加OnClickListener事件 如果View不存在则抛出NullPointerException
-     *
-     * @param id ViewId
-     * @return View
-     */
-    protected View setOnClickListener(final int id) {
-        View v = getView(id);
-        if (v != null) {
-            v.setOnClickListener(this);
-        }
-        return v;
-    }
-
-    /**
      * 返回指定key在CLIENT_INFO_CACHE_FILE中是否存在
      *
      * @param key 名称
@@ -481,41 +417,6 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
     protected void removeCache(final String key) {
         SharedPreferencesHelper sph = new SharedPreferencesHelper(this);
         sph.remove(Configuration.CLIENT_INFO_CACHE_FILE, key);
-    }
-
-    /**
-     * 根据fileName及key获取对应文件中的value值
-     *
-     * @param fileName 文件名
-     * @param key      key
-     * @return value 没有返回null
-     */
-    protected String queryFromSharedPreferences(final String fileName, final String key) {
-        SharedPreferencesHelper sph = new SharedPreferencesHelper(this);
-        return sph.query(fileName, key);
-    }
-
-    /**
-     * 将给定的key与value存储到fileName指定的文件中 *当key存在时执行覆盖操作*
-     *
-     * @param fileName 文件名
-     * @param key      key
-     * @param value    值
-     */
-    protected void saveToSharedPreferences(final String fileName, final String key, final String value) {
-        SharedPreferencesHelper sph = new SharedPreferencesHelper(this);
-        sph.put(fileName, key, value);
-    }
-
-    /**
-     * 删除指定key在CLIENT_INFO_CACHE_FILE文件中对应的数据
-     *
-     * @param fileName 文件名
-     * @param key      名称
-     */
-    protected void removeToSharedPreferences(final String fileName, final String key) {
-        SharedPreferencesHelper sph = new SharedPreferencesHelper(this);
-        sph.remove(fileName, key);
     }
 
     /**
@@ -782,31 +683,6 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
      */
     protected void startAsyncTask(final int tag) {
         startAsyncTask(tag, null);
-    }
-
-    /**
-     * 使用securityHandler发送一条消息
-     *
-     * @param what what
-     * @param obj  Object
-     */
-    protected void sendHandleMessage(int what, Object obj) {
-        if (THIS_ACTIVITY_STATE) {
-            securityHandler.sendMessage(securityHandler.obtainMessage(what, obj));
-        }
-    }
-
-    /**
-     * 使用securityHandler发送一条延时消息
-     *
-     * @param what        what
-     * @param obj         Object
-     * @param delayMillis what
-     */
-    protected void sendHandleMessageDelayed(int what, Object obj, int delayMillis) {
-        if (THIS_ACTIVITY_STATE) {
-            securityHandler.sendMessageDelayed(securityHandler.obtainMessage(what, obj), delayMillis);
-        }
     }
 
     /**

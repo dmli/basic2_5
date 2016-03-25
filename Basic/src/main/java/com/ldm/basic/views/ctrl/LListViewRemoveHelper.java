@@ -1,7 +1,5 @@
 package com.ldm.basic.views.ctrl;
 
-import com.ldm.basic.adapter.BasicAdapter;
-
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -11,8 +9,11 @@ import android.view.animation.TranslateAnimation;
 import android.widget.AbsListView;
 import android.widget.ListView;
 
+import com.ldm.basic.adapter.BasicAdapter;
+
 /**
- * Created by ldm on 14-8-7. 给listView删除时增加动画
+ * Created by ldm on 14-8-7.
+ * 给listView删除时增加动画
  */
 public class LListViewRemoveHelper {
 
@@ -155,6 +156,7 @@ public class LListViewRemoveHelper {
 
         @Override
         public void onAnimationEnd(Animation animation) {
+            v.setVisibility(View.INVISIBLE);
             if (isEnd) {
                 if (adapter != null) {
                     adapter.removeAll();
@@ -165,8 +167,6 @@ public class LListViewRemoveHelper {
                     callback.fulfil();
                 }
             }
-            v.setVisibility(View.INVISIBLE);
-            v.clearAnimation();
         }
 
         @Override
@@ -175,7 +175,7 @@ public class LListViewRemoveHelper {
     }
 
     public interface Callback {
-        public void fulfil();
+        void fulfil();
     }
 
 }

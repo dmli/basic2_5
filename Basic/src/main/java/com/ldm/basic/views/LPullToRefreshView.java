@@ -49,11 +49,11 @@ public class LPullToRefreshView extends ViewGroup {
     private RecyclerView.Adapter<?> recyclerAdapter;
     private BaseExpandableListAdapter baseExpandableListAdapter;
     private boolean effective;
-    private boolean loadPaging;// 是否处于刷新中
+    private boolean isLoadRunning;// 是否处于刷新中
     private boolean isNext;// 是否有下一页数据
     private boolean state;
+    private boolean lockTouch;//默认false,设置true将锁住刷新全部及分页功能
     private float touchMoveX, touchMoveY;
-    //    private float scaledTouchSlop;//最大忽略范围
     //本次动画将要移动的长度    方向1向上  -1向下 0原地停留
     private static final float REDUCTION_RATIO = 0.35f;//减速比例
     private static final int LOAD_MORE_DURATION_TIME = 350;// 加载更多动画使用的时间
@@ -65,11 +65,6 @@ public class LPullToRefreshView extends ViewGroup {
     private OnLoadPagingListener onLoadPagingListener;
     private OnRefreshAllListener onRefreshAllListener;
     private BasicHeadAnimation headAnimation;
-
-    /**
-     * 当设置了回掉之后这两个属性将跟随变成false
-     */
-    private boolean openLoadPagingFc, openRefreshAllListFc, isRefreshAllTouchPause;//isRefreshAllTouchPause true将暂停下拉手势
 
 
     public LPullToRefreshView(Context context) {
@@ -94,10 +89,10 @@ public class LPullToRefreshView extends ViewGroup {
     }
 
     private void init(Context context) {
+        this.lockTouch = false;
         this.isNext = true;
         this.effective = true;
         this.originalTop = 0;
-        this.isRefreshAllTouchPause = false;
         this.scroller = new Scroller(context);
         MAX_MOVE_HEIGHT = (int) (85 * SystemTool.DENSITY);
     }
@@ -105,12 +100,12 @@ public class LPullToRefreshView extends ViewGroup {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        if (openRefreshAllListFc) {
+        if (isOpenRefreshAllListFc()) {
             View v0 = getChildAt(0), v1 = getChildAt(1);
             int height = MeasureHelper.getHeight(v0, heightMeasureSpec);
             v0.measure(widthMeasureSpec, height);
             v1.measure(widthMeasureSpec, heightMeasureSpec);
-            if (openLoadPagingFc) {
+            if (getChildCount() == 3) {
                 View v2 = getChildAt(2);
                 v2.measure(widthMeasureSpec, MeasureHelper.getHeight(v2, heightMeasureSpec));
             }
@@ -123,7 +118,7 @@ public class LPullToRefreshView extends ViewGroup {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        if (openRefreshAllListFc) {
+        if (isOpenRefreshAllListFc()) {
             onLayoutOpenRefreshAllFc(changed);
         } else {
             onLayoutNotOpenRefreshAllFc(changed);
@@ -161,7 +156,7 @@ public class LPullToRefreshView extends ViewGroup {
         PULL_TO_REFRESH_HEIGHT = (int) (v0.getMeasuredHeight() * 1.20f);//记录这个头部的高度，后面做动画时作为参数
         MAX_TO_REFRESH_HEIGHT = (int) (v0.getMeasuredHeight() * 1.15f);
         v1.layout(0, 0, v1.getMeasuredWidth(), v1.getMeasuredHeight());
-        if (openLoadPagingFc) {
+        if (getChildCount() == 3) {
             View v2 = getChildAt(2);
             if (rect == null || rect.top <= 0 || changed) {
                 v2.layout(0, v1.getMeasuredHeight(), v2.getMeasuredWidth(), v1.getMeasuredHeight() + v2.getMeasuredHeight());
@@ -275,9 +270,23 @@ public class LPullToRefreshView extends ViewGroup {
         }
     }
 
+    /**
+     * 锁住Touch操作
+     */
+    public void lockTouch() {
+        this.lockTouch = true;
+    }
+
+    /**
+     * 解开touch操作
+     */
+    public void unlockTouch() {
+        this.lockTouch = false;
+    }
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (isRefreshAllTouchPause || !openRefreshAllListFc || isRefreshing() || loadPaging) {//如果没有下啦刷新功能或处于刷新中，不允许对其进行操作
+        if (lockTouch || !isOpenRefreshAllListFc() || isRefreshing() || isLoadRunning) {//如果没有下啦刷新功能或处于刷新中，不允许对其进行操作
             return false;
         }
 
@@ -327,7 +336,7 @@ public class LPullToRefreshView extends ViewGroup {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (!openRefreshAllListFc || isRefreshing() || loadPaging) {//如果没有下啦刷新功能或处于刷新中，不允许对其进行操作
+        if (!isOpenRefreshAllListFc() || isRefreshing() || isLoadRunning) {//如果没有下啦刷新功能或处于刷新中，不允许对其进行操作
             return true;
         }
         switch (event.getAction()) {
@@ -578,14 +587,6 @@ public class LPullToRefreshView extends ViewGroup {
         loadPagingCompleted(true);
     }
 
-    public void pauseRefreshAllFunc() {
-        isRefreshAllTouchPause = true;
-    }
-
-    public void resumeRefreshAllFunc() {
-        isRefreshAllTouchPause = false;
-    }
-
     /**
      * 刷新完成调用这个方法可以进行状态恢复
      */
@@ -607,8 +608,8 @@ public class LPullToRefreshView extends ViewGroup {
      */
     public void loadPagingCompleted(boolean keep) {
         isNext = keep;
-        if (loadPaging) {
-            loadPaging = false;
+        if (isLoadRunning) {
+            isLoadRunning = false;
             onEnd();
         }
     }
@@ -618,7 +619,7 @@ public class LPullToRefreshView extends ViewGroup {
      */
     public void beginLoadPaging() {
         if (loadingView != null) {
-            loadPaging = true;
+            isLoadRunning = true;
             showLoadView();
             if (this.onLoadPagingListener != null) {
                 this.onLoadPagingListener.onBeginLoadPagingListener();
@@ -706,9 +707,17 @@ public class LPullToRefreshView extends ViewGroup {
     public void setOnRefreshAllListener(OnRefreshAllListener onRefreshAllListener) {
         if (onRefreshAllListener != null) {
             this.onRefreshAllListener = onRefreshAllListener;
-            openRefreshAllListFc = true;
             headView = getChildAt(0);
         }
+    }
+
+    /**
+     * 返回true表示开启了刷新功能
+     *
+     * @return true / false
+     */
+    private boolean isOpenRefreshAllListFc() {
+        return onRefreshAllListener != null;
     }
 
     /**
@@ -725,9 +734,7 @@ public class LPullToRefreshView extends ViewGroup {
         if (onLoadPagingListener != null) {
             this.onLoadPagingListener = onLoadPagingListener;
             openLoadPagingFunc();
-            openLoadPagingFc = true;
-
-            View v1 = getChildAt(openRefreshAllListFc ? 1 : 0);
+            View v1 = getChildAt(isOpenRefreshAllListFc() ? 1 : 0);
             if (v1 instanceof AbsListView) {
                 listView1 = (AbsListView) v1;
                 listView1.setOnScrollListener(new MyAbsOnScrollListener());
@@ -735,7 +742,7 @@ public class LPullToRefreshView extends ViewGroup {
                 recyclerView = (RecyclerView) v1;
                 recyclerView.setOnScrollListener(new RecyclerViewOnScrollListener());
             }
-            this.loadingView = getChildAt(openRefreshAllListFc ? 2 : 1);
+            this.loadingView = getChildAt(isOpenRefreshAllListFc() ? 2 : 1);
             a1.setDuration(LOAD_MORE_DURATION_TIME);
             a1.setInterpolator(new AnticipateOvershootInterpolator());
             a2.setDuration(LOAD_MORE_DURATION_TIME);
@@ -786,10 +793,10 @@ public class LPullToRefreshView extends ViewGroup {
 
         @Override
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-            if (lState == DONE && isNext && !loadPaging && onLoadPagingListener != null && newState == RecyclerView.SCROLL_STATE_IDLE) {
+            if (lState == DONE && !lockTouch && isNext && !isLoadRunning && onLoadPagingListener != null && newState == RecyclerView.SCROLL_STATE_IDLE) {
                 LinearLayoutManager llm = (LinearLayoutManager) recyclerView.getLayoutManager();
                 if (llm.findLastCompletelyVisibleItemPosition() == recyclerView.getAdapter().getItemCount() - 1) {// 滚动到底部
-                    loadPaging = true;
+                    isLoadRunning = true;
                     beginLoadPaging();
                 }
             }
@@ -810,9 +817,9 @@ public class LPullToRefreshView extends ViewGroup {
 
         @Override
         public void onScrollStateChanged(AbsListView view, int scrollState) {
-            if (lState == DONE && isNext && !loadPaging && onLoadPagingListener != null && scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
+            if (!lockTouch && lState == DONE && isNext && !isLoadRunning && onLoadPagingListener != null && scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
                 if (view.getLastVisiblePosition() == (view.getCount() - 1)) {// 滚动到底部
-                    loadPaging = true;
+                    isLoadRunning = true;
                     beginLoadPaging();
                 }
             }

@@ -47,11 +47,11 @@ public class LPullToRefreshViewLite extends ViewGroup {
     private View loadingView, headView, listViewHeadView;
     private int originalTop;
     private boolean effective;
-    private boolean loadPaging;// 是否处于刷新中
+    private boolean isLoadRunning;// 是否处于刷新中
     private boolean isNext;// 是否有下一页数据
     private boolean state;
     private float touchMoveX, touchMoveY;
-    //    private float scaledTouchSlop;//最大忽略范围
+    private boolean lockTouch;//默认false,设置true将锁住刷新全部及分页功能
     //本次动画将要移动的长度    方向1向上  -1向下 0原地停留
     private static final float REDUCTION_RATIO = 0.35f;//减速比例
     private static final int DURATION_TIME = 650;// 放手时自动移动的持续时间
@@ -62,12 +62,6 @@ public class LPullToRefreshViewLite extends ViewGroup {
     private OnLoadPagingListener onLoadPagingListener;
     private OnRefreshAllListener onRefreshAllListener;
     private BasicHeadAnimation headAnimation;
-
-    /**
-     * 当设置了回掉之后这两个属性将跟随变成false
-     */
-    private boolean openRefreshAllListFc, isRefreshAllTouchPause;//isRefreshAllTouchPause true将暂停下拉手势
-
 
     public LPullToRefreshViewLite(Context context) {
         super(context);
@@ -91,10 +85,10 @@ public class LPullToRefreshViewLite extends ViewGroup {
     }
 
     private void init(Context context) {
+        this.lockTouch = false;
         this.isNext = true;
         this.effective = true;
         this.originalTop = 0;
-        isRefreshAllTouchPause = false;
         this.scroller = new Scroller(context);
         DisplayMetrics dm = new DisplayMetrics();
         ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(dm);
@@ -104,7 +98,7 @@ public class LPullToRefreshViewLite extends ViewGroup {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        if (openRefreshAllListFc) {
+        if (isOpenRefreshAllListFc()) {
             View v0 = getChildAt(0), v1 = getChildAt(1);
             v0.measure(widthMeasureSpec, MeasureHelper.getHeight(v0, heightMeasureSpec));
             v1.measure(widthMeasureSpec, heightMeasureSpec);
@@ -124,7 +118,7 @@ public class LPullToRefreshViewLite extends ViewGroup {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        if (openRefreshAllListFc) {
+        if (isOpenRefreshAllListFc()) {
             onLayoutOpenRefreshAllFc(changed);
         } else {
             onLayoutNotOpenRefreshAllFc(changed);
@@ -209,9 +203,23 @@ public class LPullToRefreshViewLite extends ViewGroup {
         return listView1;
     }
 
+    /**
+     * 锁住Touch操作
+     */
+    public void lockTouch() {
+        this.lockTouch = true;
+    }
+
+    /**
+     * 解开touch操作
+     */
+    public void unlockTouch() {
+        this.lockTouch = false;
+    }
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (isRefreshAllTouchPause || !openRefreshAllListFc || isRefreshing() || loadPaging) {//如果没有下啦刷新功能或处于刷新中，不允许对其进行操作
+        if (lockTouch || !isOpenRefreshAllListFc() || isRefreshing() || isLoadRunning) {//如果没有下啦刷新功能或处于刷新中，不允许对其进行操作
             return false;
         }
 
@@ -261,7 +269,7 @@ public class LPullToRefreshViewLite extends ViewGroup {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (!openRefreshAllListFc || isRefreshing() || loadPaging) {//如果没有下啦刷新功能或处于刷新中，不允许对其进行操作
+        if (!isOpenRefreshAllListFc() || isRefreshing() || isLoadRunning) {//如果没有下啦刷新功能或处于刷新中，不允许对其进行操作
             return true;
         }
         switch (event.getAction()) {
@@ -497,14 +505,6 @@ public class LPullToRefreshViewLite extends ViewGroup {
         loadPagingCompleted(true);
     }
 
-    public void pauseRefreshAllFunc() {
-        isRefreshAllTouchPause = true;
-    }
-
-    public void resumeRefreshAllFunc() {
-        isRefreshAllTouchPause = false;
-    }
-
     /**
      * 刷新完成调用这个方法可以进行状态恢复
      */
@@ -526,8 +526,8 @@ public class LPullToRefreshViewLite extends ViewGroup {
      */
     public void loadPagingCompleted(boolean keep) {
         isNext = keep;
-        if (loadPaging) {
-            loadPaging = false;
+        if (isLoadRunning) {
+            isLoadRunning = false;
             onEnd();
         }
         if (loadingView != null && (listView1 instanceof ListView)) {
@@ -549,7 +549,7 @@ public class LPullToRefreshViewLite extends ViewGroup {
      */
     public void beginLoadPaging() {
         if (loadingView != null) {
-            loadPaging = true;
+            isLoadRunning = true;
             showLoadView();
             if (this.onLoadPagingListener != null) {
                 this.onLoadPagingListener.onLoadComplete();
@@ -652,7 +652,7 @@ public class LPullToRefreshViewLite extends ViewGroup {
         if (onLoadPagingListener != null) {
             this.onLoadPagingListener = onLoadPagingListener;
             openLoadPagingFunc();
-            View v1 = getChildAt(openRefreshAllListFc ? 1 : 0);
+            View v1 = getChildAt(isOpenRefreshAllListFc() ? 1 : 0);
             if (v1 instanceof AbsListView) {
                 listView1 = (AbsListView) v1;
                 listView1.setOnScrollListener(new MyAbsOnScrollListener());
@@ -666,7 +666,7 @@ public class LPullToRefreshViewLite extends ViewGroup {
                 /**
                  * 除ListView外都用弹出式动画
                  */
-                this.loadingView = getChildAt(openRefreshAllListFc ? 2 : 1);
+                this.loadingView = getChildAt(isOpenRefreshAllListFc() ? 2 : 1);
                 a1.setDuration(DURATION_TIME);
                 a1.setInterpolator(new AnticipateOvershootInterpolator());
                 a2.setDuration(DURATION_TIME);
@@ -683,9 +683,17 @@ public class LPullToRefreshViewLite extends ViewGroup {
     public void setOnRefreshAllListener(OnRefreshAllListener onRefreshAllListener) {
         if (onRefreshAllListener != null) {
             this.onRefreshAllListener = onRefreshAllListener;
-            openRefreshAllListFc = true;
             headView = getChildAt(0);
         }
+    }
+
+    /**
+     * 返回true表示开启了刷新功能
+     *
+     * @return true / false
+     */
+    private boolean isOpenRefreshAllListFc() {
+        return onRefreshAllListener != null;
     }
 
     private Animation a1 = new Animation() {
@@ -731,9 +739,9 @@ public class LPullToRefreshViewLite extends ViewGroup {
 
         @Override
         public void onScrollStateChanged(AbsListView view, int scrollState) {
-            if (lState == DONE && isNext && !loadPaging && onLoadPagingListener != null && scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
+            if (lState == DONE && !lockTouch && isNext && !isLoadRunning && onLoadPagingListener != null && scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
                 if (view.getLastVisiblePosition() == (view.getCount() - 1)) {// 滚动到底部
-                    loadPaging = true;
+                    isLoadRunning = true;
                     beginLoadPaging();
                 }
             }
