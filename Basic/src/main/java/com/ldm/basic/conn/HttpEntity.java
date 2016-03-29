@@ -48,17 +48,6 @@ public class HttpEntity {
      */
     public static final int RESULT_CHILD_EXIT = 111;
 
-
-    /**
-     * 检查网络连接状况
-     *
-     * @param context Context
-     * @return true可用
-     */
-    private static boolean isNetWorkState(final Context context) {
-        return SystemTool.getNetworkStatus(context);
-    }
-
     /**
      * 在独立的线程中运行网络请求，当msg不等于null时附带提示框
      *
@@ -101,7 +90,7 @@ public class HttpEntity {
      * @param requestSet 网络集合
      */
     public static void httpPostSet(final Context context, final String tag, final RequestSet requestSet) {
-        if (!SystemTool.getNetworkStatus(context)) {
+        if (!SystemTool.isNetworkAvailable(context)) {
             Dialog.netWorkErrDialog(context, BasicApplication.CONSTANTS.NET_WORKERROR0);
             requestSet.ioError();// 网络异常
         } else {

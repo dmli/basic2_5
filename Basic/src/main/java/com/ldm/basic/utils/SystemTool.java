@@ -12,12 +12,10 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Rect;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
-import android.os.IBinder;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
@@ -26,7 +24,6 @@ import android.view.Display;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -95,10 +92,10 @@ public class SystemTool {
     /**
      * Activity的集合，用于记录所有初始过的Activity
      */
-    public static Map<String, WeakReference<Activity>> activitySet;
+    public static final Map<String, WeakReference<Activity>> activitySet;
 
     static {
-        activitySet = new HashMap<String, WeakReference<Activity>>();
+        activitySet = new HashMap<>();
         STATUS_BAR_HEIGHT = 0;
     }
 
@@ -123,6 +120,9 @@ public class SystemTool {
         DENSITY = dm.density;
         DENSITY_DPI = dm.densityDpi;
 
+        /**
+         * 这里尝试读取屏幕原始宽高，如果与SYS_SCREEN_HEIGHT高度不相同，表示手机存在虚拟按键
+         */
         try {
             Display display = activity.getWindowManager().getDefaultDisplay();
             Method method = Display.class.getMethod("getRealMetrics", DisplayMetrics.class);
@@ -309,7 +309,7 @@ public class SystemTool {
      *
      * @return phoneNumber 号码可能为空
      */
-    public static String localReadSIM(final Context context) {
+    public static String readLocalSIM(final Context context) {
         String result = "";
         TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         result = tm.getLine1Number();
@@ -320,41 +320,12 @@ public class SystemTool {
     }
 
     /**
-     * 返回软盘是否开启状态
-     *
-     * @param ac Activity
-     * @return true开启 false没有开启
-     */
-    public static boolean isSoftInputOpen(Activity ac) {
-        final Rect r = new Rect();
-        View rootNode = ac.getWindow().getDecorView();
-        rootNode.getWindowVisibleDisplayFrame(r);
-        final int screenHeight = rootNode.getRootView().getHeight();
-        return screenHeight != r.bottom;
-    }
-
-    /**
-     * 获取软键盘高度(这个方法需要在软键盘完全出现后调用有效,建议在OnGlobalLayoutListener监听中使用)
-     * *rootNode.getViewTreeObserver().addOnGlobalLayoutListener*
-     *
-     * @param ac Activity
-     * @return int
-     */
-    public static int getSoftInputHeight(Activity ac) {
-        final Rect r = new Rect();
-        View rootNode = ac.getWindow().getDecorView();
-        rootNode.getWindowVisibleDisplayFrame(r);
-        final int screenHeight = rootNode.getRootView().getHeight();
-        return screenHeight - r.bottom;
-    }
-
-    /**
      * 获取手机网络状态
      *
      * @param context Context
      * @return true为打开状态
      */
-    public static boolean getNetworkStatus(final Context context) {
+    public static boolean isNetworkAvailable(final Context context) {
         if (context != null) {
             ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
             if (manager != null) {
@@ -572,92 +543,6 @@ public class SystemTool {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addCategory(Intent.CATEGORY_HOME);
         activity.startActivity(intent);
-    }
-
-    /**
-     * 打开软键盘
-     *
-     * @param context Context
-     */
-    public static void showSoftInput(final Context context) {
-        showSoftInput(context, null);
-    }
-
-    /**
-     * 打开软键盘
-     *
-     * @param context Context
-     * @param view    要使用软盘的view
-     */
-    public static void showSoftInput(final Context context, final View view) {
-        InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-        view.setFocusable(true);
-        view.requestFocus();
-        boolean bool = imm.showSoftInput(view, 0);
-        if (!bool) {
-            bool = imm.showSoftInput(view, InputMethodManager.SHOW_FORCED);
-        }
-        if (!bool) {
-            imm.showSoftInputFromInputMethod(view.getWindowToken(), InputMethodManager.SHOW_FORCED);
-        }
-    }
-
-    /**
-     * 弹出软盘
-     *
-     * @param context Context
-     * @param view    要使用软盘的view
-     * @link 请使用showSoftInput(Context, View)
-     * @deprecated
-     */
-    public static void showSoftInputFromInputMethod(final Context context, final View view) {
-        showSoftInput(context, view);
-    }
-
-    /**
-     * 关闭软盘
-     *
-     * @param context Context
-     */
-    public static void hideSoftInput(final Context context) {
-        hideSoftInput(context, null);
-    }
-
-    /**
-     * 关闭软盘
-     *
-     * @param context Context
-     * @param binder  IBinder
-     */
-    public static boolean hideSoftInput(final Context context, final IBinder binder) {
-        InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-        boolean bool = false;
-        try {
-            if (imm.isActive()) {
-                if (binder != null) {
-                    bool = imm.hideSoftInputFromWindow(binder, 0);
-                }
-                if (!bool && context instanceof Activity) {
-                    Activity a = (Activity) context;
-                    if (a.getCurrentFocus() != null) {
-                        bool = imm.hideSoftInputFromWindow(a.getCurrentFocus().getWindowToken(), 0);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return bool;
-    }
-
-    /**
-     * 软盘开启则关闭，软盘关闭则开启
-     *
-     * @param activity Activity
-     */
-    public static void toggleSoftInput(final Activity activity) {
-        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
     }
 
     /**

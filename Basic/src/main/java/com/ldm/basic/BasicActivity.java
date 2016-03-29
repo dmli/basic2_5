@@ -14,6 +14,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -580,8 +581,15 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
         Rect r = new Rect();
         View rootNode = this.getWindow().getDecorView();
         rootNode.getWindowVisibleDisplayFrame(r);
-        softInputHeight = rootNode.getRootView().getHeight() - r.bottom;
-        onSoftInputState(softInputHeight == 0 ? SOFT_INPUT_STATE_CLOSE : SOFT_INPUT_STATE_OPEN);
+        DisplayMetrics dm = getResources().getDisplayMetrics();
+        int state, sih = Math.min(rootNode.getRootView().getHeight(), dm.heightPixels) - r.bottom;
+        if (sih <= 200) {
+            state = SOFT_INPUT_STATE_CLOSE;
+        } else {
+            state = SOFT_INPUT_STATE_OPEN;
+            softInputHeight = sih;
+        }
+        onSoftInputState(state);
     }
 
     /**

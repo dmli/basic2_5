@@ -93,10 +93,10 @@ public abstract class RequestRetCallBack {
 	 * @param context c
 	 * @return true可用
 	 */
-	public boolean isNetWorkState(final Context context) {
+	public boolean isNetworkAvailable(final Context context) {
 		boolean bool = false;
 		if (context != null) {
-			bool = SystemTool.getNetworkStatus(context);
+			bool = SystemTool.isNetworkAvailable(context);
 		}
 		return bool;
 	}

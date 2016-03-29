@@ -7,10 +7,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 
-import com.ldm.basic.app.BasicApplication;
 import com.ldm.basic.conn.BasicHttpGet;
 import com.ldm.basic.conn.BasicHttpPost;
-import com.ldm.basic.dialog.Dialog;
 import com.ldm.basic.utils.SystemTool;
 import com.ldm.basic.utils.TaskThreadToMultiService;
 
@@ -336,22 +334,6 @@ public class BasicService extends Service {
             return -1;
         }
 
-        /**
-         * 网络是否可用 context等于null时返回false
-         *
-         * @param context c
-         * @return true可用
-         */
-        public boolean isNetWorkState(Context context) {
-            boolean bool = false;
-            if (context != null) {
-                bool = SystemTool.getNetworkStatus(context);
-                if (!bool) {
-                    Dialog.netWorkErrDialog(context, BasicApplication.CONSTANTS.NET_WORKERROR0);
-                }
-            }
-            return bool;
-        }
     }
 
     /**

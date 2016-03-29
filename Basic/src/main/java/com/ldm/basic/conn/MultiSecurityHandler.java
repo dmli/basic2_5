@@ -70,7 +70,7 @@ public class MultiSecurityHandler extends Handler {
         } else if (msg.what == HttpEntity.RESULT_ERROR) {// 子线程“error”的回调
             callBack.error(context, callBack.code, String.valueOf(callBack.data));
         } else if (msg.what == HttpEntity.RESULT_IS_NETWORK_STATE) {// 子线程“isNetWorkState”的回调
-            callBack.isNetWorkState(context);
+            callBack.isNetworkAvailable(context);
         } else if (msg.what == HttpEntity.RESULT_IO_ERROR) {// 子线程“ioError”的回调
             callBack.ioError(context);
         } else if (msg.what == HttpEntity.RESULT_CHILD_ENTER) {// 子线程开始
