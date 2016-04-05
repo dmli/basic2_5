@@ -26,10 +26,10 @@ import android.os.Build;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.ldm.basic.utils.Base64;
 import com.ldm.basic.utils.FileTool;
 import com.ldm.basic.utils.FileType;
 import com.ldm.basic.utils.SystemTool;
-import com.ldm.basic.utils.base64.BASE64Encoder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -187,10 +187,10 @@ public class BitmapHelper {
         try {
             if (SystemTool.SYS_SDK_INT <= Build.VERSION_CODES.JELLY_BEAN && "webp".equals(FileType.getFileType(path))) {
                 FileTool ft = new FileTool();
-                Bitmap bit = BitmapHelper.decodeWebp(ft.openFile(path));
+                Bitmap bit = BitmapHelper.decodeWebp(FileTool.openFile(path));
 
                 byte[] buffer = new byte[1024];
-                InputStream fis = ft.openFile(path);
+                InputStream fis = FileTool.openFile(path);
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 try {
                     while ((fis.read(buffer, 0, buffer.length)) > 0) {
@@ -296,7 +296,7 @@ public class BitmapHelper {
         scale = scale <= 0 ? 1 : scale;
         options.inSampleSize = scale;
         options.inJustDecodeBounds = false;
-        Bitmap result = null;
+        Bitmap result;
         Bitmap bitmap = BitmapFactory.decodeFile(path, options);
         if (bitmap == null) {
             return null;
@@ -321,7 +321,6 @@ public class BitmapHelper {
         } else {
             result = bitmap;
         }
-        bitmap = null;
         return result;
     }
 
@@ -342,7 +341,6 @@ public class BitmapHelper {
             Bitmap b2 = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), m, true);
             if (bmp != b2 && !bmp.isRecycled()) {
                 bmp.recycle();
-                bmp = null;
             }
             return new BitmapDrawable(res, b2);
         } catch (OutOfMemoryError e) {
@@ -964,9 +962,7 @@ public class BitmapHelper {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        // 对字节数组Base64编码
-        BASE64Encoder encoder = new BASE64Encoder();
-        return encoder.encode(data);// 返回Base64编码过的字节数组字符串
+        return Base64.encodeToString(data, Base64.DEFAULT);
     }
 
     /**
@@ -978,8 +974,7 @@ public class BitmapHelper {
     public static String imageToBase64Str(Bitmap bitmap) {
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
         bitmap.compress(CompressFormat.JPEG, 100, bao);// 得到输出流
-        BASE64Encoder encoder = new BASE64Encoder();// 对字节数组Base64编码
-        return encoder.encode(bao.toByteArray());// 返回Base64编码过的字节数组字符串
+        return Base64.encodeToString(bao.toByteArray(), Base64.DEFAULT);
     }
 
     /**

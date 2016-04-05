@@ -545,19 +545,18 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
     /**
      * 异步完成结束后的回调函数，SecurityHandler及Asynchronous接口的任务处理
      *
-     * @param tag 标识，用户可以用该标识来区分任务
-     * @param obj Asynchronous接口中async方法的返回参数
+     * @param msg Message
      */
-    protected void handleMessage(int tag, Object obj) {
+    protected void handleMessage(Message msg) {
     }
 
     /**
      * 启动异步回调函数 *使用tag作为标记*
      *
-     * @param tag 将被分配到handleMessage(tag, obj)的第一个参数中
+     * @param what 将被分配到handleMessage(...)
      */
-    protected void startAsyncTask(final int tag) {
-        startAsyncTask(tag, null);
+    protected void startAsyncTask(final int what) {
+        startAsyncTask(what, null);
     }
 
     /**
@@ -602,13 +601,13 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
     }
 
     /**
-     * 启动异步回调函数 *使用tag作为标记*
+     * 启动异步回调函数 *使用what作为标记*
      *
-     * @param tag 将被分配到handleMessage(tag, obj)的第一个参数中
-     * @param obj 数据被传送到handleMessage(tag, Object)中的第二个参数
+     * @param what 将被分配到handleMessage(...)的what
+     * @param obj  数据被传送到handleMessage(...)的obj
      */
-    protected void startAsyncTask(int tag, Object obj) {
-        new AsyncThread<SecurityHandler<BasicActivity>>(securityHandler, ((Object) this).getClass().getName(), tag, obj) {
+    protected void startAsyncTask(int what, Object obj) {
+        new AsyncThread<SecurityHandler<BasicActivity>>(securityHandler, ((Object) this).getClass().getName(), what, obj) {
             @Override
             public void run() {
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
@@ -616,13 +615,13 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
                 if (ASYNC_SET != null) {
                     Asynchronous a = ASYNC_SET.get(key);
                     if (a != null) {
-                        object = a.async(tag, obj);
+                        object = a.async(what, obj);
                     }
                 }
                 if (w != null) {
                     SecurityHandler<BasicActivity> t = w.get();
                     if (t != null) {
-                        t.sendMessage(t.obtainMessage(tag, object));
+                        t.sendMessage(t.obtainMessage(what, object));
                     }
                 }
             }
@@ -645,7 +644,7 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
     }
 
     /**
-     * 相对安全的Handler，所有请求均由BasicActivity中handleMessage(int, Object)接收(这个handler允许在协议中使用)
+     * 相对安全的Handler，所有请求均由BasicActivity中handleMessage(...)接收(这个handler允许在协议中使用)
      */
     public SecurityHandler<BasicActivity> securityHandler = new SecurityHandler<>(this);
 
@@ -666,7 +665,7 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
                     } else if (POST_SHOW_LONG == msg.what) {
                         t.showLong(String.valueOf(msg.obj));
                     } else {
-                        t.handleMessage(msg.what, msg.obj);
+                        t.handleMessage(msg);
                     }
                 }
             }
@@ -688,21 +687,21 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
     public class AsyncThread<T> extends Thread {
         WeakReference<T> w;
         String key;
-        int tag;
+        int what;
         Object obj;
 
         /**
          * 创建一个简易的异步任务
          *
-         * @param w   弱引用
-         * @param key 用来查找对应的任务
-         * @param tag 参数1
-         * @param obj 参数2
+         * @param w    弱引用
+         * @param key  用来查找对应的任务
+         * @param what 参数1
+         * @param obj  参数2
          */
-        public AsyncThread(T w, String key, int tag, Object obj) {
+        public AsyncThread(T w, String key, int what, Object obj) {
             this.w = new WeakReference<>(w);
             this.key = key;
-            this.tag = tag;
+            this.what = what;
             this.obj = obj;
         }
     }

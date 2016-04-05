@@ -64,7 +64,7 @@ public class HttpFileTool {
             urlConnection.setRequestMethod("GET");
             int responseCode = urlConnection.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) {
-                List<String> result = FileTool.inputStreamToLines(urlConnection.getInputStream());
+                List<String> result = FileTool.toLines(urlConnection.getInputStream());
                 if (result != null && result.size() > 0) {
                     return result.get(0);
                 }
@@ -91,7 +91,7 @@ public class HttpFileTool {
             urlConnection.setRequestMethod("GET");
             int responseCode = urlConnection.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) {
-                List<String> result = FileTool.inputStreamToLines(urlConnection.getInputStream());
+                List<String> result = FileTool.toLines(urlConnection.getInputStream());
                 if (result != null && result.size() > 0) {
                     return result;
                 }

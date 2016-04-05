@@ -1,15 +1,18 @@
 package com.ldm.basic.views.ctrl;
 
 import android.view.View;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
-import android.view.animation.ScaleAnimation;
-import android.view.animation.TranslateAnimation;
 import android.widget.AbsListView;
 import android.widget.ListView;
 
-import com.ldm.basic.adapter.BasicAdapter;
+import com.ldm.basic.adapter.BasicMultiTypeAdapter;
+import com.nineoldandroids.animation.Animator;
+import com.nineoldandroids.animation.AnimatorSet;
+import com.nineoldandroids.animation.ObjectAnimator;
+import com.nineoldandroids.animation.PropertyValuesHolder;
+import com.nineoldandroids.view.ViewHelper;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by ldm on 14-8-7.
@@ -18,14 +21,16 @@ import com.ldm.basic.adapter.BasicAdapter;
 public class LListViewRemoveHelper {
 
     private AbsListView absListView;
-    private BasicAdapter<?> adapter;
+    private BasicMultiTypeAdapter<?> adapter;
     private Callback callback;// 完成反馈
+    private final List<View> animView;//被执行过动画的View
     private boolean isBusy;// 是否处于繁忙状态
 
-    public LListViewRemoveHelper(AbsListView absListView, BasicAdapter<?> adapter, Callback callback) {
+    public LListViewRemoveHelper(AbsListView absListView, BasicMultiTypeAdapter<?> adapter, Callback callback) {
         this.absListView = absListView;
         this.adapter = adapter;
         this.callback = callback;
+        this.animView = new ArrayList<>();
     }
 
     /**
@@ -33,64 +38,8 @@ public class LListViewRemoveHelper {
      *
      * @param adapter BasicAdapter<?>
      */
-    public void setAdapter(BasicAdapter<?> adapter) {
+    public void setAdapter(BasicMultiTypeAdapter<?> adapter) {
         this.adapter = adapter;
-    }
-
-    /**
-     * 左侧移除动画
-     *
-     * @return true动画开始执行
-     */
-    public boolean removeToLeftOut() {
-        if (isBusy) {
-            return false;
-        }
-        isBusy = true;
-        final int len = absListView.getChildCount();
-        int offset = 0;
-        if (absListView instanceof ListView) {
-            offset = ((ListView) absListView).getHeaderViewsCount();
-        }
-        for (int i = offset; i < len; i++) {
-            View v = absListView.getChildAt(i);
-            if (v != null) {
-                TranslateAnimation ta = new TranslateAnimation(Animation.RELATIVE_TO_PARENT, 0.0f, Animation.RELATIVE_TO_PARENT, -1.0f, Animation.RELATIVE_TO_PARENT, 0.0f, Animation.RELATIVE_TO_PARENT, 0.0f);
-                ta.setDuration(120);
-                ta.setAnimationListener(new MyAnimationListener(v, i == len - 1));
-                ta.setStartOffset(20 * i);
-                v.startAnimation(ta);
-            }
-        }
-        return true;
-    }
-
-    /**
-     * 淡出动画
-     *
-     * @return true动画开始执行
-     */
-    public boolean removeToFadeOut() {
-        if (isBusy) {
-            return false;
-        }
-        isBusy = true;
-        final int len = absListView.getChildCount();
-        int offset = 0;
-        if (absListView instanceof ListView) {
-            offset = ((ListView) absListView).getHeaderViewsCount();
-        }
-        for (int i = offset; i < len; i++) {
-            View v = absListView.getChildAt(i);
-            if (v != null) {
-                Animation ta = new AlphaAnimation(1.0f, 0.0f);
-                ta.setDuration(120);
-                ta.setAnimationListener(new MyAnimationListener(v, i == len - 1));
-                ta.setStartOffset(20 * i);
-                v.startAnimation(ta);
-            }
-        }
-        return true;
     }
 
     /**
@@ -98,23 +47,24 @@ public class LListViewRemoveHelper {
      *
      * @return true动画开始执行
      */
-    public boolean removeToPlummet() {
+    public boolean removeToPlummet(int duration) {
         if (isBusy) {
             return false;
         }
         isBusy = true;
         final int len = absListView.getChildCount();
         int offset = 0;
-        if (absListView instanceof ListView) {
+        if (absListView instanceof ListView && absListView.getFirstVisiblePosition() == 0) {
             offset = ((ListView) absListView).getHeaderViewsCount();
         }
+        animView.clear();
         for (int i = len - 1; i >= offset; i--) {
             View v = absListView.getChildAt(i);
             if (v != null) {
-                Animation a = getPlummetAnimation();
-                a.setAnimationListener(new MyAnimationListener(v, i == offset));
-                a.setStartOffset(20 * i);
-                v.startAnimation(a);
+                animView.add(v);
+                AnimatorSet a = getPlummetAnimator(v, duration, i);
+                a.addListener(new MyAnimatorListener(v, i == len - 1));
+                a.start();
             }
         }
         return true;
@@ -125,42 +75,71 @@ public class LListViewRemoveHelper {
      *
      * @return Animation
      */
-    private Animation getPlummetAnimation() {
-        AnimationSet set = new AnimationSet(false);
-        Animation sa = new ScaleAnimation(1.0f, 0.95f, 1.0f, 0.95f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-        sa.setDuration(120);
-        set.addAnimation(sa);
-        Animation aa = new AlphaAnimation(1.0f, 0.0f);
-        aa.setDuration(280);
-        aa.setStartOffset(100);
-        set.addAnimation(aa);
-        Animation ta = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF, 2.0f);
-        ta.setDuration(280);
-        ta.setStartOffset(100);
-        set.addAnimation(ta);
-        return set;
+    private AnimatorSet getPlummetAnimator(View v, int duration, int index) {
+        AnimatorSet set1 = new AnimatorSet();
+        float scale = (float) (0.95f - index * 0.016);
+        PropertyValuesHolder valuesHolder1 = PropertyValuesHolder.ofFloat("scaleX", 1.0f, scale);
+        PropertyValuesHolder valuesHolder2 = PropertyValuesHolder.ofFloat("scaleY", 1.0f, scale);
+        ObjectAnimator sAnimator = ObjectAnimator.ofPropertyValuesHolder(v, valuesHolder1, valuesHolder2);
+        sAnimator.setDuration(120);
+        set1.play(sAnimator);
+
+        PropertyValuesHolder valuesHolder3 = PropertyValuesHolder.ofFloat("alpha", 1.0f, 0.0f);
+        PropertyValuesHolder valuesHolder4 = PropertyValuesHolder.ofFloat("translationY", 0.0f, v.getMeasuredHeight());
+        ObjectAnimator aAnimator = ObjectAnimator.ofPropertyValuesHolder(v, valuesHolder3, valuesHolder4);
+        aAnimator.setDuration(duration);
+        aAnimator.setStartDelay(100);
+        set1.play(aAnimator);
+
+        set1.setStartDelay(35 * index);
+        return set1;
     }
 
-    private class MyAnimationListener implements Animation.AnimationListener {
+    /**
+     * 使用removeToPlummet()动画结束后，可以调用这个方法恢复动到动画开始效果
+     *
+     * @param v View
+     */
+    public static void resetPlummetAnimator(View v) {
+        ViewHelper.setTranslationY(v, 0);
+        ViewHelper.setAlpha(v, 1);
+        ViewHelper.setScaleX(v, 1);
+        ViewHelper.setScaleY(v, 1);
+    }
+
+    private class MyAnimatorListener implements Animator.AnimatorListener {
+
         private View v;
         private boolean isEnd;
 
-        public MyAnimationListener(View v, boolean isEnd) {
+        public MyAnimatorListener(View v, boolean isEnd) {
             this.v = v;
             this.isEnd = isEnd;
         }
 
         @Override
-        public void onAnimationStart(Animation animation) {
+        public void onAnimationStart(Animator animator) {
+
         }
 
         @Override
-        public void onAnimationEnd(Animation animation) {
+        public void onAnimationEnd(Animator animator) {
             v.setVisibility(View.INVISIBLE);
+            resetPlummetAnimator(v);
             if (isEnd) {
                 if (adapter != null) {
                     adapter.removeAll();
                     adapter.notifyDataSetChanged();
+
+                    /**
+                     * 恢复View的显示状态
+                     */
+                    for (View view : animView) {
+                        if (view != null) {
+                            view.setVisibility(View.VISIBLE);
+                        }
+                    }
+                    animView.clear();
                     isBusy = false;
                 }
                 if (callback != null) {
@@ -170,9 +149,16 @@ public class LListViewRemoveHelper {
         }
 
         @Override
-        public void onAnimationRepeat(Animation animation) {
+        public void onAnimationCancel(Animator animator) {
+
+        }
+
+        @Override
+        public void onAnimationRepeat(Animator animator) {
+
         }
     }
+
 
     public interface Callback {
         void fulfil();

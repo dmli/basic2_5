@@ -93,7 +93,6 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onDetach() {
-        activity = null;
         super.onDetach();
     }
 
@@ -154,8 +153,9 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
 
     /**
      * 接收由BasicFragmentActivity发来的消息
+     *
      * @param state 状态
-     * @param obj Object
+     * @param obj   Object
      * @return Object
      */
     public Object receiverMessageFromSuper(int state, Object obj) {
@@ -205,26 +205,6 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
     }
 
     /**
-     * 获取TextView的text属性, TextView == null时 返回null
-     *
-     * @param viewId TextView ID
-     * @return text
-     */
-    protected String getViewText(final int viewId) {
-        return getViewText((TextView) getView(viewId));
-    }
-
-    /**
-     * 获取TextView的text属性, TextView == null时 返回null
-     *
-     * @param tv TextView
-     * @return text
-     */
-    protected String getViewText(final TextView tv) {
-        return tv == null ? null : tv.getText() == null ? null : tv.getText().toString();
-    }
-
-    /**
      * Short Toast
      *
      * @param smg 提示语
@@ -248,7 +228,7 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
      * @param smg 提示语
      */
     protected void postShowShort(final String smg) {
-        if (securityHandler != null){
+        if (securityHandler != null) {
             securityHandler.sendMessage(securityHandler.obtainMessage(BasicActivity.POST_SHOW_SHORT, smg));
         }
     }
@@ -259,7 +239,7 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
      * @param smg 提示语
      */
     protected void postShowLong(final String smg) {
-        if (securityHandler != null){
+        if (securityHandler != null) {
             securityHandler.sendMessage(securityHandler.obtainMessage(BasicActivity.POST_SHOW_LONG, smg));
         }
     }
@@ -431,41 +411,6 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
     }
 
     /**
-     * 根据fileName及key获取对应文件中的value值
-     *
-     * @param fileName 文件名
-     * @param key      key
-     * @return value 没有返回null
-     */
-    protected String queryFromSharedPreferences(final String fileName, final String key) {
-        SharedPreferencesHelper sph = new SharedPreferencesHelper(activity);
-        return sph.query(fileName, key);
-    }
-
-    /**
-     * 将给定的key与value存储到fileName指定的文件中 *当key存在时执行覆盖操作*
-     *
-     * @param fileName 文件名
-     * @param key      key
-     * @param value    值
-     */
-    protected void saveToSharedPreferences(final String fileName, final String key, final String value) {
-        SharedPreferencesHelper sph = new SharedPreferencesHelper(activity);
-        sph.put(fileName, key, value);
-    }
-
-    /**
-     * 删除指定key在CLIENT_INFO_CACHE_FILE文件中对应的数据
-     *
-     * @param fileName 文件名
-     * @param key      名称
-     */
-    protected void removeToSharedPreferences(final String fileName, final String key) {
-        SharedPreferencesHelper sph = new SharedPreferencesHelper(activity);
-        sph.remove(fileName, key);
-    }
-
-    /**
      * 启动接收器
      *
      * @param actions 动作
@@ -487,31 +432,6 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
     private void stopReceiver() {
         if (null != receiver && activity != null)
             this.activity.unregisterReceiver(receiver);
-    }
-
-    /**
-     * 使用securityHandler发送一条消息
-     *
-     * @param what what
-     * @param obj  Object
-     */
-    protected void sendHandleMessage(int what, Object obj) {
-        if (THIS_FRAGMENT_STATE) {
-            securityHandler.sendMessage(securityHandler.obtainMessage(what, obj));
-        }
-    }
-
-    /**
-     * 使用securityHandler发送一条延时消息
-     *
-     * @param what        what
-     * @param obj         Object
-     * @param delayMillis what
-     */
-    protected void sendHandleMessageDelayed(int what, Object obj, int delayMillis) {
-        if (THIS_FRAGMENT_STATE) {
-            securityHandler.sendMessageDelayed(securityHandler.obtainMessage(what, obj), delayMillis);
-        }
     }
 
     /**
@@ -564,43 +484,34 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
     /**
      * 异步完成结束后的回调函数，SecurityHandler及Asynchronous接口的任务处理
      *
-     * @param tag 标识，用户可以用该标识来区分任务
-     * @param obj Asynchronous接口中async方法的返回参数
+     * @param msg Message
      */
-    protected void handleMessage(int tag, Object obj) {
+    protected void handleMessage(Message msg) {
+
     }
 
     /**
-     * 启动异步回调函数 *使用tag作为标记*
+     * 启动异步回调函数 *使用what作为标记*
      *
-     * @param tag 将被分配到handleMessage(tag, obj)的第一个参数中
+     * @param what 将被分配到handleMessage(...)的what
+     * @param obj  数据被传送到handleMessage(...)的obj
      */
-    protected void startAsyncTask(final int tag) {
-        startAsyncTask(tag, null);
-    }
-
-    /**
-     * 启动异步回调函数 *使用tag作为标记*
-     *
-     * @param tag 将被分配到handleMessage(tag, obj)的第一个参数中
-     * @param obj 数据被传送到handleMessage(tag, Object)中的第二个参数
-     */
-    protected void startAsyncTask(int tag, Object obj) {
-        new AsyncThread<SecurityHandler<BasicFragment>>(securityHandler, ((Object) this).getClass().getName(), tag, obj) {
+    protected void startAsyncTask(int what, Object obj) {
+        new AsyncThread<SecurityHandler<BasicFragment>>(securityHandler, ((Object) this).getClass().getName(), what, obj) {
             @Override
             public void run() {
-            	android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
                 Object object = null;
                 if (ASYNC_SET != null) {
                     Asynchronous a = ASYNC_SET.get(key);
                     if (a != null) {
-                        object = a.async(tag, obj);
+                        object = a.async(what, obj);
                     }
                 }
                 if (w != null) {
                     SecurityHandler<BasicFragment> t = w.get();
                     if (t != null) {
-                        t.sendMessage(t.obtainMessage(tag, object));
+                        t.sendMessage(t.obtainMessage(what, object));
                     }
                 }
             }
@@ -623,7 +534,7 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
     }
 
     /**
-     * 相对安全的Handler，所有请求均由BasicFragment中handleMessage(int, Object)接收
+     * 相对安全的Handler，所有请求均由BasicFragment中handleMessage(...)接收
      */
     protected SecurityHandler<BasicFragment> securityHandler = new SecurityHandler<>(this);
 
@@ -644,7 +555,7 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
                     } else if (BasicActivity.POST_SHOW_LONG == msg.what) {
                         t.showLong(String.valueOf(msg.obj));
                     } else {
-                        t.handleMessage(msg.what, msg.obj);
+                        t.handleMessage(msg);
                     }
                 }
             }
@@ -666,21 +577,21 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
     public class AsyncThread<T> extends Thread {
         WeakReference<T> w;
         String key;
-        int tag;
+        int what;
         Object obj;
 
         /**
          * 创建一个简易的异步任务
          *
-         * @param w   弱引用
-         * @param key 用来查找对应的任务
-         * @param tag 参数1
-         * @param obj 参数2
+         * @param w    弱引用
+         * @param key  用来查找对应的任务
+         * @param what Message.what
+         * @param obj  Message.obj
          */
-        public AsyncThread(T w, String key, int tag, Object obj) {
-            this.w = new WeakReference<T>(w);
+        public AsyncThread(T w, String key, int what, Object obj) {
+            this.w = new WeakReference<>(w);
             this.key = key;
-            this.tag = tag;
+            this.what = what;
             this.obj = obj;
         }
     }

@@ -1,6 +1,7 @@
 package com.ldm.basic;
 
 import android.os.Bundle;
+import android.os.Message;
 import android.view.View;
 
 import com.ldm.basic.utils.Log;
@@ -37,16 +38,16 @@ public class BasicActivityExamples extends BasicActivity {
 
 
     @Override
-    protected void handleMessage(int tag, Object obj) {
-        if (tag == 1) {
+    protected void handleMessage(Message m) {
+        if (m.what == 1) {
             /**
              * Asynchronous的async方法执行完成时会执行这里
              */
-            Log.e("第一个任务开始完成 = " + String.valueOf(obj));
+            Log.e("第一个任务开始完成 = " + String.valueOf(m.obj));
 
-        } else if (tag == 2) {
-            Log.e("第二个任务开始完成 = " + String.valueOf(obj));
-        } else if (tag == 3) {
+        } else if (m.what == 2) {
+            Log.e("第二个任务开始完成 = " + String.valueOf(m.obj));
+        } else if (m.what == 3) {
             Log.e("这是由securityHandler发送出的一个任务");
         }
     }

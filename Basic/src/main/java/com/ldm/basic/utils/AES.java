@@ -1,12 +1,9 @@
 package com.ldm.basic.utils;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import java.security.Provider;
+import java.security.Security;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
@@ -29,6 +26,23 @@ public class AES {
     }
 
     /**
+     * 返回一个可用的Provider
+     *
+     * @return Provider
+     */
+    private static Provider getProvider() {
+        String[] ps = new String[]{"BC", "SRP", "Crypto", "HarmonyJSSE"};
+        Provider provider = null;
+        for (String name : ps) {
+            provider = Security.getProvider(name);
+            if (provider != null) {
+                break;
+            }
+        }
+        return provider;
+    }
+
+    /**
      * 加密
      *
      * @param encryptByte 需要加密的字节数组
@@ -36,19 +50,11 @@ public class AES {
      */
     public static byte[] encrypt(byte[] encryptByte, String key) {
         try {
-            Cipher cipher = Cipher.getInstance("AES");
+            Cipher cipher = Cipher.getInstance("AES", getProvider());
             SecretKeySpec securekey = new SecretKeySpec(key.getBytes(), "AES");
             cipher.init(Cipher.ENCRYPT_MODE, securekey);// 设置密钥和加密形式
             return cipher.doFinal(encryptByte);
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (NoSuchPaddingException e) {
-            e.printStackTrace();
-        } catch (IllegalBlockSizeException e) {
-            e.printStackTrace();
-        } catch (BadPaddingException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -76,19 +82,11 @@ public class AES {
      */
     public static byte[] decrypt(byte[] encryptByte, String key) {
         try {
-            Cipher cipher = Cipher.getInstance("AES");
+            Cipher cipher = Cipher.getInstance("AES", getProvider());
             SecretKeySpec secureKey = new SecretKeySpec(key.getBytes(), "AES");// 设置加密Key
             cipher.init(Cipher.DECRYPT_MODE, secureKey);// 设置密钥和解密形式
             return cipher.doFinal(encryptByte);
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (NoSuchPaddingException e) {
-            e.printStackTrace();
-        } catch (IllegalBlockSizeException e) {
-            e.printStackTrace();
-        } catch (BadPaddingException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -136,7 +134,7 @@ public class AES {
 
         String idDecrypt = decrypt(idEncrypt, "f9277c7c760b4e91a07e62930b92b71b");
         System.out.println(idDecrypt);
-        
+
     }
 
 }

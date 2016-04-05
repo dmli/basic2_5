@@ -113,8 +113,8 @@ public class FileTool {
      * @param f0 文件
      * @return List<String>
      */
-    public static List<String> fileToLines(File f0) {
-        return inputStreamToLines(openFile(f0));
+    public static List<String> toLines(File f0) {
+        return toLines(openFile(f0));
     }
 
     /**
@@ -123,8 +123,8 @@ public class FileTool {
      * @param filePath 文件地址
      * @return List<String>
      */
-    public static List<String> fileToLines(final String filePath) {
-        return inputStreamToLines(openFile(filePath));
+    public static List<String> toLines(final String filePath) {
+        return toLines(openFile(filePath));
     }
 
     /**
@@ -133,7 +133,7 @@ public class FileTool {
      * @param is InputStream
      * @return List<String>
      */
-    public static List<String> inputStreamToLines(InputStream is) {
+    public static List<String> toLines(InputStream is) {
         List<String> result = null;
         if (is != null) {
             result = new ArrayList<>();
@@ -154,6 +154,35 @@ public class FileTool {
             }
         }
         return result;
+    }
+
+    /**
+     * 将指定InputStream中的内容以行的方式整理成String后返回
+     *
+     * @param is InputStream
+     * @return String
+     */
+    public static String toString(InputStream is) {
+        if (is != null) {
+            StringBuilder builder = new StringBuilder();
+            InputStreamReader inReader = new InputStreamReader(is);
+            BufferedReader buffReader = new BufferedReader(inReader);
+            String data;
+            try {
+                while ((data = buffReader.readLine()) != null) {
+                    if (!"".equals(data.trim())) {
+                        builder.append(data.trim());
+                    }
+                }
+                is.close();
+                inReader.close();
+                buffReader.close();
+                return builder.toString();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 
     /**
