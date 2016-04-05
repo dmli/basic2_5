@@ -5,7 +5,7 @@ import java.util.Map;
 
 /**
  * Created by ldm on 16/2/24.
- * 这是一个简易的Thread工具(后期可以使用线程池来替换Thread)，它只有一个功能，可以保证带有唯一标记的任务不被重复执行的功能，
+ * 这是一个简易的Thread工具(后期可以使用线程池来替换Thread)，它只有一个功能，可以保证带有唯一标记的任务不被重复执行，
  * 当任务tag=1被执行时，在tag=1没有执行完成时，再次触发tag=1的任务时将会被自动过滤掉。
  * 在开发时可以更轻松的使用TNPOnlyAsyncTaskTool来创建任务，而不需要考虑任务的callback被多次触发.
  * 注：AsyncTask中的callback方法均为异步

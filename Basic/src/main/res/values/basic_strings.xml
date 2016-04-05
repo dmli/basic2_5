@@ -3,5 +3,6 @@
     <string name="app_name">basic</string>
     <string name="down_push_to_refresh_text">下拉刷新</string>
     <string name="loading_text">加载中&#8230;</string>
-    <string name="unlock_to_refresh">松手刷新</string>
+    <string name="unlock_to_refresh">松开刷新</string>
+    <string name="refresh_load_text">正在刷新&#8230;</string>
 </resources>
