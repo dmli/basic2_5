@@ -374,8 +374,7 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
      * @return false表示没有找到对应的值
      */
     protected boolean isExists(final String key) {
-        SharedPreferencesHelper sph = new SharedPreferencesHelper(activity);
-        return sph.query(Configuration.CLIENT_INFO_CACHE_FILE, key) != null;
+        return SharedPreferencesHelper.query(activity, Configuration.CLIENT_INFO_CACHE_FILE, key) != null;
     }
 
     /**
@@ -385,8 +384,7 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
      * @return String
      */
     protected String queryCache(final String key) {
-        SharedPreferencesHelper sph = new SharedPreferencesHelper(activity);
-        return sph.query(Configuration.CLIENT_INFO_CACHE_FILE, key);
+        return SharedPreferencesHelper.query(activity, Configuration.CLIENT_INFO_CACHE_FILE, key);
     }
 
     /**
@@ -396,8 +394,7 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
      * @param value 值
      */
     protected void saveCache(final String key, final String value) {
-        SharedPreferencesHelper sph = new SharedPreferencesHelper(activity);
-        sph.put(Configuration.CLIENT_INFO_CACHE_FILE, key, value);
+        SharedPreferencesHelper.put(activity, Configuration.CLIENT_INFO_CACHE_FILE, key, value);
     }
 
     /**
@@ -406,8 +403,7 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
      * @param key 名称
      */
     protected void removeCache(final String key) {
-        SharedPreferencesHelper sph = new SharedPreferencesHelper(activity);
-        sph.remove(Configuration.CLIENT_INFO_CACHE_FILE, key);
+        SharedPreferencesHelper.remove(activity, Configuration.CLIENT_INFO_CACHE_FILE, key);
     }
 
     /**

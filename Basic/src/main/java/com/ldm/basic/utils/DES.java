@@ -1,13 +1,6 @@
 package com.ldm.basic.utils;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -32,17 +25,7 @@ public class DES {
 			Cipher cipher = Cipher.getInstance("DES/CBC/PKCS5Padding");
 			cipher.init(Cipher.ENCRYPT_MODE, key, zeroIv);
 			return byte2HexString(cipher.doFinal(encryptString.getBytes()));
-		} catch (InvalidKeyException e) {
-			e.printStackTrace();
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		} catch (NoSuchPaddingException e) {
-			e.printStackTrace();
-		} catch (InvalidAlgorithmParameterException e) {
-			e.printStackTrace();
-		} catch (IllegalBlockSizeException e) {
-			e.printStackTrace();
-		} catch (BadPaddingException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
         return null;
@@ -62,17 +45,7 @@ public class DES {
 			Cipher cipher = Cipher.getInstance("DES/CBC/PKCS5Padding");
 			cipher.init(Cipher.DECRYPT_MODE, key, zeroIv);
 			return new String(cipher.doFinal(byteMi));
-		} catch (InvalidKeyException e) {
-			e.printStackTrace();
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		} catch (NoSuchPaddingException e) {
-			e.printStackTrace();
-		} catch (InvalidAlgorithmParameterException e) {
-			e.printStackTrace();
-		} catch (IllegalBlockSizeException e) {
-			e.printStackTrace();
-		} catch (BadPaddingException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
         return null;

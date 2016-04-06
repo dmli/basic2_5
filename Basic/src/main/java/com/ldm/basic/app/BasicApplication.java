@@ -151,7 +151,6 @@ public abstract class BasicApplication extends Application implements Serializab
      */
     public static void saveUserInfoToLocal(Context context, Object obj) {
         if (obj != null) {
-            SharedPreferencesHelper sph = new SharedPreferencesHelper(context);
             String cache = SystemTool.getGson().toJson(obj);
             String base64Result = null;
             try {
@@ -161,24 +160,24 @@ public abstract class BasicApplication extends Application implements Serializab
             }
             if (base64Result == null) {
                 // base64加密失败，存储明文
-                sph.put(Configuration.USER_LOGIN_CACHE_FILE, "type", "0");// 0=明文
+                SharedPreferencesHelper.put(context, Configuration.USER_LOGIN_CACHE_FILE, "type", "0");// 0=明文
                 // 1=base64
                 // 2=base64+aes
-                sph.put(Configuration.USER_LOGIN_CACHE_FILE, "cache1", cache);
+                SharedPreferencesHelper.put(context, Configuration.USER_LOGIN_CACHE_FILE, "cache1", cache);
             } else {
                 String aesResult = AES.encrypt(base64Result, "f9277c7c760b4e91a07e62930b92b71b");
                 if (aesResult == null) {
                     // aes加密失败，存储base64密文
-                    sph.put(Configuration.USER_LOGIN_CACHE_FILE, "type", "1");// 0明文
+                    SharedPreferencesHelper.put(context, Configuration.USER_LOGIN_CACHE_FILE, "type", "1");// 0明文
                     // 1base64
                     // 2base64+aes
-                    sph.put(Configuration.USER_LOGIN_CACHE_FILE, "cache1", base64Result);
+                    SharedPreferencesHelper.put(context, Configuration.USER_LOGIN_CACHE_FILE, "cache1", base64Result);
                 } else {
                     // 存储base64+aes密文
-                    sph.put(Configuration.USER_LOGIN_CACHE_FILE, "type", "2");// 0明文
+                    SharedPreferencesHelper.put(context, Configuration.USER_LOGIN_CACHE_FILE, "type", "2");// 0明文
                     // 1base64
                     // 2base64+aes
-                    sph.put(Configuration.USER_LOGIN_CACHE_FILE, "cache1", aesResult);
+                    SharedPreferencesHelper.put(context, Configuration.USER_LOGIN_CACHE_FILE, "cache1", aesResult);
                 }
             }
         }
@@ -194,9 +193,8 @@ public abstract class BasicApplication extends Application implements Serializab
      * @return <T>
      */
     public static <T> T getUserInfoFromLocal(Context context, Class<T> classOfT) {
-        SharedPreferencesHelper sph = new SharedPreferencesHelper(context);
-        String type = sph.query(Configuration.USER_LOGIN_CACHE_FILE, "type");// 加密类型
-        String data = sph.query(Configuration.USER_LOGIN_CACHE_FILE, "cache1");// data
+        String type = SharedPreferencesHelper.query(context, Configuration.USER_LOGIN_CACHE_FILE, "type");// 加密类型
+        String data = SharedPreferencesHelper.query(context, Configuration.USER_LOGIN_CACHE_FILE, "cache1");// data
         if (type == null || data == null) {
             return null;// 没有用户登陆信息
         }
@@ -230,9 +228,8 @@ public abstract class BasicApplication extends Application implements Serializab
      * @return json串
      */
     public static String getUserInfoFromLocal(Context context) {
-        SharedPreferencesHelper sph = new SharedPreferencesHelper(context);
-        String type = sph.query(Configuration.USER_LOGIN_CACHE_FILE, "type");// 加密类型
-        String data = sph.query(Configuration.USER_LOGIN_CACHE_FILE, "cache1");// data
+        String type = SharedPreferencesHelper.query(context, Configuration.USER_LOGIN_CACHE_FILE, "type");// 加密类型
+        String data = SharedPreferencesHelper.query(context, Configuration.USER_LOGIN_CACHE_FILE, "cache1");// data
         if (type == null || data == null) {
             return null;// 没有用户登陆信息
         }
@@ -265,8 +262,7 @@ public abstract class BasicApplication extends Application implements Serializab
      * @param context Context
      */
     public static void clearUserInfo(Context context) {
-        SharedPreferencesHelper sph = new SharedPreferencesHelper(context);
-        sph.clear("user_login_cache_file");
+        SharedPreferencesHelper.clear(context, "user_login_cache_file");
     }
 
     /**

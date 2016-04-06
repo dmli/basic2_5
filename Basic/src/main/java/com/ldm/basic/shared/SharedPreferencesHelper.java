@@ -12,15 +12,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 /**
- * Created by ldm on 12-10-19. SharedPreferences的一个增强助手，提供了常用的操作
+ * Created by ldm on 12-10-19.
+ * SharedPreferences的一个增强助手，提供了常用的操作
  */
 public class SharedPreferencesHelper {
-
-    private Context lContext;
-
-    public SharedPreferencesHelper(Context context) {
-        lContext = context;
-    }
 
     /**
      * 向指定文件内部写入数据
@@ -28,8 +23,8 @@ public class SharedPreferencesHelper {
      * @param sysFileName 文件名称
      * @param map         data
      */
-    public void put(String sysFileName, Map<String, String> map) {
-        Editor editor = createSharedPreferences(sysFileName).edit();
+    public static void put(Context context, String sysFileName, Map<String, String> map) {
+        Editor editor = createSharedPreferences(context, sysFileName).edit();
         if (editor == null) {
             notFindSysFile(sysFileName);
         } else {
@@ -47,8 +42,8 @@ public class SharedPreferencesHelper {
      * @param key         k
      * @param value       v
      */
-    public void put(String sysFileName, String key, String value) {
-        Editor editor = createSharedPreferences(sysFileName).edit();
+    public static void put(Context context, String sysFileName, String key, String value) {
+        Editor editor = createSharedPreferences(context, sysFileName).edit();
         if (editor == null) {
             notFindSysFile(sysFileName);
         } else {
@@ -63,8 +58,8 @@ public class SharedPreferencesHelper {
      * @param sysFileName 文件名称
      * @param key         KEY
      */
-    public void remove(String sysFileName, String key) {
-        Editor editor = createSharedPreferences(sysFileName).edit();
+    public static void remove(Context context, String sysFileName, String key) {
+        Editor editor = createSharedPreferences(context, sysFileName).edit();
         if (editor == null) {
             notFindSysFile(sysFileName);
         } else {
@@ -78,8 +73,8 @@ public class SharedPreferencesHelper {
      *
      * @param sysFileName 文件名称
      */
-    public void removeFirst(String sysFileName) {
-        SharedPreferences sp = createSharedPreferences(sysFileName);
+    public static void removeFirst(Context context, String sysFileName) {
+        SharedPreferences sp = createSharedPreferences(context, sysFileName);
         if (sp != null) {
             Map<String, ?> map = sp.getAll();
             if (map != null && map.size() > 0) {
@@ -97,8 +92,8 @@ public class SharedPreferencesHelper {
      *
      * @param sysFileName 文件名称
      */
-    public void removeLast(String sysFileName) {
-        SharedPreferences sp = createSharedPreferences(sysFileName);
+    public static void removeLast(Context context, String sysFileName) {
+        SharedPreferences sp = createSharedPreferences(context, sysFileName);
         if (sp != null) {
             Map<String, ?> map = sp.getAll();
             if (map != null && map.size() > 0) {
@@ -118,8 +113,8 @@ public class SharedPreferencesHelper {
      * @param key         k
      * @return 没有返回 null
      */
-    public String query(String sysFileName, String key) {
-        SharedPreferences sp = createSharedPreferences(sysFileName);
+    public static String query(Context context, String sysFileName, String key) {
+        SharedPreferences sp = createSharedPreferences(context, sysFileName);
         if (sp != null) {
             return sp.getString(key, null);
         }
@@ -132,8 +127,8 @@ public class SharedPreferencesHelper {
      * @param sysFileName 文件名
      * @return count
      */
-    public int queryCount(String sysFileName) {
-        SharedPreferences sp = createSharedPreferences(sysFileName);
+    public static int queryCount(Context context, String sysFileName) {
+        SharedPreferences sp = createSharedPreferences(context, sysFileName);
         if (sp != null && sp.getAll() != null) {
             return sp.getAll().size();
         }
@@ -146,8 +141,8 @@ public class SharedPreferencesHelper {
      * @param sysFileName 文件名称
      * @return map
      */
-    public Map<String, ?> query(String sysFileName) {
-        SharedPreferences sp = createSharedPreferences(sysFileName);
+    public static Map<String, ?> query(Context context, String sysFileName) {
+        SharedPreferences sp = createSharedPreferences(context, sysFileName);
         if (sp != null) {
             return sp.getAll();
         }
@@ -160,8 +155,8 @@ public class SharedPreferencesHelper {
      * @param sysName 文件名称
      * @return SharedPreferences
      */
-    public SharedPreferences createSharedPreferences(String sysName) {
-        return lContext == null ? null : lContext.getSharedPreferences(sysName, Activity.MODE_PRIVATE);
+    public static SharedPreferences createSharedPreferences(Context context, String sysName) {
+        return context.getSharedPreferences(sysName, Activity.MODE_PRIVATE);
     }
 
     /**
@@ -169,8 +164,8 @@ public class SharedPreferencesHelper {
      *
      * @param sysFileName 文件名称
      */
-    public void clear(String sysFileName) {
-        Editor editor = createSharedPreferences(sysFileName).edit();
+    public static void clear(Context context, String sysFileName) {
+        Editor editor = createSharedPreferences(context, sysFileName).edit();
         if (editor == null) {
             notFindSysFile(sysFileName);
         } else {
@@ -184,7 +179,7 @@ public class SharedPreferencesHelper {
      *
      * @param sysFileName 文件名称
      */
-    private void notFindSysFile(String sysFileName) {
+    private static void notFindSysFile(String sysFileName) {
         Log.w("没有找到【" + sysFileName + "】指向的数据文件！！！");
     }
 }

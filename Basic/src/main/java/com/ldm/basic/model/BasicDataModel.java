@@ -1,13 +1,13 @@
 package com.ldm.basic.model;
 
-import java.util.List;
+import android.content.Context;
+import android.database.Cursor;
 
 import com.ldm.basic.db.BasicSQLiteOpenHelper;
 import com.ldm.basic.db.BasicTable;
 import com.ldm.basic.db.DBHelper;
 
-import android.content.Context;
-import android.database.Cursor;
+import java.util.List;
 
 /**
  * Created by ldm on 14-5-30. 数据模型基础类
@@ -169,6 +169,33 @@ public abstract class BasicDataModel {
 		return DBHelper.saveSameClassToDB(BasicSQLiteOpenHelper.getInstance(context).getWritableDatabase(), table, data.toArray(new BasicTable[data.size()]));
 	}
 
+    /**
+     * 保存单条数据,如果存在就做修改
+     *
+     * @param o 修改
+     * @param <T> T extends BasicTable
+     * @return true 修改/保存 成功
+     */
+    public <T extends BasicTable> boolean saveOrUpdate(T o) {
+        return saveOrUpdate(o, null);
+    }
+
+    /**
+     * 保存单条数据,如果存在就做修改
+     *
+     * @param o 修改
+     * @param <T> T extends BasicTable
+     * @param tableName 表明
+     * @return true 修改/保存 成功
+     */
+    public <T extends BasicTable> boolean saveOrUpdate(T o, String tableName) {
+        if (o.get_id() <= -1) {
+            return DBHelper.saveSameClassToDB(BasicSQLiteOpenHelper.getInstance(context).getWritableDatabase(), tableName, o);
+        } else {
+            return DBHelper.updateToClass(context, tableName, o);
+        }
+    }
+
 	/**
 	 * 根据_id删除数据
 	 *
@@ -239,33 +266,6 @@ public abstract class BasicDataModel {
 			return false;
 		}
 		return DBHelper.updateToClass(context, tableName, o);
-	}
-
-	/**
-	 * 修改单条数据,如果不存在就改为保存
-	 *
-	 * @param o 修改
-	 * @param <T> T extends BasicTable
-	 * @return true 修改/保存 成功
-	 */
-	public <T extends BasicTable> boolean update2(T o) {
-		return update2(o, null);
-	}
-
-	/**
-	 * 修改单条数据,如果不存在就改为保存
-	 *
-	 * @param o 修改
-	 * @param <T> T extends BasicTable
-	 * @param tableName 表明
-	 * @return true 修改/保存 成功
-	 */
-	public <T extends BasicTable> boolean update2(T o, String tableName) {
-		if (o.get_id() <= -1) {
-			return DBHelper.saveSameClassToDB(BasicSQLiteOpenHelper.getInstance(context).getWritableDatabase(), tableName, o);
-		} else {
-			return DBHelper.updateToClass(context, tableName, o);
-		}
 	}
 
 }

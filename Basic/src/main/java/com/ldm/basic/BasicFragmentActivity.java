@@ -384,8 +384,7 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
      * @return false表示没有找到对应的值
      */
     protected boolean isExists(final String key) {
-        SharedPreferencesHelper sph = new SharedPreferencesHelper(this);
-        return sph.query(Configuration.CLIENT_INFO_CACHE_FILE, key) != null;
+        return SharedPreferencesHelper.query(this, Configuration.CLIENT_INFO_CACHE_FILE, key) != null;
     }
 
     /**
@@ -395,8 +394,7 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
      * @return String
      */
     protected String queryCache(final String key) {
-        SharedPreferencesHelper sph = new SharedPreferencesHelper(this);
-        return sph.query(Configuration.CLIENT_INFO_CACHE_FILE, key);
+        return SharedPreferencesHelper.query(this, Configuration.CLIENT_INFO_CACHE_FILE, key);
     }
 
     /**
@@ -406,8 +404,7 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
      * @param value 值
      */
     protected void saveCache(final String key, final String value) {
-        SharedPreferencesHelper sph = new SharedPreferencesHelper(this);
-        sph.put(Configuration.CLIENT_INFO_CACHE_FILE, key, value);
+        SharedPreferencesHelper.put(this, Configuration.CLIENT_INFO_CACHE_FILE, key, value);
     }
 
     /**
@@ -416,8 +413,7 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
      * @param key 名称
      */
     protected void removeCache(final String key) {
-        SharedPreferencesHelper sph = new SharedPreferencesHelper(this);
-        sph.remove(Configuration.CLIENT_INFO_CACHE_FILE, key);
+        SharedPreferencesHelper.remove(this, Configuration.CLIENT_INFO_CACHE_FILE, key);
     }
 
     /**
