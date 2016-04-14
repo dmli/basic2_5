@@ -9,7 +9,7 @@ import android.widget.ScrollView;
  * Created by ldm on 14-9-4.
  * 带滚动事件的ScrollView
  */
-public class LScrollView extends ScrollView {
+public class LScrollView extends ScrollView implements LAbsScrollState {
 
     int oldY;
     OnScrollListener onScrollListener;
@@ -103,6 +103,16 @@ public class LScrollView extends ScrollView {
         } else {
             scrollTo(0, computeVerticalScrollRange() - getHeight());
         }
+    }
+
+    @Override
+    public boolean isMoveDown() {
+        return isTop();
+    }
+
+    @Override
+    public boolean isMoveUp() {
+        return isBottom();
     }
 
     public interface OnScrollListener {

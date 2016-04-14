@@ -540,6 +540,8 @@ public class LPullToRefreshViewLite extends ViewGroup {
     }
 
     /**
+     * 使用loadPagingCompleted(false); 时需要在setAdapter(...)后使用
+     * <p/>
      * 加载完成
      *
      * @param keep true保留分页 false去掉分页
@@ -769,7 +771,7 @@ public class LPullToRefreshViewLite extends ViewGroup {
     /**
      * 下拉刷新时将会根据当前状态对BasicHeadAnimation进行回调
      *
-     * @param headAnimation BasicHeadAnimation
+     * @param headAnimation BasicPullViewAnimation
      */
     public void setHeadAnimation(BasicHeadAnimation headAnimation) {
         this.headAnimation = headAnimation;

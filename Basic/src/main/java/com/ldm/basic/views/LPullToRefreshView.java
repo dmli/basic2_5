@@ -752,7 +752,7 @@ public class LPullToRefreshView extends ViewGroup {
     /**
      * 下拉刷新时将会根据当前状态对BasicHeadAnimation进行回调
      *
-     * @param headAnimation BasicHeadAnimation
+     * @param headAnimation BasicPullViewAnimation
      */
     public void setHeadAnimation(BasicHeadAnimation headAnimation) {
         this.headAnimation = headAnimation;

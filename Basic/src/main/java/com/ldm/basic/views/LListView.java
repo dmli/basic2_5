@@ -3,6 +3,9 @@ package com.ldm.basic.views;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -12,7 +15,7 @@ import java.util.List;
  * Created by ldm on 15/3/6.
  * 增加了一个OnInterceptTouchEventListener监听，仅限拦截，不能够妨碍onInterceptTouchEvent(MotionEvent)的实际处理
  */
-public class LListView extends ListView {
+public class LListView extends ListView implements LAbsScrollState {
 
     private boolean isOnMeasure;
     private OnInterceptTouchEventListener onInterceptTouchEventListener;
@@ -97,6 +100,22 @@ public class LListView extends ListView {
 
     public void setOnInterceptTouchEventListener(OnInterceptTouchEventListener onInterceptTouchEventListener) {
         this.onInterceptTouchEventListener = onInterceptTouchEventListener;
+    }
+
+    @Override
+    public boolean isMoveDown() {
+        return getChildCount() <= 0 || (getFirstVisiblePosition() == 0 && getChildAt(0).getTop() == getPaddingTop());
+    }
+
+    @Override
+    public boolean isMoveUp() {
+        return (getChildCount() <= 0) || (getLastVisiblePosition() == getCount() - 1) && (getChildAt(getChildCount() - 1).getBottom() == getBottom() + getPaddingBottom());
+    }
+
+    public void addPlaceholderView(int height) {
+        View view = new View(getContext());
+        view.setLayoutParams(new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
+        this.addHeaderView(view, null, false);
     }
 
     public interface OnInterceptTouchEventListener {
