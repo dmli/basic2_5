@@ -1,5 +1,6 @@
 package com.ldm.basic.adapter;
 
+import android.text.TextUtils;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -17,12 +18,12 @@ public class BasicAdapterCacheManager {
     /**
      * 存储Convert View的类型
      */
-    public static final int CACHE_TAG_ID = 0x59999599;
+    public static final int CACHE_TAG_ID = 0x59959599;
 
     /**
      * 缓存容器
      */
-    Map<String, List<View>> caches = new HashMap<>();
+    final Map<String, List<View>> caches = new HashMap<>();
 
     /**
      * 向容器中添加缓存
@@ -36,6 +37,7 @@ public class BasicAdapterCacheManager {
             vs = new ArrayList<>();
         }
         vs.add(view);
+        caches.put(tag, vs);
     }
 
     /**
@@ -47,43 +49,43 @@ public class BasicAdapterCacheManager {
     private View getView(String tag) {
         List<View> vs = caches.get(tag);
         if (vs != null && vs.size() > 0) {
-            return vs.get(0);
+            return vs.remove(0);
         }
         return null;
     }
 
+    /**
+     * 同步标记
+     *
+     * @param v   View
+     * @param tag 标识，标识View类型的字符串
+     */
+    public static void syncTag(View v, String tag) {
+        if (v != null && !TextUtils.isEmpty(tag)) {
+            v.setTag(CACHE_TAG_ID, tag);
+        }
+    }
 
     /**
      * 根据tag查询是否有可用的Cache View，如果没有返回null
      *
-     * @param convertView adapter中getView(...)中的convertView
-     * @param tag         类型
+     * @param view 需要cache的View
+     * @param tag  类型
      * @return 如果没有可用的View直接返回
      */
-    public View findCacheView(View convertView, String tag) {
-        if (convertView == null) {
-            return null;
+    public View findCacheView(View view, String tag) {
+        if (view != null && !TextUtils.isEmpty(String.valueOf(view.getTag(CACHE_TAG_ID)))) {
+            String cacheViewTag = String.valueOf(view.getTag(CACHE_TAG_ID));
+            if (tag.equals(cacheViewTag)) {
+                //如果类型相同，直接返回
+                return view;
+            } else {
+                //加入到缓存容器中
+                putView(cacheViewTag, view);
+            }
         }
-        String viewTag = String.valueOf(convertView.getTag(CACHE_TAG_ID));
-        /**
-         * 如果类型相同，直接返回
-         */
-        if (tag.equals(viewTag)) {
-            return convertView;
-        }
-
-        /**
-         * 查询是否有返回
-         */
-        View cacheView = getView(tag);
-
-        /**
-         * 加入到缓存容器中
-         */
-        convertView.setTag(CACHE_TAG_ID, tag);
-        putView(tag, convertView);
-
-        return cacheView;
+        //查询是否有缓存可用
+        return getView(tag);
     }
 
 }
