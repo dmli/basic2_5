@@ -35,13 +35,13 @@ public class LPasswordEditText extends EditText implements TextWatcher {
         setMaxLines(1);
         drawable = null;
         isShowDeleteIcon = getText().length() != 0;
-        control();
+        showControlLayout();
         addTextChangedListener(this);
     }
 
     public void setDeleteIcon(int icon) {
         drawable = getResources().getDrawable(icon);
-        control();
+        showControlLayout();
     }
 
     @Override
@@ -51,8 +51,7 @@ public class LPasswordEditText extends EditText implements TextWatcher {
             x = event.getX();
             viewWidth = getWidth();
         }
-        if (event.getAction() == MotionEvent.ACTION_UP && isShowDeleteIcon
-                && System.currentTimeMillis() - downTime < 100) {
+        if (event.getAction() == MotionEvent.ACTION_UP && isShowDeleteIcon && System.currentTimeMillis() - downTime < 100) {
             if (viewWidth - x < drawable.getIntrinsicWidth()) {
                 setText("");
             }
@@ -61,14 +60,13 @@ public class LPasswordEditText extends EditText implements TextWatcher {
     }
 
     @Override
-    public void beforeTextChanged(CharSequence s, int start, int count,
-                                  int after) {
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
     }
 
     @Override
     public void afterTextChanged(Editable s) {
         isShowDeleteIcon = s.length() != 0;
-        control();
+        showControlLayout();
     }
 
     @Override
@@ -76,7 +74,7 @@ public class LPasswordEditText extends EditText implements TextWatcher {
 
     }
 
-    private void control() {
+    private void showControlLayout() {
         setCompoundDrawablesWithIntrinsicBounds(null, null, isShowDeleteIcon ? drawable : null, null);
     }
 }

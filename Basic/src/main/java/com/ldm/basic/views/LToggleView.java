@@ -193,7 +193,7 @@ public class LToggleView extends ViewGroup {
     /**
      * 开启缓存
      */
-    void enableChildrenCache() {
+    private void enableChildrenCache() {
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {
             View v = getChildAt(i);
@@ -206,7 +206,7 @@ public class LToggleView extends ViewGroup {
     /**
      * 清除缓存
      */
-    void clearChildrenCache() {
+    private void clearChildrenCache() {
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {
             View v = getChildAt(i);
@@ -226,13 +226,13 @@ public class LToggleView extends ViewGroup {
          *
          * @param visible 0第一个view可见 1第二个view可见
          */
-        public void onStateChangeBeforeListener(int visible);
+        void onStateChangeBeforeListener(int visible);
 
         /**
          * 当状态发生改变后触发
          *
          * @param visible 0第一个view可见 1第二个view可见
          */
-        public void onStateChangeAfterListener(int visible);
+        void onStateChangeAfterListener(int visible);
     }
 }

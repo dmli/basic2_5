@@ -19,6 +19,7 @@ import java.util.List;
  */
 public abstract class BasicAdapter<T> extends BaseAdapter {
 
+    protected Context context;
     protected List<T> data;
     protected LayoutInflater layoutInflater;
     private int animPosition;// 大于等于该位置的view需要增加动画
@@ -29,8 +30,9 @@ public abstract class BasicAdapter<T> extends BaseAdapter {
 
     public BasicAdapter(Context context, List<T> data) {
         this.layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        this.context = context;
         this.data = data;
-        notPlayAnimation();// 第一次初始化不开始动画
+        this.notPlayAnimation();// 第一次初始化不开始动画
         this.oldCount = data.size();
     }
 

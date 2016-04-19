@@ -133,7 +133,7 @@ public abstract class BasicMultiTypeAdapter<T extends BasicMultiTypeAdapter.Basi
      */
     public void add(T data) {
         if (this.data == null) {
-            this.data = new ArrayList<T>();
+            this.data = new ArrayList<>();
         }
         this.data.add(data);
     }

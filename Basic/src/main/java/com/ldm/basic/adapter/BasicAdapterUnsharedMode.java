@@ -20,6 +20,7 @@ import java.util.List;
  */
 public abstract class BasicAdapterUnsharedMode<T> extends BaseAdapter {
 
+    protected Context context;
 	protected List<T> data;
 	protected LayoutInflater layoutInflater;
 	private int animPosition;// 大于等于该位置的view需要增加动画
@@ -30,9 +31,10 @@ public abstract class BasicAdapterUnsharedMode<T> extends BaseAdapter {
 
 	public BasicAdapterUnsharedMode(Context context, List<? extends T> data) {
 		this.layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        this.context = context;
 		this.data = new ArrayList<>();
 		this.data.addAll(data);
-		notPlayAnimation();// 第一次初始化不开始动画
+		this.notPlayAnimation();// 第一次初始化不开始动画
 		this.oldCount = data.size();
 	}
 	

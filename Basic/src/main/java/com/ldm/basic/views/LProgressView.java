@@ -11,7 +11,8 @@ import com.nineoldandroids.animation.ValueAnimator;
 
 /**
  * Created by ldm on 16/2/16.
- * 旋转的进度条，使用RotateAnimation动画
+ * 旋转的进度条，使用ObjectAnimator.ofFloat(..."rotation"......)动画
+ * 使用ObjectAnimator动画在ListView的HeadView及footerView中使用可能刷新不及时
  */
 public class LProgressView extends ImageView {
 

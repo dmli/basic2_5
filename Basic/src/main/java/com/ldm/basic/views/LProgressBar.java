@@ -9,7 +9,7 @@ import android.widget.ImageView;
 
 /**
  * Created by ldm on 13-6-5.
- * 使用AnimationDrawable做动画
+ * 使用AnimationDrawable做动画，使用的AnimationDrawable可以更好的兼容listView的headView及footerView
  */
 public class LProgressBar extends ImageView {
 
