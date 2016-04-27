@@ -9,8 +9,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ImageView;
@@ -150,11 +148,6 @@ public class LazyImageDownloader {
     private int invisiblePosition;
 
     /**
-     * 当ImageRef开启了动画动能时，可以通过这个属性及ImageRef中的position属性进行过滤，仅当ImageRef.position
-     */
-    private int animPosition;
-
-    /**
      * 默认的内存大小
      */
     private static int sizeLimit = 16 * 1024 * 1024;
@@ -205,7 +198,6 @@ public class LazyImageDownloader {
          */
         FileTool.createDirectory(IMAGE_CACHE_PATH);
         scrollState = SCROLL_STATE_IDLE;
-        animPosition = -1;// 希望出现动画的位置
         invisiblePosition = -1;// 默认-1
         // 用来下载的线程
         if (services != null) {
@@ -230,6 +222,34 @@ public class LazyImageDownloader {
             lHandler = new SecurityHandler<>(this);
         }
         isStart = true;
+    }
+
+    /**
+     * 创建一个图像下载任务，图像下载使用原图大小
+     *
+     * @param url        图像地址
+     * @param view       显示图片的View
+     * @param position   如果是在adapter中时，这个可以用getView(...)中的position作为参数，如果没有可以使用0或随机数代替
+     * @param imageWidth 目标图片载入内存中宽度
+     */
+    public synchronized void addTask(String url, View view, int position, int imageWidth) {
+        ImageRef ref = new ImageRef(url, view, position);
+        ref.width = imageWidth;
+        ref.useMinWidth = true;
+        addTask(ref);
+    }
+
+    /**
+     * 创建一个图像下载任务，图像下载使用原图大小
+     *
+     * @param url      图像地址
+     * @param view     显示图片的View
+     * @param position 如果是在adapter中时，这个可以用getView(...)中的position作为参数，如果没有可以使用0或随机数代替
+     */
+    public synchronized void addTask(String url, View view, int position) {
+        ImageRef ref = new ImageRef(url, view, position);
+        ref.useMinWidth = true;
+        addTask(ref);
     }
 
     private final List<ImageRef> cacheImage = new ArrayList<>();
@@ -308,7 +328,6 @@ public class LazyImageDownloader {
         if (ref.bitmap != null && !ref.bitmap.isRecycled()) {
             ref.loadSuccess = true;
             ref.onSuccess(context.get());// 设置图像
-            ref.isAnim(false);
             ref.end();
         } else {
             if (ref.progressView != null) {
@@ -501,10 +520,6 @@ public class LazyImageDownloader {
                     // 检查图片是否可以使用，如果可以发送200通知
 
                     if (_ref.loadSuccess) {
-                        // 检查是否需要取消动画
-                        if (_ref.isAnim && _ref.position <= animPosition) {
-                            _ref.isAnim(false);// 取消本次动画
-                        }
                         if (lHandler != null) {
                             lHandler.sendMessage(lHandler.obtainMessage(200, _ref));
                         }
@@ -690,10 +705,6 @@ public class LazyImageDownloader {
             createImage(_ref, path, cacheName);
             // 检查图片是否可以使用，如果可以发送200通知
             if (_ref.loadSuccess) {
-                // 检查是否需要取消动画
-                if (_ref.isAnim && _ref.position <= animPosition) {
-                    _ref.isAnim(false);// 取消本次动画
-                }
                 if (lHandler != null) {
                     lHandler.sendMessage(lHandler.obtainMessage(200, _ref));
                 }
@@ -850,7 +861,7 @@ public class LazyImageDownloader {
                             if (w.get().defDrawable != null || w.get().useNullFill) {
                                 _ref.setDefaultImage(w.get().defDrawable);
                             }
-                            _ref.error(w.get().getContext(), -1);
+                            _ref.failed(w.get().getContext(), -1);
                             _ref.end();
                         }
                     }
@@ -901,11 +912,10 @@ public class LazyImageDownloader {
                     if (t.defDrawable != null || t.useNullFill) {
                         _ref.setDefaultImage(t.defDrawable);
                     }
-                    _ref.isAnim(false);
                     if (_ref.progressView != null) {
                         _ref.progressView.setVisibility(View.GONE);
                     }
-                    _ref.error(t.getContext(), _ref.responseCode);
+                    _ref.failed(t.getContext(), _ref.responseCode);
                     _ref.end();
                 }
             }
@@ -957,24 +967,6 @@ public class LazyImageDownloader {
         synchronized (P_IDS) {
             return P_IDS.containsKey(pId);
         }
-    }
-
-    /**
-     * 当ImageRef开启了动画动能时，可以通过这个属性及ImageRef中的position属性进行过滤，仅当ImageRef.position > animPosition时才会播放动画
-     *
-     * @param animPosition 需要执行动画的view的最小position
-     */
-    public void setAnimPosition(int animPosition) {
-        this.animPosition = animPosition;
-    }
-
-    /**
-     * 自动隐藏，设置true后将在任务成功添加之后自动设置隐藏状态
-     *
-     * @param autoInvisible boolean
-     */
-    public void setAutoInvisible(boolean autoInvisible) {
-        this.autoInvisible = autoInvisible;
     }
 
     /**
@@ -1103,8 +1095,6 @@ public class LazyImageDownloader {
          * 当下载图片时，且重写onAsynchronous方法时 需要给这个bitmap赋值
          */
         public Bitmap bitmap;
-        //默认的动画时间
-        public int duration = 50;
         public int width;
         public int height;
         //设置true时这个任务将不会被设置默认图片
@@ -1119,8 +1109,6 @@ public class LazyImageDownloader {
         public int responseCode = 0;
         // 仅当这个控件需要控制动画时才会使用这个属性
         public int position;
-        //是否开启动画
-        public boolean isAnim;
         //是否是本地任务，如果这个变量被设置true，控件会先检查本地文件，如果不存在执行网络下载
         public boolean localImage;
         public boolean imageToSrc;
@@ -1141,38 +1129,35 @@ public class LazyImageDownloader {
         /**
          * 创建ImageRef
          *
-         * @param pId  唯一标识(如果界面中没有相同的url同时出现时可以不传)
          * @param url  地址
          * @param view View, 这个ImageView的tag会在创建ImageRef时被赋予新的数值，请不要把重要数据放到tag中
          */
-        public ImageRef(String pId, String url, View view, int position) {
-            init(pId, url, view, null, position);
+        public ImageRef(String url, View view, int position) {
+            init(url, view, MD5.md5(url), position);
         }
 
         /**
          * 创建ImageRef
          *
-         * @param pId       唯一标识
          * @param url       地址
          * @param view      View, 这个ImageView的tag会在创建ImageRef时被赋予新的数值，请不要把重要数据放到tag中
          * @param cacheName 缓存后的名称
          */
-        public ImageRef(String pId, String url, View view, String cacheName, int position) {
-            init(pId, url, view, cacheName, position);
+        public ImageRef(String url, View view, String cacheName, int position) {
+            init(url, view, cacheName, position);
         }
 
         /**
          * 初始化
          *
-         * @param pId      唯一标识
          * @param url      文件地址
          * @param view     将要显示图片的载体
          * @param cn       cacheName
          * @param position 索引
          */
-        private void init(String pId, String url, View view, String cn, int position) {
+        private void init(String url, View view, String cn, int position) {
+            this.pId = MD5.md5(url + "_" + position);
             this.cacheName = cn;
-            this.pId = pId;
             this.url = url;
             this.imageToSrc = true;
             this.view = view;
@@ -1214,17 +1199,6 @@ public class LazyImageDownloader {
         }
 
         /**
-         * 返回一个淡出的动画
-         *
-         * @return Animation
-         */
-        public Animation getAnim() {
-            AlphaAnimation anim = new AlphaAnimation(0.3f, 1.0f);
-            anim.setDuration(duration);
-            return anim;
-        }
-
-        /**
          * 这个方法会在子线程中运行，通过返回的boolean值来区分图像是否加载成功
          *
          * @param path         本地图片路径
@@ -1239,31 +1213,6 @@ public class LazyImageDownloader {
 
         public void setUnifiedSuffix(String us) {
             this.uSuffix = us;
-        }
-
-
-        /**
-         * 设置true后将会在结束时执行一个特定的动画
-         *
-         * @param bool true/false
-         * @return ImageRef
-         */
-        public ImageRef isAnim(boolean bool) {
-            this.isAnim = bool;
-            return this;
-        }
-
-        /**
-         * 设置true后将会在结束时执行一个特定的动画
-         *
-         * @param bool     true/false
-         * @param duration 动画时长
-         * @return ImageRef
-         */
-        public ImageRef isAnim(boolean bool, int duration) {
-            this.isAnim = bool;
-            this.duration = duration;
-            return this;
         }
 
         /**
@@ -1338,7 +1287,7 @@ public class LazyImageDownloader {
          * @param context   Context
          * @param stateCode 网络请求的 responseCode
          */
-        public void error(Context context, int stateCode) {
+        public void failed(Context context, int stateCode) {
         }
 
 
@@ -1350,9 +1299,6 @@ public class LazyImageDownloader {
                 progressView.setVisibility(View.GONE);
             }
             view.setVisibility(View.VISIBLE);
-            if (isAnim && view.getAnimation() == null) {
-                view.startAnimation(getAnim());
-            }
             // 放弃Bitmap的引用
             bitmap = null;
         }

@@ -106,7 +106,7 @@ public class TaskThreadService {
 
         public TaskThread() {
             isRun = true;
-            taskQueue = new LinkedList<Task>();
+            taskQueue = new LinkedList<>();
         }
 
         @Override
@@ -223,7 +223,7 @@ public class TaskThreadService {
     
     
     public interface OnTaskNumberEmptyListener {
-    	public void onTaskNumberEmptyListener();
+    	void onTaskNumberEmptyListener();
 	}
 
 }

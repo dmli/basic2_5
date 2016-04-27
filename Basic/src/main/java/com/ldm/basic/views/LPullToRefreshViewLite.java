@@ -571,8 +571,8 @@ public class LPullToRefreshViewLite extends ViewGroup {
      */
     public void beginLoadPaging() {
         if (loadingView != null) {
-            isLoadRunning = true;
             showLoadView();
+            isLoadRunning = true;
             if (this.onLoadPagingListener != null) {
                 this.onLoadPagingListener.onLoadComplete();
             }
