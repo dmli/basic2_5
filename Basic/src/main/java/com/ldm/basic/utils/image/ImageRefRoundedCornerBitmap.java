@@ -14,15 +14,30 @@ public class ImageRefRoundedCornerBitmap extends LazyImageDownloader.ImageRef {
 
 	private int pixels;
 
-	public ImageRefRoundedCornerBitmap(String pId, String url, View view, String cacheName, int position, int pixels) {
-		super(pId, url, view, cacheName, position);
-		this.pixels = pixels;
-	}
+    /**
+     * 创建ImageRef
+     *
+     * @param url      地址
+     * @param view     View, 这个ImageView的tag会在创建ImageRef时被赋予新的数值，请不要把重要数据放到tag中
+     * @param position 索引
+     */
+    public ImageRefRoundedCornerBitmap(String url, View view, int position, int pixels) {
+        super(url, view, position);
+        this.pixels = pixels;
+    }
 
-	public ImageRefRoundedCornerBitmap(String pId, String url, View view, int position, int pixels) {
-		super(pId, url, view, position);
-		this.pixels = pixels;
-	}
+    /**
+     * 创建ImageRef
+     *
+     * @param url       地址
+     * @param view      View, 这个ImageView的tag会在创建ImageRef时被赋予新的数值，请不要把重要数据放到tag中
+     * @param cacheName 缓存后的名称
+     * @param position  索引
+     */
+    public ImageRefRoundedCornerBitmap(String url, View view, String cacheName, int position, int pixels) {
+        super(url, view, cacheName, position);
+        this.pixels = pixels;
+    }
 
     /**
      * 这个方法会在子线程中运行，通过返回的boolean值来区分图像是否加载成功

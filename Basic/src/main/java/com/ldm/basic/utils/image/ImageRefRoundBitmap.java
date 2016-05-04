@@ -13,12 +13,27 @@ import java.util.Locale;
 public class ImageRefRoundBitmap extends LazyImageDownloader.ImageRef {
 
 
-    public ImageRefRoundBitmap(String pId, String url, View view, String cacheName, int position) {
-        super(pId, url, view, cacheName, position);
+    /**
+     * 创建ImageRef
+     *
+     * @param url      地址
+     * @param view     View, 这个ImageView的tag会在创建ImageRef时被赋予新的数值，请不要把重要数据放到tag中
+     * @param position 索引
+     */
+    public ImageRefRoundBitmap(String url, View view, int position) {
+        super(url, view, position);
     }
 
-    public ImageRefRoundBitmap(String pId, String url, View view, int position) {
-        super(pId, url, view, position);
+    /**
+     * 创建ImageRef
+     *
+     * @param url       地址
+     * @param view      View, 这个ImageView的tag会在创建ImageRef时被赋予新的数值，请不要把重要数据放到tag中
+     * @param cacheName 缓存后的名称
+     * @param position  索引
+     */
+    public ImageRefRoundBitmap(String url, View view, String cacheName, int position) {
+        super(url, view, cacheName, position);
     }
 
     /**

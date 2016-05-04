@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.ldm.basic.res.memory;
-
-import java.util.Collection;
+package com.ldm.basic.utils.image.memory;
 
 import android.graphics.Bitmap;
+
+import java.util.Collection;
 
 /**
  * Interface for memory cache

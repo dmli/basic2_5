@@ -3,9 +3,6 @@ package com.ldm.basic.adapter;
 import android.content.Context;
 import android.os.Handler;
 import android.view.LayoutInflater;
-import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.TranslateAnimation;
 import android.widget.BaseAdapter;
 
 import com.ldm.basic.utils.image.LazyImageDownloader;
@@ -22,18 +19,13 @@ public abstract class BasicAdapter<T> extends BaseAdapter {
     protected Context context;
     protected List<T> data;
     protected LayoutInflater layoutInflater;
-    private int animPosition;// 大于等于该位置的view需要增加动画
-    private int oldPosition, oldCount;// 上一次初始化VIEW的位置，用来控制动画
-    private boolean startTwoWayAnimation;
-    private Handler handler;
     private int failCount;
+    private Handler handler;
 
     public BasicAdapter(Context context, List<T> data) {
         this.layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.context = context;
         this.data = data;
-        this.notPlayAnimation();// 第一次初始化不开始动画
-        this.oldCount = data.size();
     }
 
     /**
@@ -45,10 +37,6 @@ public abstract class BasicAdapter<T> extends BaseAdapter {
         return null;
     }
 
-    public void setHandler(Handler handler) {
-        this.handler = handler;
-    }
-
     /**
      * 使用者可以重写这个方法来使用现有的Handler
      *
@@ -56,25 +44,19 @@ public abstract class BasicAdapter<T> extends BaseAdapter {
      */
     public Handler getHandler() {
         if (handler == null) {
-            setHandler(new Handler());
+            handler = new Handler();
         }
         return handler;
     }
 
     @Override
     public void notifyDataSetChanged() {
-        notifyDataSetChanged(false);
-    }
-
-    public void notifyDataSetChanged(boolean closeAnim) {
         LazyImageDownloader d = getLazyImageDownloader();
         if (d != null) {
             d.setFailViewPosition((failCount <= 0 ? -1 : failCount));
+            getHandler().postDelayed(new RefreshRunnable(), getDelayedTime());
         }
         super.notifyDataSetChanged();
-        if (d != null || closeAnim) {
-            getHandler().postDelayed(new RefreshRunnable(closeAnim), getDelayedTime());
-        }
     }
 
     /**
@@ -156,132 +138,14 @@ public abstract class BasicAdapter<T> extends BaseAdapter {
         return position;
     }
 
-    protected View startAnim(View convertView, int position) {
-        if (position >= animPosition) {
-            Animation a;
-            if (oldCount > getCount()) {// 数据集被增加
-                setAnimPosition(oldPosition);
-                a = getAnimationUp(convertView.getWidth(), getConvertViewHeight(convertView));
-            } else if (oldCount < getCount()) {// 数据集减少，使用向上动画，但需要开发者设置AnimPosition
-                a = getAnimationUp(convertView.getWidth(), getConvertViewHeight(convertView));
-            } else {// 普通滑动，这里检查是否开了双向动画
-                if (startTwoWayAnimation) {
-                    if (oldPosition <= position) {// 向上
-                        a = getAnimationUp(convertView.getWidth(), getConvertViewHeight(convertView));
-                    } else {// 向下
-                        a = getAnimationDown(convertView.getWidth(), getConvertViewHeight(convertView));
-                    }
-                } else {
-                    a = getAnimationUp(convertView.getWidth(), getConvertViewHeight(convertView));
-                }
-            }
-            if (a != null) {
-                a.setAnimationListener(new MyAnimationListener(convertView));
-                convertView.startAnimation(a);
-            }
-        }
-        oldCount = getCount();
-        oldPosition = position;
-        return convertView;
-    }
-
-    private int getConvertViewHeight(View convertView) {
-        int height;
-        if ((height = convertView.getHeight()) <= 0) {
-            height = convertView.getMeasuredHeight();
-        }
-        return height;
-    }
-
-    /**
-     * 设置是否支持双向动画，默认不支持
-     *
-     * @param startTwoWayAnimation true/false
-     */
-    public void setStartTwoWayAnimation(boolean startTwoWayAnimation) {
-        this.startTwoWayAnimation = startTwoWayAnimation;
-    }
-
-    /**
-     * 开发者可以重写这个方法实现自定义动画
-     *
-     * @param width  view宽度
-     * @param height view高度
-     * @return Animation
-     */
-    protected Animation getAnimationUp(int width, int height) {
-        if (height > 0) {
-            TranslateAnimation ta = new TranslateAnimation(0, 0, height, 0);
-            ta.setDuration(300);
-            return ta;
-        }
-        return null;
-    }
-
-    protected Animation getAnimationDown(int width, int height) {
-        if (height > 0) {
-            TranslateAnimation ta = new TranslateAnimation(0, 0, -height, 0);
-            ta.setDuration(300);
-            return ta;
-        }
-        return null;
-    }
-
-    /**
-     * 设置本次刷新不播放动画
-     */
-    public void notPlayAnimation() {
-        setAnimPosition(getCount());
-    }
-
-    public void setAnimPosition(int position) {
-        animPosition = position;
-    }
-
-    public int getAnimPosition() {
-        return animPosition;
-    }
-
-    public class MyAnimationListener implements Animation.AnimationListener {
-
-        View v;
-
-        public MyAnimationListener(View v) {
-            this.v = v;
-        }
-
-        @Override
-        public void onAnimationStart(Animation animation) {
-
-        }
-
-        @Override
-        public void onAnimationRepeat(Animation animation) {
-
-        }
-
-        @Override
-        public void onAnimationEnd(Animation animation) {
-            if (v != null) {
-                v.clearAnimation();
-            }
-        }
-    }
-
     public class RefreshRunnable implements Runnable {
-        boolean close;
-
-        public RefreshRunnable(boolean close) {
-            this.close = close;
+        public RefreshRunnable() {
         }
 
         @Override
         public void run() {
             if (getLazyImageDownloader() != null) {
                 getLazyImageDownloader().setFailViewPosition(-1);
-            }
-            if (close) {
-                notPlayAnimation();
             }
         }
     }

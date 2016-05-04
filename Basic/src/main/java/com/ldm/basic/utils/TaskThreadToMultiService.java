@@ -1,15 +1,15 @@
 package com.ldm.basic.utils;
 
+import com.ldm.basic.BasicTimerTask;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Timer;
 
-import com.ldm.basic.BasicTimerTask;
-
 /**
- * Created by ldm on 13-6-4. 
+ * Created by ldm on 13-6-4.
  * 提供TaskThread功能，多线程多任务模式，详细使用见代码中的各个方法注释
  */
 public class TaskThreadToMultiService {
@@ -20,7 +20,7 @@ public class TaskThreadToMultiService {
      */
     public final Queue<Task> taskQueue = new LinkedList<>();
     private int MAX_THREAD_NUMBER;
-    private int MAX_RETAIN_FREE_THREAD_NUMBER = 3;// 最大的空闲线程保留数
+    private int MAX_RETAIN_FREE_THREAD_NUMBER = 1;// 最大的空闲线程保留数
     private Timer timer;
 
     /**
@@ -29,26 +29,26 @@ public class TaskThreadToMultiService {
      * @param threadNumber 任务数量
      */
     public TaskThreadToMultiService(int threadNumber) {
-        init(threadNumber, 1500 * 10);
+        init(threadNumber, 3000 * 10);
     }
 
     /**
      * 创建一个带有TaskThread功能的service
      *
-     * @param threadNumber 任务数量
-     * @param delay        检查空闲任务的定时器间隔 不传时默认15秒
+     * @param threadNumber  任务数量
+     * @param keepAliveTime 线程空闲时间,超过最大空闲时间的任务将会被释放掉，不传时默认30秒
      */
-    public TaskThreadToMultiService(int threadNumber, int delay) {
-        init(threadNumber, delay);
+    public TaskThreadToMultiService(int threadNumber, int keepAliveTime) {
+        init(threadNumber, keepAliveTime);
     }
 
     /**
      * 初始化
      *
-     * @param threadNumber 最大线程数
-     * @param delay        任务检测间隔时间
+     * @param threadNumber  最大线程数
+     * @param keepAliveTime 线程空闲时间,超过最大空闲时间的任务将会被释放掉
      */
-    private void init(int threadNumber, int delay) {
+    private void init(int threadNumber, int keepAliveTime) {
         MAX_THREAD_NUMBER = threadNumber;
         TaskThread tt = new TaskThread();
         taskThreads.add(tt);
@@ -57,11 +57,11 @@ public class TaskThreadToMultiService {
          * 启动一个无线循环的定时器，用来检测任务的空闲度
          */
         timer = new Timer();
-        timer.scheduleAtFixedRate(checkThreadFreeTask, delay, delay);
+        timer.scheduleAtFixedRate(checkThreadFreeTask, keepAliveTime, keepAliveTime);
     }
 
     /**
-     * 设置最大的空闲线程保留数量（这个参数将又定时器使用，默认值为3）
+     * 设置最大的空闲线程保留数量
      *
      * @param number 最大数量（取值范围在 0 - MAX_THREAD_NUMBER 之间
      *               如果传入数量大于MAX_THREAD_NUMBER时将被截取）
@@ -140,10 +140,10 @@ public class TaskThreadToMultiService {
             isRun = true;
             isWait = false;
         }
-        
+
         @Override
         public void run() {
-        	android.os.Process.setThreadPriority( android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
             while (isRun) {
                 /***
                  * 如果没有任务则等待用户添加任务 如果有任务则进行处理

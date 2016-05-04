@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.ldm.basic.res.memory;
+package com.ldm.basic.utils.image.memory;
 
 import java.util.Collections;
 import java.util.LinkedList;

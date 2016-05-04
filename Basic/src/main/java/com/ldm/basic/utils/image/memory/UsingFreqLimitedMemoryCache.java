@@ -13,108 +13,125 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.ldm.basic.res.memory.impl;
+package com.ldm.basic.utils.image.memory;
 
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import com.ldm.basic.res.memory.LimitedMemoryCache;
 
 import android.graphics.Bitmap;
 
 /**
  * Limited {@link Bitmap bitmap} cache. Provides {@link Bitmap bitmaps} storing.
  * Size of all stored bitmaps will not to exceed size limit. When cache reaches
- * limit size then the least recently used bitmap is deleted from cache.<br />
+ * limit size then the bitmap which used the least frequently is deleted from
+ * cache.<br />
  * <br />
  * <b>NOTE:</b> This cache uses strong and weak references for stored Bitmaps.
  * Strong references - for limited count of Bitmaps (depends on cache size),
  * weak references - for all other cached Bitmaps.
  * 
  * @author Sergey Tarasevich (nostra13[at]gmail[dot]com)
- * @since 1.3.0
+ * @since 1.0.0
  */
-public class LRULimitedMemoryCache extends LimitedMemoryCache {
+public class UsingFreqLimitedMemoryCache extends LimitedMemoryCache {
+	/**
+	 * Contains strong references to stored objects (keys) and last object usage
+	 * date (in milliseconds). If hard cache size will exceed limit then object
+	 * with the least frequently usage is deleted (but it continue exist at
+	 * {@link #softMap} and can be collected by GC at any time)
+	 */
+	private final Map<Bitmap, Integer> usingCounts = Collections.synchronizedMap(new HashMap<Bitmap, Integer>());
 
-	private static final int INITIAL_CAPACITY = 10;
-	private static final float LOAD_FACTOR = 1.1f;
-
-	/** Cache providing Least-Recently-Used logic */
-	private final Map<String, Bitmap> lruCache = Collections.synchronizedMap(new LinkedHashMap<String, Bitmap>(INITIAL_CAPACITY, LOAD_FACTOR, true));
-
-	/** @param maxSize Maximum sum of the sizes of the Bitmaps in this cache */
-	public LRULimitedMemoryCache(int maxSize) {
-		super(maxSize);
+	public UsingFreqLimitedMemoryCache(int sizeLimit) {
+		super(sizeLimit);
 	}
 
 	@Override
 	public boolean put(String key, Bitmap value) {
 		if (super.put(key, value)) {
-			lruCache.put(key, value);
+			usingCounts.put(value, 1);
 			return true;
 		} else {
+			usingCounts.remove(0);
 			return false;
 		}
 	}
 
 	@Override
 	public Bitmap get(String key) {
-		lruCache.get(key); // call "get" for LRU logic
-		return super.get(key);
+		Bitmap value = super.get(key);
+		// Increment usage count for value if value is contained in hardCahe
+		if (value != null) {
+			Integer usageCount = usingCounts.get(value);
+			if (usageCount != null) {
+				usingCounts.put(value, usageCount + 1);
+			}
+		}
+		return value;
 	}
 
 	@Override
 	public Bitmap remove(String key) {
-		lruCache.remove(key);
+		Bitmap value = super.get(key);
+		if (value != null) {
+			usingCounts.remove(value);
+		}
 		return super.remove(key);
 	}
 
 	@Override
 	public void clear() {
-		lruCache.clear();
+		usingCounts.clear();
 		super.clear();
 	}
-	
+
 	/**
 	 * 释放资源时，尝试Recycle Bitmap
 	 */
 	public void clearToRecycle() {
-		synchronized (lruCache) {
-			Set<String> set = lruCache.keySet();
-			for (String key : set) {
-				Bitmap bit = lruCache.get(key);
+		synchronized (usingCounts) {
+			Set<Bitmap> set = usingCounts.keySet();
+			for (Bitmap bit : set) {
 				if (bit != null && !bit.isRecycled()) {
 					bit.recycle();
 				}
 			}
 		}
-		lruCache.clear();
+		usingCounts.clear();
 		super.clearToRecycle();
 	}
 
 	@Override
 	protected int getSize(Bitmap value) {
-		return value.getRowBytes() * value.getHeight();
+		return (value == null || value.isRecycled()) ? 0 : (value.getRowBytes() * value.getHeight());
 	}
 
 	@Override
 	protected Bitmap removeNext() {
-		Bitmap mostLongUsedValue = null;
-		synchronized (lruCache) {
-			Iterator<Entry<String, Bitmap>> it = lruCache.entrySet().iterator();
-			if (it.hasNext()) {
-				Entry<String, Bitmap> entry = it.next();
-				mostLongUsedValue = entry.getValue();
-				it.remove();
+		Integer minUsageCount = null;
+		Bitmap leastUsedValue = null;
+		Set<Entry<Bitmap, Integer>> entries = usingCounts.entrySet();
+		synchronized (usingCounts) {
+			for (Entry<Bitmap, Integer> entry : entries) {
+				if (leastUsedValue == null) {
+					leastUsedValue = entry.getKey();
+					minUsageCount = entry.getValue();
+				} else {
+					Integer lastValueUsage = entry.getValue();
+					if (lastValueUsage < minUsageCount) {
+						minUsageCount = lastValueUsage;
+						leastUsedValue = entry.getKey();
+					}
+				}
 			}
 		}
-		return mostLongUsedValue;
+		usingCounts.remove(leastUsedValue);
+		return leastUsedValue;
 	}
 
 	@Override

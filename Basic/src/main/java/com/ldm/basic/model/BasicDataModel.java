@@ -262,10 +262,7 @@ public abstract class BasicDataModel {
 	 * @return true 修改成功
 	 */
 	public <T extends BasicTable> boolean update(T o, String tableName) {
-		if (o.get_id() == -1) {
-			return false;
-		}
-		return DBHelper.updateToClass(context, tableName, o);
+		return o.get_id() != -1 && DBHelper.updateToClass(context, tableName, o);
 	}
 
 }
