@@ -14,10 +14,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.ldm.basic.app.Configuration;
 import com.ldm.basic.dialog.LToast;
 import com.ldm.basic.intent.IntentUtil;
-import com.ldm.basic.shared.SharedPreferencesHelper;
 import com.ldm.basic.utils.Log;
 
 import java.lang.ref.WeakReference;
@@ -210,24 +208,6 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
      * @param smg 提示语
      */
     protected void showShort(final String smg) {
-        LToast.showShort(activity, smg);
-    }
-
-    /**
-     * Long Toast
-     *
-     * @param smg 提示语
-     */
-    protected void showLong(final String smg) {
-        LToast.showLong(activity, smg);
-    }
-
-    /**
-     * Short Toast
-     *
-     * @param smg 提示语
-     */
-    protected void postShowShort(final String smg) {
         if (securityHandler != null) {
             securityHandler.sendMessage(securityHandler.obtainMessage(BasicActivity.POST_SHOW_SHORT, smg));
         }
@@ -238,7 +218,7 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
      *
      * @param smg 提示语
      */
-    protected void postShowLong(final String smg) {
+    protected void showLong(final String smg) {
         if (securityHandler != null) {
             securityHandler.sendMessage(securityHandler.obtainMessage(BasicActivity.POST_SHOW_LONG, smg));
         }
@@ -368,45 +348,6 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
     }
 
     /**
-     * 返回指定key在CLIENT_INFO_CACHE_FILE中是否存在
-     *
-     * @param key 名称
-     * @return false表示没有找到对应的值
-     */
-    protected boolean isExists(final String key) {
-        return SharedPreferencesHelper.query(activity, Configuration.CLIENT_INFO_CACHE_FILE, key) != null;
-    }
-
-    /**
-     * 返回指定key在CLIENT_INFO_CACHE_FILE中对应的值，没有返回null
-     *
-     * @param key 名称
-     * @return String
-     */
-    protected String queryCache(final String key) {
-        return SharedPreferencesHelper.query(activity, Configuration.CLIENT_INFO_CACHE_FILE, key);
-    }
-
-    /**
-     * 将给定的key与value存储到CLIENT_INFO_CACHE_FILE中 *当key存在时执行覆盖操作*
-     *
-     * @param key   名称
-     * @param value 值
-     */
-    protected void saveCache(final String key, final String value) {
-        SharedPreferencesHelper.put(activity, Configuration.CLIENT_INFO_CACHE_FILE, key, value);
-    }
-
-    /**
-     * 删除指定key在CLIENT_INFO_CACHE_FILE文件中对应的数据
-     *
-     * @param key 名称
-     */
-    protected void removeCache(final String key) {
-        SharedPreferencesHelper.remove(activity, Configuration.CLIENT_INFO_CACHE_FILE, key);
-    }
-
-    /**
      * 启动接收器
      *
      * @param actions 动作
@@ -464,7 +405,7 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
      *
      * @param time 毫秒
      */
-    protected void startClickSleepTime(int time) {
+    protected void setClickSleepTime(int time) {
         this.clickSleepTime = time;
     }
 
@@ -547,9 +488,9 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
                 BasicFragment t = w.get();
                 if (t != null && t.THIS_FRAGMENT_STATE) {
                     if (BasicActivity.POST_SHOW_SHORT == msg.what) {
-                        t.showShort(String.valueOf(msg.obj));
+                        LToast.showShort(t.getActivity(), String.valueOf(msg.obj));
                     } else if (BasicActivity.POST_SHOW_LONG == msg.what) {
-                        t.showLong(String.valueOf(msg.obj));
+                        LToast.showLong(t.getActivity(), String.valueOf(msg.obj));
                     } else {
                         t.handleMessage(msg);
                     }

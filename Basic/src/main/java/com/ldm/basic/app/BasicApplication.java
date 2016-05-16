@@ -1,7 +1,10 @@
 package com.ldm.basic.app;
 
+import android.app.Activity;
 import android.app.Application;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -134,6 +137,28 @@ public abstract class BasicApplication extends Application implements Serializab
         Object result = null;
         try {
             ApplicationInfo ai = this.getPackageManager().getApplicationInfo(this.getPackageName(), PackageManager.GET_META_DATA);
+            if (ai != null && ai.metaData != null && ai.metaData.containsKey(key)) {
+                result = ai.metaData.get(key);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    /**
+     * 读取AndroidManifest中Activity的meta_data属性
+     *
+     * @param activity           key
+     * @param componentName Activity.getComponentName()
+     * @param key           key
+     * @return Object
+     */
+    public Object getActivityMetaData(Activity activity, ComponentName componentName, String key) {
+        Object result = null;
+        try {
+            ComponentName cn = componentName == null ? activity.getComponentName() : componentName;
+            ActivityInfo ai = this.getPackageManager().getActivityInfo(cn, PackageManager.GET_META_DATA);
             if (ai != null && ai.metaData != null && ai.metaData.containsKey(key)) {
                 result = ai.metaData.get(key);
             }

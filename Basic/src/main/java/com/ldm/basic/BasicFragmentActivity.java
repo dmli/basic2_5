@@ -3,12 +3,9 @@ package com.ldm.basic;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,7 +23,6 @@ import com.ldm.basic.app.BasicApplication;
 import com.ldm.basic.app.Configuration;
 import com.ldm.basic.dialog.LToast;
 import com.ldm.basic.intent.IntentUtil;
-import com.ldm.basic.shared.SharedPreferencesHelper;
 import com.ldm.basic.utils.Log;
 import com.ldm.basic.utils.SystemTool;
 import com.ldm.basic.utils.image.LazyImageDownloader;
@@ -180,10 +176,6 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
         ACTION = action;
         THIS_ACTIVITY_STATE = true;
         SystemTool.activitySet.put(getActivityKey(), new WeakReference<Activity>(this));
-        if (null == SystemTool.activitySet) {
-            showLong(BasicApplication.CONSTANTS.APP_ERROR);
-            SystemTool.exit(false);// 保留已启动的service
-        }
     }
 
     /**
@@ -268,24 +260,6 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
      * @param smg 提示语
      */
     protected void showShort(final String smg) {
-        LToast.showShort(this, smg);
-    }
-
-    /**
-     * Long Toast
-     *
-     * @param smg 提示语
-     */
-    protected void showLong(final String smg) {
-        LToast.showLong(this, smg);
-    }
-
-    /**
-     * Short Toast
-     *
-     * @param smg 提示语
-     */
-    protected void postShowShort(final String smg) {
         if (securityHandler != null) {
             securityHandler.sendMessage(securityHandler.obtainMessage(BasicActivity.POST_SHOW_SHORT, smg));
         }
@@ -296,7 +270,7 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
      *
      * @param smg 提示语
      */
-    protected void postShowLong(final String smg) {
+    protected void showLong(final String smg) {
         if (securityHandler != null) {
             securityHandler.sendMessage(securityHandler.obtainMessage(BasicActivity.POST_SHOW_LONG, smg));
         }
@@ -375,66 +349,6 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
      */
     public void finishAnim(final int enterAnim, final int exitAnim) {
         IntentUtil.finishDIY(this, enterAnim, exitAnim);
-    }
-
-    /**
-     * 返回指定key在CLIENT_INFO_CACHE_FILE中是否存在
-     *
-     * @param key 名称
-     * @return false表示没有找到对应的值
-     */
-    protected boolean isExists(final String key) {
-        return SharedPreferencesHelper.query(this, Configuration.CLIENT_INFO_CACHE_FILE, key) != null;
-    }
-
-    /**
-     * 返回指定key在CLIENT_INFO_CACHE_FILE中对应的值，没有返回null
-     *
-     * @param key 名称
-     * @return String
-     */
-    protected String queryCache(final String key) {
-        return SharedPreferencesHelper.query(this, Configuration.CLIENT_INFO_CACHE_FILE, key);
-    }
-
-    /**
-     * 将给定的key与value存储到CLIENT_INFO_CACHE_FILE中 *当key存在时执行覆盖操作*
-     *
-     * @param key   名称
-     * @param value 值
-     */
-    protected void saveCache(final String key, final String value) {
-        SharedPreferencesHelper.put(this, Configuration.CLIENT_INFO_CACHE_FILE, key, value);
-    }
-
-    /**
-     * 删除指定key在CLIENT_INFO_CACHE_FILE文件中对应的数据
-     *
-     * @param key 名称
-     */
-    protected void removeCache(final String key) {
-        SharedPreferencesHelper.remove(this, Configuration.CLIENT_INFO_CACHE_FILE, key);
-    }
-
-    /**
-     * 读取AndroidManifest中Activity的meta_data属性
-     *
-     * @param componentName Activity.getComponentName()
-     * @param key           key
-     * @return Object
-     */
-    protected Object getActivityMetaData(ComponentName componentName, String key) {
-        Object result = null;
-        try {
-            ComponentName cn = componentName == null ? this.getComponentName() : componentName;
-            ActivityInfo ai = this.getPackageManager().getActivityInfo(cn, PackageManager.GET_META_DATA);
-            if (ai != null && ai.metaData != null && ai.metaData.containsKey(key)) {
-                result = ai.metaData.get(key);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return result;
     }
 
     /**
@@ -616,7 +530,7 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
      *
      * @param time 毫秒
      */
-    protected void startClickSleepTime(int time) {
+    protected void setClickSleepTime(int time) {
         this.clickSleepTime = time;
     }
 
@@ -739,9 +653,9 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
                 BasicFragmentActivity t = w.get();
                 if (t != null && t.THIS_ACTIVITY_STATE) {
                     if (BasicActivity.POST_SHOW_SHORT == msg.what) {
-                        t.showShort(String.valueOf(msg.obj));
+                        LToast.showShort(t, String.valueOf(msg.obj));
                     } else if (BasicActivity.POST_SHOW_LONG == msg.what) {
-                        t.showLong(String.valueOf(msg.obj));
+                        LToast.showLong(t, String.valueOf(msg.obj));
                     } else {
                         t.handleMessage(msg);
                     }

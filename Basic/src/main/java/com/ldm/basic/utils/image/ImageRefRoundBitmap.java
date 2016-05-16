@@ -10,7 +10,7 @@ import com.ldm.basic.utils.SystemTool;
 
 import java.util.Locale;
 
-public class ImageRefRoundBitmap extends LazyImageDownloader.ImageRef {
+public class ImageRefRoundBitmap extends ImageOptions {
 
 
     /**

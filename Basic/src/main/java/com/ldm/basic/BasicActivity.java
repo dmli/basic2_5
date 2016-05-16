@@ -25,7 +25,6 @@ import com.ldm.basic.app.Configuration;
 import com.ldm.basic.dialog.LToast;
 import com.ldm.basic.helper.RightSlidingFinishActivity;
 import com.ldm.basic.intent.IntentUtil;
-import com.ldm.basic.shared.SharedPreferencesHelper;
 import com.ldm.basic.utils.CPUHelper;
 import com.ldm.basic.utils.Log;
 import com.ldm.basic.utils.SystemTool;
@@ -196,10 +195,6 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
         ACTION = action;
         THIS_ACTIVITY_STATE = true;
         SystemTool.activitySet.put(getActivityKey(), new WeakReference<Activity>(this));
-        if (null == SystemTool.activitySet) {
-            showLong(BasicApplication.CONSTANTS.APP_ERROR);
-            SystemTool.exit(false);// 保留已启动的service
-        }
     }
 
     /**
@@ -230,24 +225,6 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
      * @param smg 提示语
      */
     public void showShort(final String smg) {
-        LToast.showShort(this, smg);
-    }
-
-    /**
-     * Long Toast
-     *
-     * @param smg 提示语
-     */
-    public void showLong(final String smg) {
-        LToast.showLong(this, smg);
-    }
-
-    /**
-     * Short Toast
-     *
-     * @param smg 提示语
-     */
-    public void postShowShort(final String smg) {
         securityHandler.sendMessage(securityHandler.obtainMessage(POST_SHOW_SHORT, smg));
     }
 
@@ -256,7 +233,7 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
      *
      * @param smg 提示语
      */
-    public void postShowLong(final String smg) {
+    public void showLong(final String smg) {
         securityHandler.sendMessage(securityHandler.obtainMessage(POST_SHOW_LONG, smg));
     }
 
@@ -333,46 +310,6 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
      */
     public void finishAnim(final int enterAnim, final int exitAnim) {
         IntentUtil.finishDIY(this, enterAnim, exitAnim);
-    }
-
-
-    /**
-     * 返回指定key在CLIENT_INFO_CACHE_FILE中是否存在
-     *
-     * @param key 名称
-     * @return false表示没有找到对应的值
-     */
-    protected boolean isExists(final String key) {
-        return SharedPreferencesHelper.query(this, Configuration.CLIENT_INFO_CACHE_FILE, key) != null;
-    }
-
-    /**
-     * 返回指定key在CLIENT_INFO_CACHE_FILE中对应的值，没有返回null
-     *
-     * @param key 名称
-     * @return String
-     */
-    protected String queryCache(final String key) {
-        return SharedPreferencesHelper.query(this, Configuration.CLIENT_INFO_CACHE_FILE, key);
-    }
-
-    /**
-     * 将给定的key与value存储到CLIENT_INFO_CACHE_FILE中 *当key存在时执行覆盖操作*
-     *
-     * @param key   名称
-     * @param value 值
-     */
-    protected void saveCache(final String key, final String value) {
-        SharedPreferencesHelper.put(this, Configuration.CLIENT_INFO_CACHE_FILE, key, value);
-    }
-
-    /**
-     * 删除指定key在CLIENT_INFO_CACHE_FILE文件中对应的数据
-     *
-     * @param key 名称
-     */
-    protected void removeCache(final String key) {
-        SharedPreferencesHelper.remove(this, Configuration.CLIENT_INFO_CACHE_FILE, key);
     }
 
     /**
@@ -657,9 +594,9 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
                 BasicActivity t = w.get();
                 if (t != null && t.THIS_ACTIVITY_STATE) {
                     if (POST_SHOW_SHORT == msg.what) {
-                        t.showShort(String.valueOf(msg.obj));
+                        LToast.showShort(t, String.valueOf(msg.obj));
                     } else if (POST_SHOW_LONG == msg.what) {
-                        t.showLong(String.valueOf(msg.obj));
+                        LToast.showLong(t, String.valueOf(msg.obj));
                     } else {
                         t.handleMessage(msg);
                     }

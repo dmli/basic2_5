@@ -174,8 +174,8 @@ public abstract class BasicMultiTypeAdapter<T extends BasicMultiTypeAdapter.Basi
     /**
      * 使用这个适配器
      */
-    public abstract static class BasicMultiTypeBean {
+    public interface BasicMultiTypeBean {
 
-        public abstract String getViewType();
+        String getViewType();
     }
 }

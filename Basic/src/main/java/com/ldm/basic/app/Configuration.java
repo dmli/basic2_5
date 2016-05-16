@@ -1,8 +1,8 @@
 package com.ldm.basic.app;
 
-import java.io.Serializable;
-
 import android.os.Environment;
+
+import java.io.Serializable;
 
 /**
  * Created by ldm on 12-11-8.
@@ -49,26 +49,14 @@ public class Configuration implements Serializable {
     public static final String SYS_CONFIG_GLOBAL_CACHE_LISTENER_KEY = "GLOBAL_CACHE_LISTENER";
 
     /**
-     * 全名service.properties 默认的配置文件，当内存出现问题时 尝试读取配置文件中的备用信息
-     */
-    public static final String DEF_SERVICE_FILE_NAME = "service";
-
-    /**
-     * 对应url的KEY
-     */
-    public static final String DEF_SERVICE_URL_KEY = "SERVICE_URL";
-
-    /**
      * 用户登陆信息缓存文件名
      */
     public static final String USER_LOGIN_CACHE_FILE = "user_login_cache_file";
 
-    public static final String SYS_APP_CONFIG_CACHE_FILE = "SYS_APP_CONFIG_CACHE_FILE";
-
     /**
-     * 客户端缓存文件名-BasicActivity中的saveCache方法使用的就是CLIENT_INFO_CACHE_FILE
+     * 客户端共享缓存文件名
      */
-    public static final String CLIENT_INFO_CACHE_FILE = "client_info_cache_file";
+    public static final String CLIENT_SHARED_CACHE_FILE = "sys_client_shared_cache_file";
 
     /**
      * 客户端用来存储临时Bundle的 KEY

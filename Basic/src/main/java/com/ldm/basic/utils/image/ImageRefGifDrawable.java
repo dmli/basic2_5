@@ -12,7 +12,7 @@ import pl.droidsonroids.gif.GifDrawable;
  * Created by ldm on 16/1/19.
  * 用来显示GIF图片
  */
-public class ImageRefGifDrawable extends LazyImageDownloader.ImageRef {
+public class ImageRefGifDrawable extends ImageOptions {
 
     private GifDrawable gif;
 
@@ -60,13 +60,13 @@ public class ImageRefGifDrawable extends LazyImageDownloader.ImageRef {
     @Override
     public void onSuccess(Context context) {
         if (gif != null) {
-            if (!pId.equals(view.getTag(LazyImageDownloader.TAG_ID))) {
+            if (!pId.equals(view.getTag(ImageOptions.TAG_ID))) {
                 return;
             }
             //设置GIF图片
             ((ImageView) view).setImageDrawable(gif);
             // 这里修复一次Pid缓存
-            view.setTag(LazyImageDownloader.TAG_ID, pId);
+            view.setTag(ImageOptions.TAG_ID, pId);
         }
     }
 }

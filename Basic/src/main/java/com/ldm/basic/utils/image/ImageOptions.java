@@ -75,6 +75,8 @@ public class ImageOptions {
     public boolean useMinWidth;
     //下载完成后的文件路径
     public String filePath;
+    // 设置后强制将图片下载到某路径下面
+    public String localDirectory;
     //这个属性用来接收onAsynchronous方法的返回值
     protected boolean loadSuccess;
     public String UUID;

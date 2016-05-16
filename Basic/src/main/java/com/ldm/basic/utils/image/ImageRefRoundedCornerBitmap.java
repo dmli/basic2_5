@@ -10,7 +10,7 @@ import com.ldm.basic.utils.SystemTool;
 
 import java.util.Locale;
 
-public class ImageRefRoundedCornerBitmap extends LazyImageDownloader.ImageRef {
+public class ImageRefRoundedCornerBitmap extends ImageOptions {
 
 	private int pixels;
 

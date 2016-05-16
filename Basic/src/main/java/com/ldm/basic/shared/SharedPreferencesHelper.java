@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 
+import com.ldm.basic.app.Configuration;
 import com.ldm.basic.utils.Log;
 
 import java.util.Map;
@@ -16,6 +17,46 @@ import java.util.Set;
  * SharedPreferences的一个增强助手，提供了常用的操作
  */
 public class SharedPreferencesHelper {
+
+
+    /**
+     * 返回指定key在CLIENT_SHARED_CACHE_FILE中是否存在
+     *
+     * @param key 名称
+     * @return false表示没有找到对应的值
+     */
+    public static boolean isSharedFileExists(final Context context, final String key) {
+        return SharedPreferencesHelper.query(context, Configuration.CLIENT_SHARED_CACHE_FILE, key) != null;
+    }
+
+    /**
+     * 返回指定key在CLIENT_SHARED_CACHE_FILE中对应的值，没有返回null
+     *
+     * @param key 名称
+     * @return String
+     */
+    public static String queryCacheInSharedFile(final Context context, final String key) {
+        return SharedPreferencesHelper.query(context, Configuration.CLIENT_SHARED_CACHE_FILE, key);
+    }
+
+    /**
+     * 将给定的key与value存储到CLIENT_SHARED_CACHE_FILE中 *当key存在时执行覆盖操作*
+     *
+     * @param key   名称
+     * @param value 值
+     */
+    public static void saveCacheToSharedFile(final Context context, final String key, final String value) {
+        SharedPreferencesHelper.put(context, Configuration.CLIENT_SHARED_CACHE_FILE, key, value);
+    }
+
+    /**
+     * 删除指定key在CLIENT_SHARED_CACHE_FILE文件中对应的数据
+     *
+     * @param key 名称
+     */
+    public static void removeCacheInSharedFile(final Context context, final String key) {
+        SharedPreferencesHelper.remove(context, Configuration.CLIENT_SHARED_CACHE_FILE, key);
+    }
 
     /**
      * 向指定文件内部写入数据
