@@ -4,7 +4,7 @@ package com.ldm.basic.bean;
  * Created by ldm on 14-6-20.
  * 异常日志bean,客户端存储异常日志的默认格式
  */
-public class ErrorLogBean {
+public class BasicErrorLogBean {
 
     private String appVersion;//客户端版本
     private String userId;//用户ID

@@ -7,20 +7,13 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 
-import com.ldm.basic.db.BasicSQLiteOpenHelper;
-import com.ldm.basic.properties.PropertiesHelper;
-import com.ldm.basic.shared.SharedPreferencesHelper;
+import com.ldm.basic.shared.BasicSharedPreferencesHelper;
 import com.ldm.basic.utils.AES;
 import com.ldm.basic.utils.Base64;
 import com.ldm.basic.utils.SystemTool;
 
 import java.io.Serializable;
-import java.lang.ref.WeakReference;
-import java.util.Properties;
 
 /**
  * Created by ldm on 12-11-8. 基础的全局变量且包含了一个可实时缓存的Serializable（CLIENT_CACHE）对象，
@@ -39,22 +32,10 @@ public abstract class BasicApplication extends Application implements Serializab
     private static BasicApplication app;
 
     /**
-     * 全局的缓存状态监听接口，
-     * 可以用来监听app内所有activity的onSaveInstanceState及onRestoreInstanceState方法
-     */
-    public static GlobalCacheListener globalCacheListener;
-
-    /**
      * 客户端启动状态， true客户端启动， false客户端已经退出
      * 改变量的状态由SystemTool控制，如果SystemTool没有被正确使用，改变量将无法保证正确性
      */
     public static boolean CLIENT_START_STATE;
-
-    /**
-     * 客户端缓存，通过getClientCache()获取 ，setClientCache（Serializable）设置，
-     * BasicActivity包中通过getBundle（Bundle）获取
-     */
-    public static Serializable CLIENT_CACHE;
 
     /**
      * 常量字符串
@@ -70,8 +51,6 @@ public abstract class BasicApplication extends Application implements Serializab
     public void onCreate() {
         super.onCreate();
         app = this;
-        // 尝试检查是否有配置了GlobalCacheListener接口
-        initGlobalCacheListener(getApplicationContext());
     }
 
     /**
@@ -93,39 +72,6 @@ public abstract class BasicApplication extends Application implements Serializab
         IS_DEBUG = isDebug;
     }
 
-    /**
-     * 获取一个需要缓存的Bundle对象
-     *
-     * @param bundle sBundle
-     */
-    public static void getBundle(Bundle bundle) {
-        if (CLIENT_CACHE != null) {
-            if (bundle == null) {
-                bundle = new Bundle();
-            }
-            bundle.putSerializable(Configuration.CLIENT_CACHE_KEY, CLIENT_CACHE);
-        }
-    }
-
-    /**
-     * 缓存Serializable对象将通过该方法进行恢复
-     *
-     * @param obj 需要缓存的对象
-     */
-    public static void setClientCache(Serializable obj) {
-        if (obj != null) {
-            CLIENT_CACHE = obj;
-        }
-    }
-
-    /**
-     * 获取客户端缓存
-     *
-     * @return Serializable
-     */
-    public static Serializable getClientCache() {
-        return CLIENT_CACHE;
-    }
 
     /**
      * 读取AndroidManifest中的meta_data属性
@@ -185,29 +131,27 @@ public abstract class BasicApplication extends Application implements Serializab
             }
             if (base64Result == null) {
                 // base64加密失败，存储明文
-                SharedPreferencesHelper.put(context, Configuration.USER_LOGIN_CACHE_FILE, "type", "0");// 0=明文
+                BasicSharedPreferencesHelper.put(context, Configuration.USER_LOGIN_CACHE_FILE, "type", "0");// 0=明文
                 // 1=base64
                 // 2=base64+aes
-                SharedPreferencesHelper.put(context, Configuration.USER_LOGIN_CACHE_FILE, "cache1", cache);
+                BasicSharedPreferencesHelper.put(context, Configuration.USER_LOGIN_CACHE_FILE, "cache1", cache);
             } else {
                 String aesResult = AES.encrypt(base64Result, "f9277c7c760b4e91a07e62930b92b71b");
                 if (aesResult == null) {
                     // aes加密失败，存储base64密文
-                    SharedPreferencesHelper.put(context, Configuration.USER_LOGIN_CACHE_FILE, "type", "1");// 0明文
+                    BasicSharedPreferencesHelper.put(context, Configuration.USER_LOGIN_CACHE_FILE, "type", "1");// 0明文
                     // 1base64
                     // 2base64+aes
-                    SharedPreferencesHelper.put(context, Configuration.USER_LOGIN_CACHE_FILE, "cache1", base64Result);
+                    BasicSharedPreferencesHelper.put(context, Configuration.USER_LOGIN_CACHE_FILE, "cache1", base64Result);
                 } else {
                     // 存储base64+aes密文
-                    SharedPreferencesHelper.put(context, Configuration.USER_LOGIN_CACHE_FILE, "type", "2");// 0明文
+                    BasicSharedPreferencesHelper.put(context, Configuration.USER_LOGIN_CACHE_FILE, "type", "2");// 0明文
                     // 1base64
                     // 2base64+aes
-                    SharedPreferencesHelper.put(context, Configuration.USER_LOGIN_CACHE_FILE, "cache1", aesResult);
+                    BasicSharedPreferencesHelper.put(context, Configuration.USER_LOGIN_CACHE_FILE, "cache1", aesResult);
                 }
             }
         }
-        // 当用户数据发生变化时，尝试更新可变化的表
-        BasicSQLiteOpenHelper db = BasicSQLiteOpenHelper.getInstance(context);
     }
 
     /**
@@ -218,8 +162,8 @@ public abstract class BasicApplication extends Application implements Serializab
      * @return <T>
      */
     public static <T> T getUserInfoFromLocal(Context context, Class<T> classOfT) {
-        String type = SharedPreferencesHelper.query(context, Configuration.USER_LOGIN_CACHE_FILE, "type");// 加密类型
-        String data = SharedPreferencesHelper.query(context, Configuration.USER_LOGIN_CACHE_FILE, "cache1");// data
+        String type = BasicSharedPreferencesHelper.query(context, Configuration.USER_LOGIN_CACHE_FILE, "type");// 加密类型
+        String data = BasicSharedPreferencesHelper.query(context, Configuration.USER_LOGIN_CACHE_FILE, "cache1");// data
         if (type == null || data == null) {
             return null;// 没有用户登陆信息
         }
@@ -253,8 +197,8 @@ public abstract class BasicApplication extends Application implements Serializab
      * @return json串
      */
     public static String getUserInfoFromLocal(Context context) {
-        String type = SharedPreferencesHelper.query(context, Configuration.USER_LOGIN_CACHE_FILE, "type");// 加密类型
-        String data = SharedPreferencesHelper.query(context, Configuration.USER_LOGIN_CACHE_FILE, "cache1");// data
+        String type = BasicSharedPreferencesHelper.query(context, Configuration.USER_LOGIN_CACHE_FILE, "type");// 加密类型
+        String data = BasicSharedPreferencesHelper.query(context, Configuration.USER_LOGIN_CACHE_FILE, "cache1");// data
         if (type == null || data == null) {
             return null;// 没有用户登陆信息
         }
@@ -287,42 +231,7 @@ public abstract class BasicApplication extends Application implements Serializab
      * @param context Context
      */
     public static void clearUserInfo(Context context) {
-        SharedPreferencesHelper.clear(context, "user_login_cache_file");
-    }
-
-    /**
-     * 全局的缓存状态监听接口，
-     * 设置后将会在app内所有activity的onSaveInstanceState及onRestoreInstanceState方法中进行监听
-     * 设置该监听后将会在所有的activity中触发接口内的方法
-     *
-     * @param globalCacheListener GlobalCacheListener
-     */
-    public static void setGlobalCacheListener(GlobalCacheListener globalCacheListener) {
-        BasicApplication.globalCacheListener = globalCacheListener;
-    }
-
-    /**
-     * 如果配置了config.properties， 将从GLOBAL_CACHE_LISTENER属性中寻找可用的可用的实体并执行映射
-     */
-    public static void initGlobalCacheListener(Context context) {
-        if (globalCacheListener != null || context == null) {
-            return;
-        }
-        Properties p = PropertiesHelper.loadProperties(context, Configuration.SYS_CONFIG_FILE_NAME, "raw", context.getPackageName());
-        if (p != null) {
-            String cs = p.getProperty(Configuration.SYS_CONFIG_GLOBAL_CACHE_LISTENER_KEY, null);
-            if (cs != null) {
-                try {
-                    Class<?> c = Class.forName(cs);
-                    GlobalCacheListener gcl = (GlobalCacheListener) c.newInstance();
-                    if (gcl != null) {
-                        setGlobalCacheListener(gcl);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        BasicSharedPreferencesHelper.clear(context, "user_login_cache_file");
     }
 
     /**
@@ -333,28 +242,5 @@ public abstract class BasicApplication extends Application implements Serializab
      */
     public void handleMessage(int what, Object obj) {
 
-    }
-
-    /**
-     * 相对安全的Handler
-     */
-    public SecurityHandler<BasicApplication> securityHandler = new SecurityHandler<>(this);
-
-    protected static class SecurityHandler<T extends BasicApplication> extends Handler {
-        WeakReference<T> w;
-
-        private SecurityHandler(T t) {
-            w = new WeakReference<>(t);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            if (w != null) {
-                BasicApplication t = w.get();
-                if (t != null) {
-                    t.handleMessage(msg.what, msg.obj);
-                }
-            }
-        }
     }
 }

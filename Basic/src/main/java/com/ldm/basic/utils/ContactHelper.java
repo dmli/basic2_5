@@ -4,7 +4,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ldm.basic.bean.ContactBean;
+import com.ldm.basic.bean.BasicContactBean;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -24,7 +24,7 @@ import android.text.TextUtils;
  */
 public class ContactHelper {
 
-	private static List<ContactBean> contacts, contacts2;
+	private static List<BasicContactBean> contacts, contacts2;
 
 	/**
 	 * 得到手机通讯录联系人信息
@@ -36,7 +36,7 @@ public class ContactHelper {
 		// 获取手机联系人
 		Cursor phoneCursor = resolver.query(Phone.CONTENT_URI, new String[] { Phone.DISPLAY_NAME, Phone.NUMBER, Phone.CONTACT_ID, Phone.PHOTO_ID }, null, null, null);
 		if (phoneCursor != null && phoneCursor.moveToFirst()) {
-			contacts = new ArrayList<ContactBean>();
+			contacts = new ArrayList<BasicContactBean>();
 
 			int PHONES_DISPLAY_NAME_INDEX = phoneCursor.getColumnIndex(Phone.DISPLAY_NAME);
 			int PHONES_NUMBER_INDEX = phoneCursor.getColumnIndex(Phone.NUMBER);
@@ -63,7 +63,7 @@ public class ContactHelper {
 					BitmapFactory.decodeStream(input);
 					contactPhoto = new BitmapDrawable(context.getResources(), input);
 				}
-				contacts.add(new ContactBean(contactName, phoneNumber, contactPhoto));
+				contacts.add(new BasicContactBean(contactName, phoneNumber, contactPhoto));
 			} while (phoneCursor.moveToNext());
 			if (phoneCursor != null) {
 				phoneCursor.close();
@@ -82,7 +82,7 @@ public class ContactHelper {
 			// 获取手机联系人
 			Cursor phoneCursor = resolver.query(Phone.CONTENT_URI, new String[] { Phone.DISPLAY_NAME, Phone.NUMBER, Phone.CONTACT_ID, Phone.PHOTO_ID }, null, null, null);
 			if (phoneCursor != null && phoneCursor.moveToFirst()) {
-                contacts2 = new ArrayList<ContactBean>();
+                contacts2 = new ArrayList<BasicContactBean>();
 
                 int PHONES_DISPLAY_NAME_INDEX = phoneCursor.getColumnIndex(Phone.DISPLAY_NAME);
                 int PHONES_NUMBER_INDEX = phoneCursor.getColumnIndex(Phone.NUMBER);
@@ -94,7 +94,7 @@ public class ContactHelper {
                         continue;
                     // 得到联系人名称
                     String contactName = phoneCursor.getString(PHONES_DISPLAY_NAME_INDEX);
-                    contacts2.add(new ContactBean(contactName, phoneNumber, null));
+                    contacts2.add(new BasicContactBean(contactName, phoneNumber, null));
                 } while (phoneCursor.moveToNext());
                 if (phoneCursor != null) {
                     phoneCursor.close();
@@ -111,7 +111,7 @@ public class ContactHelper {
 	 * @param context Context
 	 * @return 列表集合
 	 */
-	public static List<ContactBean> getContactsToCache(Context context) {
+	public static List<BasicContactBean> getContactsToCache(Context context) {
 		if (contacts == null || contacts.size() == 0) {
 			initContactsToCache(context);
 		}
@@ -124,7 +124,7 @@ public class ContactHelper {
 	 * @param context Context
 	 * @return 列表集合
 	 */
-	public static List<ContactBean> getContactsToCache2(Context context) {
+	public static List<BasicContactBean> getContactsToCache2(Context context) {
 		if (contacts == null || contacts.size() == 0) {
 			initContactsToCache(context);
 		}
@@ -137,7 +137,7 @@ public class ContactHelper {
 	 * @param context Context
 	 * @return 列表集合
 	 */
-	public static List<ContactBean> getContacts(Context context) {
+	public static List<BasicContactBean> getContacts(Context context) {
 		contacts.clear();
 		initContactsToCache(context);
 		return contacts;
@@ -149,7 +149,7 @@ public class ContactHelper {
 	 * @param context Context
 	 * @return 列表集合
 	 */
-	public static List<ContactBean> getContacts2(Context context) {
+	public static List<BasicContactBean> getContacts2(Context context) {
 		contacts2.clear();
 		initContactsToCache(context);
 		return contacts2;

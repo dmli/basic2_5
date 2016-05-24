@@ -6,18 +6,18 @@ import android.graphics.drawable.Drawable;
  * Created by ldm on 2013-5-22.
  * 通讯录数据Bean, 仅提供了：名称、电话、头像
  */
-public class ContactBean {
+public class BasicContactBean {
 
 	private String name;
 	private String number;
 	private Drawable photo;// 联系人头像
 
-	public ContactBean(String name, String number) {
+	public BasicContactBean(String name, String number) {
 		this.name = name;
 		this.number = number;
 	}
 
-	public ContactBean(String name, String number, Drawable photo) {
+	public BasicContactBean(String name, String number, Drawable photo) {
 		this.name = name;
 		this.number = number;
 		this.photo = photo;

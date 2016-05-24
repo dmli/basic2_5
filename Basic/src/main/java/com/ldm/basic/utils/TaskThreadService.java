@@ -47,7 +47,7 @@ public class TaskThreadService {
      */
     public void addTask(Task task) {
         if (taskThread == null) {
-            Log.e("您没有启用任务功能，不能调用该方法！");
+            LLog.e("您没有启用任务功能，不能调用该方法！");
             return;
         }
 

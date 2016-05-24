@@ -3,8 +3,6 @@ package com.ldm.basic.utils;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -590,29 +588,6 @@ public class SystemTool {
     }
 
     /**
-     * 延时启动Activity
-     *
-     * @param context     Context
-     * @param intent      Intent
-     * @param millisecond 延时毫秒数
-     */
-    public static void delayStart(final Context context, final Intent intent, final long millisecond) {
-        PendingIntent restartIntent = PendingIntent.getActivity(context, 0, intent, Intent.FILL_IN_ACTION);
-        AlarmManager mgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        mgr.set(AlarmManager.RTC, System.currentTimeMillis() + millisecond, restartIntent);
-        exit(true);
-    }
-
-    /**
-     * 2秒内连续2次返回键退出系统 退出所有的activity，保留service
-     *
-     * @param context Context
-     */
-    public static void quit(final Context context) {
-        quit(context, null, false);
-    }
-
-    /**
      * 2秒内连续2次返回键退出系统 退出所有的activity，保留service
      *
      * @param context  Context
@@ -702,10 +677,7 @@ public class SystemTool {
     public static void finishAllActivity(Activity keep) {
         final Map<String, WeakReference<Activity>> acs = activitySet;
         if (acs != null && acs.size() > 0) {
-            String[] names = null;
-            synchronized (acs) {
-                names = acs.keySet().toArray(new String[acs.size()]);
-            }
+            String[] names = acs.keySet().toArray(new String[acs.size()]);
             for (String s : names) {
                 WeakReference<Activity> wr = acs.get(s);
                 if (wr != null) {
@@ -726,10 +698,7 @@ public class SystemTool {
     public static void removeActivity(Class<? extends Activity> cla) {
         final Map<String, WeakReference<Activity>> acs = activitySet;
         if (acs != null && acs.size() > 0) {
-            String[] names;
-            synchronized (acs) {
-                names = acs.keySet().toArray(new String[acs.size()]);
-            }
+            String[] names = acs.keySet().toArray(new String[acs.size()]);
             String name = cla.getName();
             synchronized (activitySet) {
                 for (String str : names) {
@@ -766,10 +735,7 @@ public class SystemTool {
         int count = 0;
         final Map<String, WeakReference<Activity>> acs = activitySet;
         if (acs != null && acs.size() > 0) {
-            String[] names;
-            synchronized (acs) {
-                names = acs.keySet().toArray(new String[acs.size()]);
-            }
+            String[] names = acs.keySet().toArray(new String[acs.size()]);
             String name = cla.getName();
             for (String s : names) {
                 if (s.startsWith(name)) {
@@ -802,10 +768,7 @@ public class SystemTool {
         final Map<String, WeakReference<Activity>> acs = activitySet;
         if (acs != null && acs.size() > 0) {
             String name = cla.getName();
-            String[] names;
-            synchronized (acs) {
-                names = acs.keySet().toArray(new String[acs.size()]);
-            }
+            String[] names = acs.keySet().toArray(new String[acs.size()]);
             for (String s : names) {
                 if (s.startsWith(name)) {
                     WeakReference<Activity> wa1 = acs.get(s);

@@ -1,6 +1,6 @@
 package com.ldm.basic.filter;
 
-import com.ldm.basic.utils.Log;
+import com.ldm.basic.utils.LLog;
 
 import android.annotation.SuppressLint;
 import android.opengl.GLES11Ext;
@@ -100,7 +100,7 @@ public class FrameRendererBlur extends FrameRendererDrawOrigin {
         mProgramDrawCache.bindAttribLocation(POSITION_NAME, 0);
 
         if(!mProgramDrawCache.init(vshBlurCache, fshBlurExtOES)) {
-            Log.e("blur filter program init failed - 1...");
+            LLog.e("blur filter program init failed - 1...");
             return false;
         }
 
@@ -111,7 +111,7 @@ public class FrameRendererBlur extends FrameRendererDrawOrigin {
         mProgram.bindAttribLocation(POSITION_NAME, 0);
 
         if(!mProgram.init(vshBlur, fshBlurTex2D)) {
-            Log.e("blur filter program init failed - 2...");
+            LLog.e("blur filter program init failed - 2...");
             return false;
         }
 
@@ -186,7 +186,7 @@ public class FrameRendererBlur extends FrameRendererDrawOrigin {
 
 
     protected void resetCacheTexture() {
-        Log.i("resetCacheTexture...");
+        LLog.i("resetCacheTexture...");
         mCacheTexWidth = mTextureWidth;
         mCacheTexHeight = mTextureHeight;
         if(mTexCache == 0)

@@ -5,7 +5,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import com.ldm.basic.filter.FrameRenderer;
 import com.ldm.basic.filter.FrameRendererWave;
-import com.ldm.basic.utils.Log;
+import com.ldm.basic.utils.LLog;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -73,12 +73,12 @@ public class LFilterGLSurfaceView extends GLSurfaceView implements GLSurfaceView
 	@Override
 	protected void onDetachedFromWindow() {
 		super.onDetachedFromWindow();
-		Log.e("onDetachedFromWindow 1 ");
+		LLog.e("onDetachedFromWindow 1 ");
 		if (myRenderer != null) {
 			myRenderer.release();
 			myRenderer = null;
 		}
-		Log.e("onDetachedFromWindow 2 ");
+		LLog.e("onDetachedFromWindow 2 ");
 	}
 
 	public int initTexture(GL10 gl, Bitmap bitmap) {

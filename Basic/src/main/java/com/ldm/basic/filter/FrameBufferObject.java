@@ -1,6 +1,6 @@
 package com.ldm.basic.filter;
 
-import com.ldm.basic.utils.Log;
+import com.ldm.basic.utils.LLog;
 
 import android.opengl.GLES20;
 
@@ -31,7 +31,7 @@ public class FrameBufferObject {
 		bind();
 		GLES20.glFramebufferTexture2D(GLES20.GL_FRAMEBUFFER, GLES20.GL_COLOR_ATTACHMENT0, GLES20.GL_TEXTURE_2D, texID, 0);
 		if (GLES20.glCheckFramebufferStatus(GLES20.GL_FRAMEBUFFER) != GLES20.GL_FRAMEBUFFER_COMPLETE) {
-			Log.e("CGE::FrameBuffer::bindTexture2D - Frame buffer is not valid!");
+			LLog.e("CGE::FrameBuffer::bindTexture2D - Frame buffer is not valid!");
 		}
 	}
 

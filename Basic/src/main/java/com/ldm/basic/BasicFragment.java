@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.text.Spanned;
@@ -16,10 +15,9 @@ import android.widget.TextView;
 
 import com.ldm.basic.dialog.LToast;
 import com.ldm.basic.intent.IntentUtil;
-import com.ldm.basic.utils.Log;
+import com.ldm.basic.utils.BasicSimpleHandler;
+import com.ldm.basic.utils.LLog;
 
-import java.lang.ref.WeakReference;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -30,7 +28,7 @@ import java.util.Map;
  * <p/>
  * *仅限于配合BasicFragmentActivity使用*
  */
-public class BasicFragment extends Fragment implements View.OnClickListener {
+public class BasicFragment extends Fragment implements View.OnClickListener, BasicSimpleHandler.OnSimpleHandlerInterface {
 
     protected View rootView;
     protected LayoutInflater inflater;
@@ -44,15 +42,12 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
     public boolean THIS_FRAGMENT_STATE;
 
     /**
-     * 简易的异步线程接口，为了脱离asynchronous内部方法影响finish()而设计的
-     */
-    private static Map<String, Asynchronous> ASYNC_SET;
-
-    /**
      * 界面按钮控制器，可以通过设置间隔时间开启点击事件监听
      */
     private long upClickTime;// 上一次点击的时间
     private long clickSleepTime;
+
+    protected BasicSimpleHandler<BasicFragment> handler = new BasicSimpleHandler<>(this);
 
     /**
      * 返回resource指向的View布局，并初始化相关功能及方法， 建议使用方法： public View
@@ -96,14 +91,10 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onDestroyView() {
-        // 如果设置了异步任务，这里需要清除
-        if (ASYNC_SET != null) {
-            ASYNC_SET.remove(((Object) this).getClass().getName());
-        }
         stopReceiver();
         THIS_FRAGMENT_STATE = false;
-        if (securityHandler != null) {
-            securityHandler.removeCallbacksAndMessages(null);
+        if (handler != null) {
+            handler.removeCallbacksAndMessages(null);
         }
         super.onDestroyView();
     }
@@ -118,7 +109,7 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
      */
     protected View inflate(int resource, ViewGroup root, boolean attachToRoot) {
         if (inflater == null) {
-            Log.e("inflater 没有初始化，可以考虑在onCreateView中使用initView(LayoutInflater, ViewGroup, int)方法或自行设置inflater");
+            LLog.e("inflater 没有初始化，可以考虑在onCreateView中使用initView(LayoutInflater, ViewGroup, int)方法或自行设置inflater");
         }
         return inflater == null ? null : inflater.inflate(resource, root, attachToRoot);
     }
@@ -182,7 +173,7 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
         if (tv != null) {
             tv.setText(str);
         } else {
-            Log.e("没有找到 id" + viewId + "所对应的View");
+            LLog.e("没有找到 id" + viewId + "所对应的View");
         }
     }
 
@@ -198,7 +189,7 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
         if (tv != null) {
             tv.setText(html);
         } else {
-            Log.e("没有找到 id" + viewId + "所对应的View");
+            LLog.e("没有找到 id" + viewId + "所对应的View");
         }
     }
 
@@ -208,9 +199,7 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
      * @param smg 提示语
      */
     protected void showShort(final String smg) {
-        if (securityHandler != null) {
-            securityHandler.sendMessage(securityHandler.obtainMessage(BasicActivity.POST_SHOW_SHORT, smg));
-        }
+        LToast.showShort(getContext(), smg);
     }
 
     /**
@@ -219,9 +208,7 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
      * @param smg 提示语
      */
     protected void showLong(final String smg) {
-        if (securityHandler != null) {
-            securityHandler.sendMessage(securityHandler.obtainMessage(BasicActivity.POST_SHOW_LONG, smg));
-        }
+        LToast.showLong(getContext(), smg);
     }
 
     /**
@@ -409,6 +396,11 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
         this.clickSleepTime = time;
     }
 
+    @Override
+    public void handleMessage(Message msg) {
+
+    }
+
     public class BaseReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -418,118 +410,4 @@ public class BasicFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    /**
-     * 异步完成结束后的回调函数，SecurityHandler及Asynchronous接口的任务处理
-     *
-     * @param msg Message
-     */
-    protected void handleMessage(Message msg) {
-
-    }
-
-    /**
-     * 启动异步回调函数 *使用what作为标记*
-     *
-     * @param what 将被分配到handleMessage(...)的what
-     * @param obj  数据被传送到handleMessage(...)的obj
-     */
-    protected void startAsyncTask(int what, Object obj) {
-        new AsyncThread<SecurityHandler<BasicFragment>>(securityHandler, ((Object) this).getClass().getName(), what, obj) {
-            @Override
-            public void run() {
-                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-                Object object = null;
-                if (ASYNC_SET != null) {
-                    Asynchronous a = ASYNC_SET.get(key);
-                    if (a != null) {
-                        object = a.async(what, obj);
-                    }
-                }
-                if (w != null) {
-                    SecurityHandler<BasicFragment> t = w.get();
-                    if (t != null) {
-                        t.sendMessage(t.obtainMessage(what, object));
-                    }
-                }
-            }
-        }.start();
-    }
-
-    /**
-     * 设置异步任务接口，多次调用后面的将冲掉前面的
-     *
-     * @param asynchronous Asynchronous
-     */
-    public void setAsynchronous(Asynchronous asynchronous) {
-        if (ASYNC_SET == null) {
-            ASYNC_SET = new HashMap<>();
-        }
-        if (ASYNC_SET.containsKey(((Object) this).getClass().getName())) {
-            ASYNC_SET.remove(((Object) this).getClass().getName());
-        }
-        ASYNC_SET.put(((Object) this).getClass().getName(), asynchronous);
-    }
-
-    /**
-     * 相对安全的Handler，所有请求均由BasicFragment中handleMessage(...)接收
-     */
-    protected SecurityHandler<BasicFragment> securityHandler = new SecurityHandler<>(this);
-
-    protected static class SecurityHandler<T extends BasicFragment> extends Handler {
-        WeakReference<T> w;
-
-        private SecurityHandler(T t) {
-            w = new WeakReference<>(t);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            if (w != null) {
-                BasicFragment t = w.get();
-                if (t != null && t.THIS_FRAGMENT_STATE) {
-                    if (BasicActivity.POST_SHOW_SHORT == msg.what) {
-                        LToast.showShort(t.getActivity(), String.valueOf(msg.obj));
-                    } else if (BasicActivity.POST_SHOW_LONG == msg.what) {
-                        LToast.showLong(t.getActivity(), String.valueOf(msg.obj));
-                    } else {
-                        t.handleMessage(msg);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * 异步接口
-     */
-    public interface Asynchronous {
-
-        Object async(final int tag, Object obj);
-
-    }
-
-    /**
-     * 异步线程，与Asynchronous匹配使用
-     */
-    public class AsyncThread<T> extends Thread {
-        WeakReference<T> w;
-        String key;
-        int what;
-        Object obj;
-
-        /**
-         * 创建一个简易的异步任务
-         *
-         * @param w    弱引用
-         * @param key  用来查找对应的任务
-         * @param what Message.what
-         * @param obj  Message.obj
-         */
-        public AsyncThread(T w, String key, int what, Object obj) {
-            this.w = new WeakReference<>(w);
-            this.key = key;
-            this.what = what;
-            this.obj = obj;
-        }
-    }
 }

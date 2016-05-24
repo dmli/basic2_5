@@ -1,7 +1,7 @@
 package com.ldm.basic.conn;
 
 import com.ldm.basic.bean.BasicInternetRetBean;
-import com.ldm.basic.utils.Log;
+import com.ldm.basic.utils.LLog;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -86,10 +86,10 @@ public class BasicHttpPost extends HttpRequest {
                 while ((line = bufferedReader.readLine()) != null) {
                     result.append(line);
                 }
-                Log.e(" 出参 " + result.toString());
+                LLog.e(" 出参 " + result.toString());
                 return result.toString();
             } else {
-                Log.e("访问[" + serviceUrl + "]失败，错误码 " + responseCode);
+                LLog.e("访问[" + serviceUrl + "]失败，错误码 " + responseCode);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -158,11 +158,11 @@ public class BasicHttpPost extends HttpRequest {
                 }
                 resultData.setCode(0);
                 resultData.setSuccess(result.toString());
-                Log.e(" 出参 " + result.toString());
+                LLog.e(" 出参 " + result.toString());
             } else {
                 resultData.setCode(1);
                 resultData.setError("error");
-                Log.e("访问[" + serviceUrl + "]失败，错误码 " + responseCode);
+                LLog.e("访问[" + serviceUrl + "]失败，错误码 " + responseCode);
             }
         } catch (IOException e) {
             resultData.setCode(2);
@@ -214,11 +214,11 @@ public class BasicHttpPost extends HttpRequest {
                 }
                 resultData.setCode(0);
                 resultData.setSuccess(result.toString());
-                Log.e(" 出参 " + result.toString());
+                LLog.e(" 出参 " + result.toString());
             } else {
                 resultData.setCode(1);
                 resultData.setError("error");
-                Log.e("访问[" + serviceUrl + "]失败，错误码 " + responseCode);
+                LLog.e("访问[" + serviceUrl + "]失败，错误码 " + responseCode);
             }
         } catch (IOException e) {
             resultData.setCode(2);
@@ -319,9 +319,9 @@ public class BasicHttpPost extends HttpRequest {
             }
             int responseCode = urlConnection.getResponseCode();
             if (responseCode == 200) {
-                Log.e(" send 成功 ");
+                LLog.e(" send 成功 ");
             } else {
-                Log.e(" send 失败，错误码 " + responseCode);
+                LLog.e(" send 失败，错误码 " + responseCode);
             }
         } catch (IOException e) {
             e.printStackTrace();

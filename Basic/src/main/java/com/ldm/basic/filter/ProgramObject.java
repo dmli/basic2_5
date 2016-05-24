@@ -1,7 +1,7 @@
 package com.ldm.basic.filter;
 
 import com.ldm.basic.app.BasicApplication;
-import com.ldm.basic.utils.Log;
+import com.ldm.basic.utils.LLog;
 
 import android.annotation.SuppressLint;
 import android.opengl.GLES20;
@@ -74,7 +74,7 @@ public class ProgramObject {
 
         if(programStatus[0] != GLES20.GL_TRUE) {
             String msg = GLES20.glGetProgramInfoLog(programID);
-            Log.e(msg);
+            LLog.e(msg);
             return false;
         }
 
@@ -90,7 +90,7 @@ public class ProgramObject {
         int uniform = GLES20.glGetUniformLocation(mProgramID, name);
         if(BasicApplication.IS_DEBUG) {
             if(uniform < 0)
-                Log.e(String.format("uniform name %s does not exist", name));
+                LLog.e(String.format("uniform name %s does not exist", name));
         }
         return uniform;
     }
@@ -176,7 +176,7 @@ public class ProgramObject {
 			}
 
             if(mShaderID == 0) {
-                Log.e("glCreateShader Failed!...");
+                LLog.e("glCreateShader Failed!...");
                 return false;
             }
 
@@ -201,7 +201,7 @@ public class ProgramObject {
                 if(compiled[0] != GLES20.GL_TRUE)
                 {
                     String errMsg = GLES20.glGetShaderInfoLog(shaderID);
-                    Log.e(errMsg);
+                    LLog.e(errMsg);
                     GLES20.glDeleteShader(shaderID);
                     return 0;
                 }

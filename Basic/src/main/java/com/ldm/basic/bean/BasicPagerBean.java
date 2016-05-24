@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Created by ldm on 12-12-13.
  * 客户端私有分页Bean
  */
-public class BasePager implements Serializable{
+public class BasicPagerBean implements Serializable{
 
 	/**
 	 * 
@@ -29,15 +29,15 @@ public class BasePager implements Serializable{
      */
     private int totalCount = 0;
 	
-	private BasePager(){
+	private BasicPagerBean(){
 	}
 	
 	/**
 	 * 实例化一个MPager对象
-	 * @return BasePager
+	 * @return BasicPagerBean
 	 */
-	public static BasePager newInstance(){
-		return new BasePager();
+	public static BasicPagerBean newInstance(){
+		return new BasicPagerBean();
 	}
 	
 	/**

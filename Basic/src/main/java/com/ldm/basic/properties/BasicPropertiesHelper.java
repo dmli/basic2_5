@@ -1,15 +1,15 @@
 package com.ldm.basic.properties;
 
-import java.util.Properties;
-
 import android.content.Context;
+
+import java.util.Properties;
 
 
 /**
  * Created by ldm on 12-8-11.
  * 简单的Properties文件操作助手
  */
-public class PropertiesHelper {
+public class BasicPropertiesHelper {
 	
 	/**
 	 * 获取Properties对象

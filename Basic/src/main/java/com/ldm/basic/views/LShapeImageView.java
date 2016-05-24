@@ -14,7 +14,7 @@ import android.view.View;
  * Created by ldm on 16/4/6.
  * 简易的
  */
-public class ShapeImageView extends LImageView {
+public class LShapeImageView extends LImageView {
 
 
     public static class Shape {
@@ -40,15 +40,15 @@ public class ShapeImageView extends LImageView {
     //画布抗锯齿
     private PaintFlagsDrawFilter paintFlagsDrawFilter = new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
 
-    public ShapeImageView(Context context) {
+    public LShapeImageView(Context context) {
         super(context);
     }
 
-    public ShapeImageView(Context context, AttributeSet attrs) {
+    public LShapeImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public ShapeImageView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public LShapeImageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
@@ -131,12 +131,12 @@ public class ShapeImageView extends LImageView {
 
 
         @Override
-        public void adorn(ShapeImageView view, Canvas canvas) {
+        public void adorn(LShapeImageView view, Canvas canvas) {
 
         }
 
         @Override
-        public void drawPath(ShapeImageView view, Canvas canvas) {
+        public void drawPath(LShapeImageView view, Canvas canvas) {
             canvas.clipPath(getPolygonPath(getPolygonPoints(view.getWidth(), view.getHeight(), 6, 0)));
         }
 
@@ -186,12 +186,12 @@ public class ShapeImageView extends LImageView {
     private class RoundRectangleShare implements BaseShape {
 
         @Override
-        public void adorn(ShapeImageView view, Canvas canvas) {
+        public void adorn(LShapeImageView view, Canvas canvas) {
 
         }
 
         @Override
-        public void drawPath(ShapeImageView view, Canvas canvas) {
+        public void drawPath(LShapeImageView view, Canvas canvas) {
             Path path = new Path();
             path.addRoundRect(new RectF(0.0f, 0.0f, view.getWidth(), view.getHeight()), view.radiusX, view.radiusY, Path.Direction.CW);
             canvas.clipPath(path);
@@ -205,12 +205,12 @@ public class ShapeImageView extends LImageView {
 
 
         @Override
-        public void adorn(ShapeImageView view, Canvas canvas) {
+        public void adorn(LShapeImageView view, Canvas canvas) {
 
         }
 
         @Override
-        public void drawPath(ShapeImageView view, Canvas canvas) {
+        public void drawPath(LShapeImageView view, Canvas canvas) {
             Path path = new Path();
             path.addRect(new RectF(0.0f, 0.0f, view.getWidth(), view.getHeight()), Path.Direction.CW);
             canvas.clipPath(path);
@@ -224,12 +224,12 @@ public class ShapeImageView extends LImageView {
     private class CircleShape implements BaseShape {
 
         @Override
-        public void adorn(ShapeImageView view, Canvas canvas) {
+        public void adorn(LShapeImageView view, Canvas canvas) {
 
         }
 
         @Override
-        public void drawPath(ShapeImageView view, Canvas canvas) {
+        public void drawPath(LShapeImageView view, Canvas canvas) {
             Path path = new Path();
             int width = view.getWidth();
             int height = view.getHeight();
@@ -243,11 +243,11 @@ public class ShapeImageView extends LImageView {
      */
     private class SquareShape implements BaseShape {
 
-        public void adorn(ShapeImageView view, Canvas canvas) {
+        public void adorn(LShapeImageView view, Canvas canvas) {
         }
 
         @Override
-        public void drawPath(ShapeImageView view, Canvas canvas) {
+        public void drawPath(LShapeImageView view, Canvas canvas) {
             Path path = new Path();
             int width = view.getWidth();
             int height = view.getHeight();
@@ -264,9 +264,9 @@ public class ShapeImageView extends LImageView {
 
     private interface BaseShape {
 
-        void adorn(ShapeImageView view, Canvas canvas);
+        void adorn(LShapeImageView view, Canvas canvas);
 
-        void drawPath(ShapeImageView view, Canvas canvas);
+        void drawPath(LShapeImageView view, Canvas canvas);
     }
 
     private class FrameStrokeRef {

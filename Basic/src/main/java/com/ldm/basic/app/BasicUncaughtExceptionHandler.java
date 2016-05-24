@@ -6,9 +6,9 @@ import java.io.IOException;
 
 import com.google.gson.Gson;
 import com.ldm.basic.BasicService;
-import com.ldm.basic.bean.ErrorLogBean;
+import com.ldm.basic.bean.BasicErrorLogBean;
 import com.ldm.basic.utils.FileTool;
-import com.ldm.basic.utils.Log;
+import com.ldm.basic.utils.LLog;
 import com.ldm.basic.utils.SystemTool;
 
 import android.content.Context;
@@ -80,7 +80,7 @@ public class BasicUncaughtExceptionHandler implements Thread.UncaughtExceptionHa
                 });
             }
             if (!f.delete()) {
-                Log.e("error.log 缓存文件删除失败！");
+                LLog.e("error.log 缓存文件删除失败！");
             }
         }
     }
@@ -134,7 +134,7 @@ public class BasicUncaughtExceptionHandler implements Thread.UncaughtExceptionHa
             sBuilder.append("*");
         }
         /************************************整理异常数据****************************************/
-        ErrorLogBean el = new ErrorLogBean();
+        BasicErrorLogBean el = new BasicErrorLogBean();
         el.setUserId("");
         el.setAppVersion(appVersion);
         el.setDeviceVersion(deviceVersion);
@@ -162,7 +162,7 @@ public class BasicUncaughtExceptionHandler implements Thread.UncaughtExceptionHa
                     FileOutputStream os = new FileOutputStream(f);
                     os.write(log.getBytes());
                     os.close();
-                    Log.e("日志记录成功");
+                    LLog.e("日志记录成功");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

@@ -20,7 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.ldm.basic.utils.Log;
+import com.ldm.basic.utils.LLog;
 
 import android.graphics.Bitmap;
 
@@ -58,7 +58,7 @@ public abstract class LimitedMemoryCache extends BaseMemoryCache {
 		this.sizeLimit = sizeLimit;
 		cacheSize = new AtomicInteger();
 		if (sizeLimit > MAX_NORMAL_CACHE_SIZE) {
-			Log.w("You set too large memory cache size (more than %1$d Mb)", MAX_NORMAL_CACHE_SIZE_IN_MB + "");
+			LLog.w("You set too large memory cache size (more than %1$d Mb)", MAX_NORMAL_CACHE_SIZE_IN_MB + "");
 		}
 	}
 

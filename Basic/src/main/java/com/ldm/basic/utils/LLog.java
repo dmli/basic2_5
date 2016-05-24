@@ -2,7 +2,7 @@ package com.ldm.basic.utils;
 
 import com.ldm.basic.app.BasicApplication;
 
-public class Log {
+public class LLog {
 
     public static String DEF_TAG = "BASIC_FRAME_LOG";
 

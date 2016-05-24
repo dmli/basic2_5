@@ -360,7 +360,7 @@ public class MultiThreadDownTool {
         File f = new File(filePath);
         if (f.exists()) {
             if (f.delete()) {
-                Log.e(MultiThreadDownTool.class.getSimpleName(), " new File(filePath).delete() return false");
+                LLog.e(MultiThreadDownTool.class.getSimpleName(), " new File(filePath).delete() return false");
             }
         }
     }

@@ -1,5 +1,16 @@
 package com.ldm.basic.res;
 
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.NinePatchDrawable;
+
+import com.ldm.basic.utils.FileTool;
+import com.ldm.basic.utils.LLog;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -8,17 +19,6 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
-import com.ldm.basic.utils.FileTool;
-import com.ldm.basic.utils.Log;
-
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.NinePatchDrawable;
 
 /**
  * Created by ldm on 14-5-3.
@@ -50,7 +50,7 @@ public class SkinTool {
      */
     public static SkinTool getInstance() {
         if (FILES_DIR == null) {
-            Log.e("FILES_DIR 为空，请使用setFilesDir(path)设置皮肤存储路径！");
+            LLog.e("FILES_DIR 为空，请使用setFilesDir(path)设置皮肤存储路径！");
             return null;
         }
         if (skinTool == null) {

@@ -15,7 +15,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.ldm.basic.utils.Log;
+import com.ldm.basic.utils.LLog;
 import com.ldm.basic.utils.MeasureHelper;
 
 public class LPullToRefreshListView extends ListView implements OnScrollListener {
@@ -124,7 +124,7 @@ public class LPullToRefreshListView extends ListView implements OnScrollListener
             lPullToRefreshText.setMinimumHeight(70);// 设置最小高度
             MeasureHelper.measure(lHeadView, MeasureHelper.getWidth(lHeadView), MeasureHelper.getHeight(lHeadView)); // 测量view大小
             lHeadContentHeight = lHeadView.getMeasuredHeight();
-            Log.e("aaaaaaaa", "lHeadContentHeight = "+ lHeadContentHeight);
+            LLog.e("aaaaaaaa", "lHeadContentHeight = "+ lHeadContentHeight);
             lHeadView.setPadding(0, -lHeadContentHeight, 0, 0);
             addHeaderView(lHeadView, null, false);
         }

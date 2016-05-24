@@ -21,7 +21,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
  * Created by ldm on 11-12-11.
  * 提供了一些简单的Dialog操作，使用系统默认的风格
  */
-public class Dialog {
+public class LDialog {
 
     /**
      * 设置这个不变量可以为下一次设置dialog设置Cancelable属性

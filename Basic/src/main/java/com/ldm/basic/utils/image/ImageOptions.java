@@ -227,6 +227,21 @@ public class ImageOptions {
     }
 
     /**
+     * 返回本次使用的URL
+     *
+     * @return url String
+     */
+    public String getUrl() {
+        String currUrl;
+        if (retryCount > 0 && backupUrl != null && backupUrl.startsWith("http")) {
+            currUrl = backupUrl;
+        } else {
+            currUrl = url;
+        }
+        return currUrl;
+    }
+
+    /**
      * 当任务失败时会触发这个方法
      *
      * @param context   Context

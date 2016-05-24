@@ -1,6 +1,6 @@
 package com.ldm.basic.utils;
 
-import com.ldm.basic.bean.ContactBean;
+import com.ldm.basic.bean.BasicContactBean;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -62,8 +62,8 @@ public class LFieldGenerateTool {
     public static void main(String[] args) {
 
 
-        LFieldGenerateTool.gen(ContactBean.class,
-                "/Users/ldm/basic_works/Basic2_5_1/Basic/src/main/java/com/ldm/basic/bean/ContactBean.java");
+        LFieldGenerateTool.gen(BasicContactBean.class,
+                "/Users/ldm/basic_works/Basic2_5_1/Basic/src/main/java/com/ldm/basic/bean/BasicContactBean.java");
 
     }
 

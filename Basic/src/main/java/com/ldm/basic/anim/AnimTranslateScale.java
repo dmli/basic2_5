@@ -1,9 +1,5 @@
 package com.ldm.basic.anim;
 
-import java.lang.ref.WeakReference;
-
-import com.ldm.basic.utils.SystemTool;
-
 import android.app.Activity;
 import android.view.View;
 import android.view.animation.Animation;
@@ -12,8 +8,13 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 
+import com.ldm.basic.utils.SystemTool;
+
+import java.lang.ref.WeakReference;
+
 /**
- * Created by ldm on 14-8-1. 移动缩放动画
+ * Created by ldm on 14-8-1.
+ * 移动缩放动画
  */
 public class AnimTranslateScale extends AnimationSet {
 
@@ -30,7 +31,7 @@ public class AnimTranslateScale extends AnimationSet {
 	 */
 	public AnimTranslateScale(Activity activity, View view) {
 		super(false);
-		a = new WeakReference<Activity>(activity);
+		a = new WeakReference<>(activity);
 		this.v = view;
 		this.setInterpolator(new DecelerateInterpolator());
 	}

@@ -12,7 +12,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Message;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -20,18 +19,15 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver;
 
-import com.ldm.basic.app.BasicApplication;
-import com.ldm.basic.app.Configuration;
 import com.ldm.basic.dialog.LToast;
 import com.ldm.basic.helper.RightSlidingFinishActivity;
 import com.ldm.basic.intent.IntentUtil;
+import com.ldm.basic.utils.BasicSimpleHandler;
 import com.ldm.basic.utils.CPUHelper;
-import com.ldm.basic.utils.Log;
 import com.ldm.basic.utils.SystemTool;
 import com.ldm.basic.utils.image.LazyImageDownloader;
 
 import java.lang.ref.WeakReference;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -39,17 +35,7 @@ import java.util.UUID;
  * Created by ldm on 11-12-10.
  * BasicActivity中提供了全局的Activity记录、BaseReceiver接收，Activity状态及常用了一些方法
  */
-public class BasicActivity extends Activity implements OnClickListener, ViewTreeObserver.OnGlobalLayoutListener {
-
-    /**
-     * 发送一个short toast的标记
-     */
-    public static final int POST_SHOW_SHORT = 900089;
-
-    /**
-     * 发送一个long toast的标记
-     */
-    public static final int POST_SHOW_LONG = 900090;
+public class BasicActivity extends Activity implements OnClickListener, ViewTreeObserver.OnGlobalLayoutListener, BasicSimpleHandler.OnSimpleHandlerInterface {
 
     /**
      * 软键盘关闭
@@ -80,10 +66,7 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
      */
     private boolean isSoftInputStateListener;
 
-    /**
-     * 简易的异步线程接口，为了脱离asynchronous内部方法影响finish()而设计的
-     */
-    private static Map<String, Asynchronous> ASYNC_SET;
+    protected BasicSimpleHandler<BasicActivity> handler = new BasicSimpleHandler<>(this);
 
     /**
      * 界面按钮控制器，可以通过设置间隔时间开启点击事件监听
@@ -146,31 +129,22 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
         }
     }
 
-    /**
-     * 创建一个支持右滑返回的Activity
-     * （这个方法将会根据手机的CPU来计算是否开启右滑销毁Activity的功能）
-     *
-     * @param v View
-     */
-    public void setContentViewToSlidingFinish(View v) {
-        if (CPUHelper.getNumCores() <= 2 && CPUHelper.getCpuMaxFreq() <= 1.2) {
-            super.setContentView(v);
+
+    @Override
+    public void setContentView(View view) {
+        if (ignoreRightSlidingFinishActivity && CPUHelper.getNumCores() > 2 && CPUHelper.getCpuMaxFreq() > 1.2f) {
+            super.setContentView(new RightSlidingFinishActivity(this, view).build());
         } else {
-            super.setContentView(new RightSlidingFinishActivity(this).createContentView(v));
+            super.setContentView(view);
         }
     }
 
-    /**
-     * 创建一个支持右滑返回的Activity
-     * （这个方法将会根据手机的CPU来计算是否开启右滑销毁Activity的功能）
-     *
-     * @param layoutResID 布局资源ID
-     */
-    public void setContentViewToSlidingFinish(int layoutResID) {
-        if (CPUHelper.getNumCores() <= 2 && CPUHelper.getCpuMaxFreq() <= 1.2) {
-            super.setContentView(layoutResID);
+    @Override
+    public void setContentView(int layoutResID) {
+        if (ignoreRightSlidingFinishActivity && CPUHelper.getNumCores() > 2 && CPUHelper.getCpuMaxFreq() > 1.2f) {
+            super.setContentView(new RightSlidingFinishActivity(this, layoutResID).build());
         } else {
-            super.setContentView(new RightSlidingFinishActivity(this).createContentView(layoutResID));
+            super.setContentView(layoutResID);
         }
     }
 
@@ -225,7 +199,7 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
      * @param smg 提示语
      */
     public void showShort(final String smg) {
-        securityHandler.sendMessage(securityHandler.obtainMessage(POST_SHOW_SHORT, smg));
+        LToast.showShort(this, smg);
     }
 
     /**
@@ -234,7 +208,7 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
      * @param smg 提示语
      */
     public void showLong(final String smg) {
-        securityHandler.sendMessage(securityHandler.obtainMessage(POST_SHOW_LONG, smg));
+        LToast.showLong(this, smg);
     }
 
     /**
@@ -355,55 +329,13 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        BasicApplication.getBundle(outState);
-        if (BasicApplication.globalCacheListener == null) {
-            BasicApplication.initGlobalCacheListener(this);// 尝试初始化GlobalCacheListener
-        }
-        if (BasicApplication.globalCacheListener != null) {
-            BasicApplication.globalCacheListener.onSaveInstanceState(this, outState);
-        } else {
-            Log.e("GlobalCacheListener is null");
-        }
-        if (outState != null) {
-            super.onSaveInstanceState(outState);
-        }
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        if (BasicApplication.globalCacheListener == null) {
-            BasicApplication.initGlobalCacheListener(this);// 尝试初始化GlobalCacheListener
-        }
-        if (BasicApplication.globalCacheListener != null) {
-            BasicApplication.globalCacheListener.onRestoreInstanceState(this, savedInstanceState);
-        }
-        if (savedInstanceState != null) {
-            BasicApplication.setClientCache(savedInstanceState.getSerializable(Configuration.CLIENT_CACHE_KEY));
-        }
-    }
-
-    @Override
-    protected void onUserLeaveHint() {
-        if (BasicApplication.globalCacheListener != null) {
-            BasicApplication.globalCacheListener.onUserLeaveHint();
-        }
-        super.onUserLeaveHint();
-    }
-
-    @Override
     protected void onDestroy() {
         //移除OnGlobalLayoutListener事件
         removeOnGlobalLayoutListener();
-        // 如果设置了异步任务，这里需要清除
-        if (ASYNC_SET != null) {
-            ASYNC_SET.remove(((Object) this).getClass().getName());
-        }
         stopReceiver();
         THIS_ACTIVITY_STATE = false;
-        if (securityHandler != null) {
-            securityHandler.removeCallbacksAndMessages(null);
+        if (handler != null) {
+            handler.removeCallbacksAndMessages(null);
         }
         super.onDestroy();
     }
@@ -480,16 +412,18 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
      *
      * @param msg Message
      */
-    protected void handleMessage(Message msg) {
-    }
+//    public void handleMessage(Message msg) {
+//        if (THIS_ACTIVITY_STATE) {
+//            if (msg.what == POST_SHOW_SHORT){
+//                LToast.showShort(this, String.valueOf(msg.obj));
+//            }else{
+//                LToast.showLong(this, String.valueOf(msg.obj));
+//            }
+//        }
+//    }
+    @Override
+    public void handleMessage(Message msg) {
 
-    /**
-     * 启动异步回调函数 *使用tag作为标记*
-     *
-     * @param what 将被分配到handleMessage(...)
-     */
-    protected void startAsyncTask(final int what) {
-        startAsyncTask(what, null);
     }
 
     /**
@@ -533,109 +467,4 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
 
     }
 
-    /**
-     * 启动异步回调函数 *使用what作为标记*
-     *
-     * @param what 将被分配到handleMessage(...)的what
-     * @param obj  数据被传送到handleMessage(...)的obj
-     */
-    protected void startAsyncTask(int what, Object obj) {
-        new AsyncThread<SecurityHandler<BasicActivity>>(securityHandler, ((Object) this).getClass().getName(), what, obj) {
-            @Override
-            public void run() {
-                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-                Object object = null;
-                if (ASYNC_SET != null) {
-                    Asynchronous a = ASYNC_SET.get(key);
-                    if (a != null) {
-                        object = a.async(what, obj);
-                    }
-                }
-                if (w != null) {
-                    SecurityHandler<BasicActivity> t = w.get();
-                    if (t != null) {
-                        t.sendMessage(t.obtainMessage(what, object));
-                    }
-                }
-            }
-        }.start();
-    }
-
-    /**
-     * 设置异步任务接口，多次调用后面的将冲掉前面的
-     *
-     * @param asynchronous Asynchronous
-     */
-    public void setAsynchronous(Asynchronous asynchronous) {
-        if (ASYNC_SET == null) {
-            ASYNC_SET = new HashMap<>();
-        }
-        if (ASYNC_SET.containsKey(((Object) this).getClass().getName())) {
-            ASYNC_SET.remove(((Object) this).getClass().getName());
-        }
-        ASYNC_SET.put(((Object) this).getClass().getName(), asynchronous);
-    }
-
-    /**
-     * 相对安全的Handler，所有请求均由BasicActivity中handleMessage(...)接收(这个handler允许在协议中使用)
-     */
-    public SecurityHandler<BasicActivity> securityHandler = new SecurityHandler<>(this);
-
-    protected static class SecurityHandler<T extends BasicActivity> extends Handler {
-        WeakReference<T> w;
-
-        private SecurityHandler(T t) {
-            w = new WeakReference<>(t);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            if (w != null) {
-                BasicActivity t = w.get();
-                if (t != null && t.THIS_ACTIVITY_STATE) {
-                    if (POST_SHOW_SHORT == msg.what) {
-                        LToast.showShort(t, String.valueOf(msg.obj));
-                    } else if (POST_SHOW_LONG == msg.what) {
-                        LToast.showLong(t, String.valueOf(msg.obj));
-                    } else {
-                        t.handleMessage(msg);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * 异步接口
-     */
-    public interface Asynchronous {
-
-        Object async(final int tag, Object obj);
-
-    }
-
-    /**
-     * 异步线程，与Asynchronous匹配使用
-     */
-    public class AsyncThread<T> extends Thread {
-        WeakReference<T> w;
-        String key;
-        int what;
-        Object obj;
-
-        /**
-         * 创建一个简易的异步任务
-         *
-         * @param w    弱引用
-         * @param key  用来查找对应的任务
-         * @param what 参数1
-         * @param obj  参数2
-         */
-        public AsyncThread(T w, String key, int what, Object obj) {
-            this.w = new WeakReference<>(w);
-            this.key = key;
-            this.what = what;
-            this.obj = obj;
-        }
-    }
 }

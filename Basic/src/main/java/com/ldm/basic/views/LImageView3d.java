@@ -1,6 +1,6 @@
 package com.ldm.basic.views;
 
-import com.ldm.basic.utils.Log;
+import com.ldm.basic.utils.LLog;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -66,7 +66,7 @@ public class LImageView3d extends View {
      */
     public void setBitmap(Bitmap bitmap) {
         if (bitmap == null) {
-            Log.e(" LImageView3D.setBitmap(bit) 中 bit == null ");
+            LLog.e(" LImageView3D.setBitmap(bit) 中 bit == null ");
             return;
         }
         int width = bitmap.getWidth();

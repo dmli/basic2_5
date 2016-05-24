@@ -31,8 +31,8 @@ public class DrawableHelper {
      * @return Drawable
      */
     public static Drawable getDrawableToPressed(final String normalColor, final String pressedColor) {
-        ColorDrawable normal = null;
-        ColorDrawable pressed = null;
+        ColorDrawable normal;
+        ColorDrawable pressed;
         if (!normalColor.startsWith("#")) {
             normal = new ColorDrawable(Color.parseColor("#" + normalColor));
             pressed = new ColorDrawable(Color.parseColor("#" + pressedColor));
@@ -77,8 +77,8 @@ public class DrawableHelper {
      * @return Drawable
      */
     public static Drawable getDrawableToChecked(final String normalColor, final String pressedColor) {
-        ColorDrawable normal = null;
-        ColorDrawable pressed = null;
+        ColorDrawable normal;
+        ColorDrawable pressed;
         if (!normalColor.startsWith("#")) {
             normal = new ColorDrawable(Color.parseColor("#" + normalColor));
             pressed = new ColorDrawable(Color.parseColor("#" + pressedColor));

@@ -1,33 +1,34 @@
 package com.ldm.basic.helper;
 
-import com.ldm.basic.BasicActivity;
-import com.ldm.basic.views.LDropRightLayoutView;
-
 import android.content.Intent;
 import android.view.View;
+
+import com.ldm.basic.BasicActivity;
+import com.ldm.basic.views.LDropRightLayoutView;
 
 /**
  * Created by ldm on 15/9/30. 右滑删除功能
  */
 public class RightSlidingFinishActivity implements LDropRightLayoutView.OnStateListener {
 
-	public LDropRightLayoutView rootView;
+    public LDropRightLayoutView rootView;
     BasicActivity activity;
 
-    public RightSlidingFinishActivity(BasicActivity activity) {
+    public RightSlidingFinishActivity(BasicActivity activity, View v) {
         this.activity = activity;
         rootView = new LDropRightLayoutView(activity);
         rootView.setOnStateListener(this);
-    }
-
-    public View createContentView(int layoutId) {
-        View v = activity.getLayoutInflater().inflate(layoutId, rootView, false);
         rootView.addView(v);
-        return rootView;
     }
 
-    public View createContentView(View v) {
-    	rootView.addView(v);
+    public RightSlidingFinishActivity(BasicActivity activity, int layoutId) {
+        this.activity = activity;
+        rootView = new LDropRightLayoutView(activity);
+        rootView.setOnStateListener(this);
+        rootView.addView(activity.getLayoutInflater().inflate(layoutId, rootView, false));
+    }
+
+    public View build() {
         return rootView;
     }
 

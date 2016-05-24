@@ -1,11 +1,10 @@
 package com.ldm.basic.db;
 
-import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.ldm.basic.utils.Log;
+import com.ldm.basic.utils.LLog;
 import com.ldm.basic.utils.TextUtils;
 
 import java.lang.reflect.Field;
@@ -61,7 +60,7 @@ public class DBHelper {
             }
             cursor.close();
         } catch (Exception e) {
-            Log.e("DBHelper.isTableExist", "not find " + tableName);
+            LLog.e("DBHelper.isTableExist", "not find " + tableName);
         }
         return result;
     }
@@ -289,55 +288,54 @@ public class DBHelper {
     /**
      * 根据Class<T>查询表数据，该方法使用默认数据库且使用*号查询
      *
-     * @param context Context
-     * @param ct      表映射的类
-     * @param <T>     T extends BasicTable
+     * @param db  BasicSQLiteOpenHelper
+     * @param ct  表映射的类
+     * @param <T> T extends BasicTable
      * @return List<T>
      * @throws Exception
      */
-    public static <T extends BasicTable> List<T> queryToClass(final Context context, final Class<T> ct) throws Exception {
-        return queryToClass(context, ct.getSimpleName(), ct, null);
+    public static <T extends BasicTable> List<T> queryToClass(final BasicSQLiteOpenHelper db, final Class<T> ct) throws Exception {
+        return queryToClass(db, ct.getSimpleName(), ct, null);
     }
 
     /**
      * 根据Class<T>查询表数据，该方法使用默认数据库且使用*号查询
      *
-     * @param context   Context
+     * @param db        BasicSQLiteOpenHelper
      * @param tableName 表名，可以为null
      * @param ct        表映射的类
      * @param <T>       T extends BasicTable
      * @return List<T>
      * @throws Exception
      */
-    public static <T extends BasicTable> List<T> queryToClass(final Context context, final String tableName, final Class<T> ct) throws Exception {
-        return queryToClass(context, tableName, ct, null);
+    public static <T extends BasicTable> List<T> queryToClass(final BasicSQLiteOpenHelper db, final String tableName, final Class<T> ct) throws Exception {
+        return queryToClass(db, tableName, ct, null);
     }
 
     /**
      * 根据Class<T>查询表数据，该方法使用默认数据库且使用*号查询
      *
-     * @param context Context
-     * @param ct      表映射的类
-     * @param <T>     T extends BasicTable
+     * @param db  BasicSQLiteOpenHelper
+     * @param ct  表映射的类
+     * @param <T> T extends BasicTable
      * @return List<T>
      * @throws Exception
      */
-    public static <T extends BasicTable> List<T> queryToClass(final Context context, final Class<T> ct, final String order) throws Exception {
-        return queryToClass(context, ct.getSimpleName(), ct, order);
+    public static <T extends BasicTable> List<T> queryToClass(final BasicSQLiteOpenHelper db, final Class<T> ct, final String order) throws Exception {
+        return queryToClass(db, ct.getSimpleName(), ct, order);
     }
 
     /**
      * 根据Class<T>查询表数据，该方法使用默认数据库且使用*号查询
      *
-     * @param context   Context
+     * @param db        BasicSQLiteOpenHelper
      * @param tableName 表名，可以为null
      * @param ct        表映射的类
      * @param <T>       T extends BasicTable
      * @return List<T>
      * @throws Exception
      */
-    public static <T extends BasicTable> List<T> queryToClass(final Context context, final String tableName, final Class<T> ct, final String order) throws Exception {
-        BasicSQLiteOpenHelper db = BasicSQLiteOpenHelper.getInstance(context);
+    public static <T extends BasicTable> List<T> queryToClass(final BasicSQLiteOpenHelper db, final String tableName, final Class<T> ct, final String order) throws Exception {
         return fromCursor(db.rawQuery("SELECT * FROM " + getTableName(tableName, ct) + (order == null ? "" : " order by " + order), null), ct);
     }
 
@@ -348,22 +346,22 @@ public class DBHelper {
     /**
      * 根据Class<T>查询表数据，该方法使用默认数据库且使用*号查询
      *
-     * @param context Context
-     * @param ct      表映射的类
-     * @param where   条件
-     * @param param   条件对应的参数
-     * @param <T>     T extends BasicTable
+     * @param db    BasicSQLiteOpenHelper
+     * @param ct    表映射的类
+     * @param where 条件
+     * @param param 条件对应的参数
+     * @param <T>   T extends BasicTable
      * @return List<T>
      * @throws Exception
      */
-    public static <T extends BasicTable> List<T> queryToClass(final Context context, final Class<T> ct, final String where, final String[] param) throws Exception {
-        return queryToClass(context, ct.getSimpleName(), ct, where, param, null);
+    public static <T extends BasicTable> List<T> queryToClass(final BasicSQLiteOpenHelper db, final Class<T> ct, final String where, final String[] param) throws Exception {
+        return queryToClass(db, ct.getSimpleName(), ct, where, param, null);
     }
 
     /**
      * 根据Class<T>查询表数据，该方法使用默认数据库且使用*号查询
      *
-     * @param context   Context
+     * @param db        BasicSQLiteOpenHelper
      * @param tableName 表名，可以为null
      * @param ct        表映射的类
      * @param where     条件
@@ -373,15 +371,14 @@ public class DBHelper {
      * @return List<T>
      * @throws Exception
      */
-    public static <T extends BasicTable> List<T> queryToClass(final Context context, final String tableName, final Class<T> ct, final String where, final String[] param, final String order) throws Exception {
-        BasicSQLiteOpenHelper db = BasicSQLiteOpenHelper.getInstance(context);
+    public static <T extends BasicTable> List<T> queryToClass(final BasicSQLiteOpenHelper db, final String tableName, final Class<T> ct, final String where, final String[] param, final String order) throws Exception {
         return fromCursor(db.rawQuery("SELECT * FROM " + getTableName(tableName, ct) + (where == null ? "" : " WHERE " + where) + (order == null ? "" : " order by " + order), param), ct);
     }
 
     /**
      * 根据Class<T>查询表数据，该方法使用默认数据库且使用*号查询
      *
-     * @param context   Context
+     * @param db        BasicSQLiteOpenHelper
      * @param tableName 表名，可以为null
      * @param ct        表映射的类
      * @param where     条件
@@ -392,8 +389,7 @@ public class DBHelper {
      * @return List<T>
      * @throws Exception
      */
-    public static <T extends BasicTable> List<T> queryToClass(final Context context, final String tableName, final Class<T> ct, final String where, final String[] param, final String order, int[] pager) throws Exception {
-        BasicSQLiteOpenHelper db = BasicSQLiteOpenHelper.getInstance(context);
+    public static <T extends BasicTable> List<T> queryToClass(final BasicSQLiteOpenHelper db, final String tableName, final Class<T> ct, final String where, final String[] param, final String order, int[] pager) throws Exception {
         List<String> params = new ArrayList<>();
         if (param != null) {
             Collections.addAll(params, param);
@@ -405,20 +401,20 @@ public class DBHelper {
     }
 
     /**
-     * @param context Context
-     * @param ct      表映射的类
-     * @param where   条件
-     * @param param   条件对应的参数
-     * @param <T>     T extends BasicTable
+     * @param db    BasicSQLiteOpenHelper
+     * @param ct    表映射的类
+     * @param where 条件
+     * @param param 条件对应的参数
+     * @param <T>   T extends BasicTable
      * @return T
      * @throws Exception
      */
-    public static <T extends BasicTable> T queryOnlyToClass(final Context context, final Class<T> ct, final String where, final String[] param) throws Exception {
-        return queryOnlyToClass(context, ct.getSimpleName(), ct, where, param);
+    public static <T extends BasicTable> T queryOnlyToClass(final BasicSQLiteOpenHelper db, final Class<T> ct, final String where, final String[] param) throws Exception {
+        return queryOnlyToClass(db, ct.getSimpleName(), ct, where, param);
     }
 
     /**
-     * @param context   Context
+     * @param db        BasicSQLiteOpenHelper
      * @param tableName 表名，可以为null
      * @param ct        表映射的类
      * @param where     条件
@@ -427,8 +423,7 @@ public class DBHelper {
      * @return T
      * @throws Exception
      */
-    public static <T extends BasicTable> T queryOnlyToClass(final Context context, final String tableName, final Class<T> ct, final String where, final String[] param) throws Exception {
-        BasicSQLiteOpenHelper db = BasicSQLiteOpenHelper.getInstance(context);
+    public static <T extends BasicTable> T queryOnlyToClass(final BasicSQLiteOpenHelper db, final String tableName, final Class<T> ct, final String where, final String[] param) throws Exception {
         return fromCursorOnly(db.rawQuery("SELECT * FROM " + getTableName(tableName, ct) + (where == null ? "" : " WHERE " + where), param), ct);
     }
 
@@ -463,26 +458,26 @@ public class DBHelper {
      * 将T在数据库中对应的记录做更新操作,使用_id作为条件
      * *这个方法执行时相对较耗时，如果批量入库时请手动编写update的sql语句使用batchExecSQL执行*
      *
-     * @param context Context
-     * @param t       记录，必需在数据库中存在
-     * @param <T>     <T extends BasicTable>
+     * @param db  BasicSQLiteOpenHelper
+     * @param t   记录，必需在数据库中存在
+     * @param <T> <T extends BasicTable>
      * @return true 修改成功
      */
-    public static <T extends BasicTable> boolean updateToClass(final Context context, T t) {
-        return updateToClass(context, null, t);
+    public static <T extends BasicTable> boolean updateToClass(final BasicSQLiteOpenHelper db, T t) {
+        return updateToClass(db, null, t);
     }
 
     /**
      * 将T在数据库中对应的记录做更新操作,使用_id作为条件
      * *这个方法执行时相对较耗时，如果批量入库时请手动编写update的sql语句使用batchExecSQL执行*
      *
-     * @param context   Context
+     * @param db        BasicSQLiteOpenHelper
      * @param tableName 表名，可以为null
      * @param t         记录，必需在数据库中存在
      * @param <T>       <T extends BasicTable>
      * @return true 修改成功
      */
-    public static <T extends BasicTable> boolean updateToClass(final Context context, final String tableName, T t) {
+    public static <T extends BasicTable> boolean updateToClass(final BasicSQLiteOpenHelper db, final String tableName, T t) {
         Map<String, Class<?>> columnRes = getColumnsField2(((Object) t).getClass(), true);// 获取Class<?>及父类的所有满足条件的属性
         Class<?> ct = ((Object) t).getClass();
         String sql = "UPDATE " + (TextUtils.isNull(tableName) ? ct.getSimpleName() : tableName).toUpperCase(Locale.CHINA) + " SET ";
@@ -508,7 +503,6 @@ public class DBHelper {
         }
         sql += w + " WHERE _id = ?";
         param.add(t.get_id() + "");
-        BasicSQLiteOpenHelper db = BasicSQLiteOpenHelper.getInstance(context);
         db.update(sql, param.toArray());
         return true;
     }
@@ -539,50 +533,49 @@ public class DBHelper {
     /**
      * 查询指定数据表中的数据条数
      *
-     * @param context   Context
+     * @param db        BasicSQLiteOpenHelper
      * @param tableName 表名
      * @return count
      */
-    public static int queryCount(Context context, String tableName) {
-        return queryCount(context, tableName, null, null);
+    public static int queryCount(BasicSQLiteOpenHelper db, String tableName) {
+        return queryCount(db, tableName, null, null);
     }
 
     /**
      * 查询指定数据表中的数据条数
      *
-     * @param context Context
-     * @param ct      表实体
+     * @param db BasicSQLiteOpenHelper
+     * @param ct 表实体
      * @return count
      */
-    public static <T extends BasicTable> int queryCount(Context context, final Class<T> ct) {
-        return queryCount(context, BasicTable.getTableName(ct), null, null);
+    public static <T extends BasicTable> int queryCount(BasicSQLiteOpenHelper db, final Class<T> ct) {
+        return queryCount(db, BasicTable.getTableName(ct), null, null);
     }
 
     /**
      * 查询指定数据表中的数据条数
      *
-     * @param context Context
-     * @param ct      对应数据表的实体
-     * @param where   条件
-     * @param param   参数
+     * @param db    BasicSQLiteOpenHelper
+     * @param ct    对应数据表的实体
+     * @param where 条件
+     * @param param 参数
      * @return count
      */
-    public static <T extends BasicTable> int queryCount(Context context, final Class<T> ct, final String where, final String[] param) {
-        return queryCount(context, BasicTable.getTableName(ct), where, param);
+    public static <T extends BasicTable> int queryCount(BasicSQLiteOpenHelper db, final Class<T> ct, final String where, final String[] param) {
+        return queryCount(db, BasicTable.getTableName(ct), where, param);
     }
 
     /**
      * 查询指定数据表中的数据条数
      *
-     * @param context   Context
+     * @param db        BasicSQLiteOpenHelper
      * @param tableName 表名
      * @param where     条件
      * @param param     参数
      * @return count
      */
-    public static int queryCount(Context context, final String tableName, final String where, final String[] param) {
+    public static int queryCount(BasicSQLiteOpenHelper db, final String tableName, final String where, final String[] param) {
         int result = 0;
-        BasicSQLiteOpenHelper db = BasicSQLiteOpenHelper.getInstance(context);
         Cursor c0;
         if (where == null || "".equals(where)) {
             c0 = db.rawQuery("select count(_id) as _id from " + tableName, null);
@@ -782,35 +775,33 @@ public class DBHelper {
      */
     public static synchronized boolean batchExecSQL(final SQLiteDatabase db, final String[] sql, final Object[][] bindArgs) {
         boolean result = false;
-        synchronized (db) {
-            db.beginTransaction();
+        db.beginTransaction();
+        try {
+            int len = sql.length;
             try {
-                int len = sql.length;
-                try {
-                    if (bindArgs == null) {
-                        for (String s : sql) {
-                            db.execSQL(s);
-                        }
-                    } else {
-                        for (int i = 0; i < len; i++) {
-                            if (bindArgs[i] == null) {
-                                db.execSQL(sql[i]);
-                            } else {
-                                db.execSQL(sql[i], bindArgs[i]);
-                            }
+                if (bindArgs == null) {
+                    for (String s : sql) {
+                        db.execSQL(s);
+                    }
+                } else {
+                    for (int i = 0; i < len; i++) {
+                        if (bindArgs[i] == null) {
+                            db.execSQL(sql[i]);
+                        } else {
+                            db.execSQL(sql[i], bindArgs[i]);
                         }
                     }
-                    result = true;
-                } catch (SQLException e) {
-                    e.printStackTrace();
                 }
-                // 提交事务
-                db.setTransactionSuccessful();
+                result = true;
             } catch (SQLException e) {
                 e.printStackTrace();
-            } finally {
-                db.endTransaction();
             }
+            // 提交事务
+            db.setTransactionSuccessful();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            db.endTransaction();
         }
         return result;
     }

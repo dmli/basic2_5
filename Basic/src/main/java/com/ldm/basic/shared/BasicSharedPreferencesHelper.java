@@ -6,7 +6,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 
 import com.ldm.basic.app.Configuration;
-import com.ldm.basic.utils.Log;
+import com.ldm.basic.utils.LLog;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -16,7 +16,7 @@ import java.util.Set;
  * Created by ldm on 12-10-19.
  * SharedPreferences的一个增强助手，提供了常用的操作
  */
-public class SharedPreferencesHelper {
+public class BasicSharedPreferencesHelper {
 
 
     /**
@@ -26,7 +26,7 @@ public class SharedPreferencesHelper {
      * @return false表示没有找到对应的值
      */
     public static boolean isSharedFileExists(final Context context, final String key) {
-        return SharedPreferencesHelper.query(context, Configuration.CLIENT_SHARED_CACHE_FILE, key) != null;
+        return BasicSharedPreferencesHelper.query(context, Configuration.CLIENT_SHARED_CACHE_FILE, key) != null;
     }
 
     /**
@@ -36,7 +36,7 @@ public class SharedPreferencesHelper {
      * @return String
      */
     public static String queryCacheInSharedFile(final Context context, final String key) {
-        return SharedPreferencesHelper.query(context, Configuration.CLIENT_SHARED_CACHE_FILE, key);
+        return BasicSharedPreferencesHelper.query(context, Configuration.CLIENT_SHARED_CACHE_FILE, key);
     }
 
     /**
@@ -46,7 +46,7 @@ public class SharedPreferencesHelper {
      * @param value 值
      */
     public static void saveCacheToSharedFile(final Context context, final String key, final String value) {
-        SharedPreferencesHelper.put(context, Configuration.CLIENT_SHARED_CACHE_FILE, key, value);
+        BasicSharedPreferencesHelper.put(context, Configuration.CLIENT_SHARED_CACHE_FILE, key, value);
     }
 
     /**
@@ -55,7 +55,7 @@ public class SharedPreferencesHelper {
      * @param key 名称
      */
     public static void removeCacheInSharedFile(final Context context, final String key) {
-        SharedPreferencesHelper.remove(context, Configuration.CLIENT_SHARED_CACHE_FILE, key);
+        BasicSharedPreferencesHelper.remove(context, Configuration.CLIENT_SHARED_CACHE_FILE, key);
     }
 
     /**
@@ -221,6 +221,6 @@ public class SharedPreferencesHelper {
      * @param sysFileName 文件名称
      */
     private static void notFindSysFile(String sysFileName) {
-        Log.w("没有找到【" + sysFileName + "】指向的数据文件！！！");
+        LLog.w("没有找到【" + sysFileName + "】指向的数据文件！！！");
     }
 }

@@ -24,7 +24,7 @@ public class LazyImageOnScrollListener implements AbsListView.OnScrollListener {
                 lazyImageDownloader.scrollState = LazyImageDownloader.SCROLL_STATE_BUSY;
                 if (lazyImageDownloader.SCROLL_FLING_P_IDS.size() > 0) {
                     synchronized (lazyImageDownloader.SCROLL_FLING_P_IDS) {
-                        lazyImageDownloader.addTaskAll(lazyImageDownloader.SCROLL_FLING_P_IDS.ref);
+                        lazyImageDownloader.addTaskAll(lazyImageDownloader.SCROLL_FLING_P_IDS.refs);
                         lazyImageDownloader.SCROLL_FLING_P_IDS.clear();
                     }
                 }
