@@ -24,7 +24,6 @@ public interface Base {
      * 数据提供商
      */
     interface BaseProvider {
-
     }
 
     /**
@@ -40,11 +39,9 @@ public interface Base {
 
         @Override
         public void handleMessage(Message msg) {
-
         }
 
         public void onCreate(){
-
         }
 
         public void onResume() {
