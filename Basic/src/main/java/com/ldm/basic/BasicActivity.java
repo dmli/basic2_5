@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver;
 
+import com.ldm.basic.base.Base;
 import com.ldm.basic.dialog.LToast;
 import com.ldm.basic.helper.RightSlidingFinishActivity;
 import com.ldm.basic.intent.IntentUtil;
@@ -156,6 +157,32 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
         if (v != null) {
             v.setOnClickListener(this);
         }
+        if (getPresenter() != null) {
+            getPresenter().onStart(getPresenter().isFirst);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (getPresenter() != null) {
+            getPresenter().onResume();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (getPresenter() != null) {
+            getPresenter().onDestroy();
+        }
+        //移除OnGlobalLayoutListener事件
+        removeOnGlobalLayoutListener();
+        stopReceiver();
+        THIS_ACTIVITY_STATE = false;
+        if (handler != null) {
+            handler.removeCallbacksAndMessages(null);
+        }
+        super.onDestroy();
     }
 
     /**
@@ -169,6 +196,15 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
         ACTION = action;
         THIS_ACTIVITY_STATE = true;
         SystemTool.activitySet.put(getActivityKey(), new WeakReference<Activity>(this));
+    }
+
+    /**
+     * 实现这个方法后Base.BasePresenter会触发生命周期
+     *
+     * @return Base.BasePresenter
+     */
+    public Base.BasePresenter getPresenter() {
+        return null;
     }
 
     /**
@@ -328,18 +364,6 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
             unregisterReceiver(receiver);
     }
 
-    @Override
-    protected void onDestroy() {
-        //移除OnGlobalLayoutListener事件
-        removeOnGlobalLayoutListener();
-        stopReceiver();
-        THIS_ACTIVITY_STATE = false;
-        if (handler != null) {
-            handler.removeCallbacksAndMessages(null);
-        }
-        super.onDestroy();
-    }
-
     /**
      * 移除OnGlobalLayoutListener事件
      */
@@ -407,20 +431,6 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
         }
     }
 
-    /**
-     * 异步完成结束后的回调函数，SecurityHandler及Asynchronous接口的任务处理
-     *
-     * @param msg Message
-     */
-//    public void handleMessage(Message msg) {
-//        if (THIS_ACTIVITY_STATE) {
-//            if (msg.what == POST_SHOW_SHORT){
-//                LToast.showShort(this, String.valueOf(msg.obj));
-//            }else{
-//                LToast.showLong(this, String.valueOf(msg.obj));
-//            }
-//        }
-//    }
     @Override
     public void handleMessage(Message msg) {
 

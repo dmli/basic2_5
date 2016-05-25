@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.ldm.basic.base.Base;
 import com.ldm.basic.dialog.LToast;
 import com.ldm.basic.intent.IntentUtil;
 import com.ldm.basic.utils.BasicSimpleHandler;
@@ -90,7 +91,26 @@ public class BasicFragment extends Fragment implements View.OnClickListener, Bas
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        if (getPresenter() != null) {
+            getPresenter().onStart(getPresenter().isFirst);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (getPresenter() != null) {
+            getPresenter().onResume();
+        }
+    }
+
+    @Override
     public void onDestroyView() {
+        if (getPresenter() != null) {
+            getPresenter().onDestroy();
+        }
         stopReceiver();
         THIS_FRAGMENT_STATE = false;
         if (handler != null) {
@@ -100,31 +120,12 @@ public class BasicFragment extends Fragment implements View.OnClickListener, Bas
     }
 
     /**
-     * 内部调用inflater.inflate(int resource, ViewGroup root, boolean attachToRoot)
+     * 实现这个方法后Base.BasePresenter会触发生命周期
      *
-     * @param resource     源ID
-     * @param root         根节点
-     * @param attachToRoot 是否附加到到根
-     * @return View 有可能为null
+     * @return Base.BasePresenter
      */
-    protected View inflate(int resource, ViewGroup root, boolean attachToRoot) {
-        if (inflater == null) {
-            LLog.e("inflater 没有初始化，可以考虑在onCreateView中使用initView(LayoutInflater, ViewGroup, int)方法或自行设置inflater");
-        }
-        return inflater == null ? null : inflater.inflate(resource, root, attachToRoot);
-    }
-
-    /**
-     * 预留回调方法，这个方法会在FragmentTransaction.hide(Fragment)时调用
-     */
-    public void hide() {
-    }
-
-    /**
-     * 预留回调方法,这个方法会被BasicFragmentActivity的onResume调用及FragmentTransaction.show(
-     * Fragment)方法调用时触发，与activity的onResume方法类似
-     */
-    public void show() {
+    public Base.BasePresenter getPresenter() {
+        return null;
     }
 
     /**

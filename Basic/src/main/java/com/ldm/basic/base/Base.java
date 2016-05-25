@@ -31,6 +31,7 @@ public interface Base {
      */
     abstract class BasePresenter implements BasicSimpleHandler.OnSimpleHandlerInterface {
 
+        public boolean isFirst = true;
         /**
          * 所有请求均由BasicActivity中handleMessage(...)接收(这个handler允许在协议中使用)
          */
@@ -41,7 +42,8 @@ public interface Base {
         public void handleMessage(Message msg) {
         }
 
-        public void onCreate(){
+        public void onStart(boolean first){
+            isFirst = false;
         }
 
         public void onResume() {

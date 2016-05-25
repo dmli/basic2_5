@@ -148,9 +148,6 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
         super.onResume();
         if (fragments != null && currentPosition >= 0 && currentPosition < fragments.length) {
             BasicFragment f = fragments[currentPosition];
-            if (f != null && f.THIS_FRAGMENT_STATE) {
-                f.show();
-            }
         }
     }
 
@@ -352,14 +349,12 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
         if (newFragment != null) {
             newFragment.setMenuVisibility(true);
             newFragment.setUserVisibleHint(true);
-            newFragment.show();
             ft.show(newFragment);
         } else {
             newFragment = fragments[newPosition];
             ft.add(getResources().getIdentifier("container", "id", getPackageName()), newFragment, newPosition + "");
         }
         if (oldFragment != null) {
-            oldFragment.hide();
             ft.hide(oldFragment);
         }
         // 切换Fragment后触发switchFragmentAfter方法
