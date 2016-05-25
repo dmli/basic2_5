@@ -1,10 +1,10 @@
-package com.ldm.basic.views;
+package com.ldm.basic.views.pull.anim;
 
 import android.view.View;
 
 /**
  * Created by ldm on 16/4/8.
- * HeadView和loadView的动画接口
+ * HeadView和loadView的动画接口，提供给LPullToRefresh... 控件使用
  */
 public interface BasicPullViewAnimation {
 

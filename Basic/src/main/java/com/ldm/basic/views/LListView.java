@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ListView;
 
+import com.ldm.basic.views.pull.listener.OnPullAbsScrollListener;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +17,7 @@ import java.util.List;
  * Created by ldm on 15/3/6.
  * 增加了一个OnInterceptTouchEventListener监听，仅限拦截，不能够妨碍onInterceptTouchEvent(MotionEvent)的实际处理
  */
-public class LListView extends ListView implements LAbsScrollState {
+public class LListView extends ListView implements OnPullAbsScrollListener {
 
     private boolean isOnMeasure;
     private OnInterceptTouchEventListener onInterceptTouchEventListener;

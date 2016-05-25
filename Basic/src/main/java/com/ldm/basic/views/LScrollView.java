@@ -5,11 +5,13 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.ScrollView;
 
+import com.ldm.basic.views.pull.listener.OnPullAbsScrollListener;
+
 /**
  * Created by ldm on 14-9-4.
  * 带滚动事件的ScrollView
  */
-public class LScrollView extends ScrollView implements LAbsScrollState {
+public class LScrollView extends ScrollView implements OnPullAbsScrollListener {
 
     int oldY;
     OnScrollListener onScrollListener;
