@@ -11,16 +11,16 @@ import com.nineoldandroids.view.ViewHelper;
 
 /**
  * Created by ldm on 12/11/14.
- * 简单的上拉刷新动画处理《圆环旋转》
+ * 简单的下拉刷新动画处理《圆环旋转》
  */
-public class SimpleLoadRotatingCircle implements BasicPullViewAnimation {
+public class SimpleHeaderRotatingCircle implements BasicPullViewAnimation {
 
     private int nowState;
     private TextView lPullToRefreshText;
     private ImageView lPullToRefreshImage;
     private View lPullToRefreshProgress;
 
-    public SimpleLoadRotatingCircle() {
+    public SimpleHeaderRotatingCircle() {
         nowState = LPullToRefreshView.DONE;
     }
 
@@ -38,7 +38,7 @@ public class SimpleLoadRotatingCircle implements BasicPullViewAnimation {
             initView(headNode);
         }
         lPullToRefreshText.setVisibility(View.VISIBLE);
-        lPullToRefreshText.setText(R.string.up_push_unlock_to_load);
+        lPullToRefreshText.setText(R.string.header_unlock_to_refresh_text);
     }
 
     @Override
@@ -56,7 +56,7 @@ public class SimpleLoadRotatingCircle implements BasicPullViewAnimation {
             initView(headNode);
         }
         lPullToRefreshText.setVisibility(View.VISIBLE);
-        lPullToRefreshText.setText(R.string.up_push_to_refresh_text);
+        lPullToRefreshText.setText(R.string.header_down_push_to_refresh_text);
         lPullToRefreshProgress.setVisibility(View.GONE);
         lPullToRefreshImage.setVisibility(View.VISIBLE);
     }
@@ -69,13 +69,13 @@ public class SimpleLoadRotatingCircle implements BasicPullViewAnimation {
         lPullToRefreshImage.setVisibility(View.GONE);
         lPullToRefreshProgress.setVisibility(View.VISIBLE);
         lPullToRefreshText.setVisibility(View.VISIBLE);
-        lPullToRefreshText.setText(R.string.up_push_refresh_load_text);
+        lPullToRefreshText.setText(R.string.header_being_refresh_text);
     }
 
     private void initView(View headNode) {
-        lPullToRefreshText = (TextView) headNode.findViewById(R.id.pullToRefreshText);
-        lPullToRefreshImage = (ImageView) headNode.findViewById(R.id.pullToRefreshImage);
-        lPullToRefreshProgress = headNode.findViewById(R.id.pullToRefreshProgress);
+        lPullToRefreshText = (TextView) headNode.findViewById(R.id.headerPullToRefreshText);
+        lPullToRefreshImage = (ImageView) headNode.findViewById(R.id.headerPullToRefreshImage);
+        lPullToRefreshProgress = headNode.findViewById(R.id.headerPullToRefreshProgress);
     }
 
     @Override
