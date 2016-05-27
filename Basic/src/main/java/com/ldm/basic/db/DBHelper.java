@@ -18,7 +18,8 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Created by ldm on 14-2-7. 数据库助手，提供了简单的数据表与实体绑定、自动生成建表语句及sql语句批处理功能
+ * Created by ldm on 14-2-7.
+ * 数据库助手，提供了简单的数据表与实体绑定、自动生成建表语句及sql语句批处理功能
  */
 public class DBHelper {
 

@@ -213,6 +213,6 @@ public class BasicSQLiteOpenHelper extends SQLiteOpenHelper {
                 }
             }
         }
-
     }
+
 }
