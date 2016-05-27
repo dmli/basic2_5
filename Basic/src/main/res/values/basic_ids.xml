@@ -31,8 +31,11 @@
     <item name="progressText1" type="id"/>
 
     <!--刷新控件-->
-    <item name="pullToRefreshText" type="id"/>
-    <item name="pullToRefreshImage" type="id"/>
-    <item name="pullToRefreshProgress" type="id"/>
+    <item name="headerPullToRefreshText" type="id"/>
+    <item name="headerPullToRefreshImage" type="id"/>
+    <item name="headerPullToRefreshProgress" type="id"/>
 
+    <item name="footerPullToRefreshText" type="id"/>
+    <item name="footerPullToRefreshImage" type="id"/>
+    <item name="footerPullToRefreshProgress" type="id"/>
 </resources>

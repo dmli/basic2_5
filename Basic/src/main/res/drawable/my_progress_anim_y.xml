@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:drawable="@drawable/pull_refresh_rotate_ic1"
+        android:duration="30"/>
+    <item
+        android:drawable="@drawable/pull_refresh_rotate_ic2"
+        android:duration="50"/>
+    <item
+        android:drawable="@drawable/pull_refresh_rotate_ic3"
+        android:duration="50"/>
+    <item
+        android:drawable="@drawable/pull_refresh_rotate_ic4"
+        android:duration="50"/>
+    <item
+        android:drawable="@drawable/pull_refresh_rotate_ic5"
+        android:duration="50"/>
+    <item
+        android:drawable="@drawable/pull_refresh_rotate_ic6"
+        android:duration="50"/>
+    <item
+        android:drawable="@drawable/pull_refresh_rotate_ic7"
+        android:duration="50"/>
+    <item
+        android:drawable="@drawable/pull_refresh_rotate_ic8"
+        android:duration="50"/>
+    <item
+        android:drawable="@drawable/pull_refresh_rotate_ic9"
+        android:duration="50"/>
+    <item
+        android:drawable="@drawable/pull_refresh_rotate_ic10"
+        android:duration="50"/>
+    <item
+        android:drawable="@drawable/pull_refresh_rotate_ic1"
+        android:duration="10"/>
+</animation-list>

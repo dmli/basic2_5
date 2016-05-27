@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">basic</string>
-    <string name="down_push_to_refresh_text">下拉刷新</string>
+
     <string name="loading_text">加载中&#8230;</string>
-    <string name="unlock_to_refresh">松开刷新</string>
-    <string name="refresh_load_text">正在刷新&#8230;</string>
+
+    <string name="header_down_push_to_refresh_text">下拉刷新</string>
+    <string name="header_unlock_to_refresh_text">释放刷新</string>
+    <string name="header_being_refresh_text">正在刷新&#8230;</string>
+
+    <string name="footer_up_push_to_loading_text">上拉加载</string>
+    <string name="footer_unlock_to_loading_text">释放加载</string>
+    <string name="footer_being_loading_text">正在加载&#8230;</string>
+
 </resources>
