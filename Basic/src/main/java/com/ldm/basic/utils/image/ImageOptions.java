@@ -250,6 +250,14 @@ public class ImageOptions {
     public void failed(Context context, int stateCode) {
     }
 
+    /**
+     * 当前任务pid与View的tag是否匹配
+     *
+     * @return true/false
+     */
+    public boolean isEffectiveTask() {
+        return view != null && pId.equals(String.valueOf(view.getTag(TAG_ID)));
+    }
 
     /**
      * 任务结束时被调用

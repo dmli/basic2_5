@@ -2,8 +2,6 @@ package com.ldm.basic.utils.image;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
-import android.os.Message;
 import android.view.View;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ImageView;
@@ -13,7 +11,6 @@ import com.ldm.basic.app.BasicRuntimeCache;
 import com.ldm.basic.app.Configuration;
 import com.ldm.basic.res.BitmapHelper;
 import com.ldm.basic.utils.FileTool;
-import com.ldm.basic.utils.HttpFileTool;
 import com.ldm.basic.utils.MD5;
 import com.ldm.basic.utils.SystemTool;
 import com.ldm.basic.utils.TaskThreadToMultiService;
@@ -22,7 +19,6 @@ import com.ldm.basic.utils.image.memory.MemoryCache;
 import com.ldm.basic.utils.image.memory.UsingFreqLimitedMemoryCache;
 
 import java.io.File;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +26,8 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Created by ldm on 14-1-22. 开启<N>个线程下载图片, 可以通过sizeLimit设置内存大小
+ * Created by ldm on 14-1-22.
+ * 开启<N>个线程下载图片, 可以通过sizeLimit设置内存大小
  * LazyImageDownloader的简洁版，不含有进度条处理能力，适合列表页使用
  */
 public class LazyImageDownloader {
@@ -48,7 +45,7 @@ public class LazyImageDownloader {
     private TaskThreadToMultiService services;
     private TaskThreadToMultiService cacheThreads;
     private TaskThreadToMultiService assignThreads;
-    private SecurityHandler<LazyImageDownloader> lHandler;
+    private LazyImageHandler lHandler;
 
     /**
      * 如果用户设置了OnScrollListener当滑动状态处于SCROLL_STATE_IDLE/SCROLL_STATE_TOUCH_SCROLL时任务添加正常， 仅当SCROLL_STATE_FLING状态时做任务暂停
@@ -91,7 +88,7 @@ public class LazyImageDownloader {
     private final List<ImageOptions> cacheImageOptions = new ArrayList<>();
 
     /**
-     * 滑动处于阻尼时的任务列表， 当LazyImageOnScrollListener状态处于SCROLL_STATE_IDLE时
+     * 滑动处于快速滑动时的任务列表， 当LazyImageOnScrollListener状态处于SCROLL_STATE_IDLE时
      */
     final FlingImageRef SCROLL_FLING_P_IDS = new FlingImageRef();
 
@@ -200,7 +197,7 @@ public class LazyImageDownloader {
         assignThreads = new TaskThreadToMultiService(2);
         // 创建一个Handler
         if (lHandler == null) {
-            lHandler = new SecurityHandler<>(this);
+            lHandler = new LazyImageHandler(this);
         }
         isStart = true;
     }
@@ -291,7 +288,7 @@ public class LazyImageDownloader {
             }
 
             /**
-             * 回填处于阻尼时的任务
+             * 回填处于快速滑动时的任务
              */
             if (cacheImageOptions.size() > 0) {
                 cacheImageOptions.add(ref);
@@ -342,7 +339,7 @@ public class LazyImageDownloader {
                 /**
                  * 检查任务是否有必要
                  */
-                if (ref.position != 0 && defDrawable == null && ref.pId.equals(String.valueOf(ref.view.getTag(ImageOptions.TAG_ID)))) {
+                if (defDrawable == null && ref.isEffectiveTask()) {
                     Drawable d;
                     if (ref.imageToSrc) {
                         ImageView iv = (ImageView) ref.view;
@@ -453,7 +450,7 @@ public class LazyImageDownloader {
     /**
      * 根据给定的信息将图片从本地路径中读取出来并设置的ImageRef中
      *
-     * @param ref      ImageOptions
+     * @param ref       ImageOptions
      * @param path      地址
      * @param cacheName 缓存名称
      */
@@ -494,119 +491,24 @@ public class LazyImageDownloader {
     }
 
     synchronized boolean checkAvailability(ImageOptions ref) {
-        final String pId = ref.pId;
-        if (!pId.equals(String.valueOf(ref.view.getTag(ImageOptions.TAG_ID)))) {
-            removePid(ref);
-            return false;// 如果pid已经无法对应直接放弃本次任务
-        }
-        synchronized (P_IDS) {
-            if (P_IDS.containsKey(pId)) {
-                // 检查是否需要清除PID
-                String uuid = P_IDS.get(pId);
-                // 如果不相等，表示任务已经失效，被新任务替代
-                if (!uuid.equals(ref.UUID)) {
-                    return false;// 放弃这次任务
-                }
-            }
-        }
-        return true;
-    }
-
-    /**
-     * 创建一个下载任务，如果失败将发送101代码
-     *
-     * @param ref ImageOptions
-     */
-    void createDownloadTask(ImageOptions ref) {
-        //下载状态
-        String state = null;
-        //下载后的路径
-        String path = null;
-        final String cacheName = getCacheName(ref);
-        final String filePath = ref.filePath;
-        File f = new File(filePath);
-        /**
-         * 如果文件存在且任务于maxIgnoreTime内创建，将忽略这个下载任务， 直接返回文件地址，这样可以过滤掉网络不稳定时导致文件重复下载的问题
-         */
-        if (f.exists() && System.currentTimeMillis() - f.lastModified() < 60000) {
-            state = "200";
-            path = filePath;
-        } else {
-            String url = ref.getUrl();
-            if (!TextUtils.isNull(url) && url.startsWith("http")) {
-                String[] info = HttpFileTool.httpToFile2(url, filePath);
-                state = info[0];
-                path = info[1];
-            }
-        }
-        if ("200".equals(state)) {
-            fileDownloadSuccess(ref, 200, path, cacheName);
-            // 任务完成后删除
-            removePid(ref);
-        } else {
-            fileDownloadError(ref, state);
-        }
-    }
-
-    /**
-     * 文件下载成功后的逻辑
-     *
-     * @param ref          ImageOptions
-     * @param responseCode 状态
-     * @param path         本地地址
-     * @param cacheName    缓存名
-     */
-    private void fileDownloadSuccess(ImageOptions ref, int responseCode, String path, String cacheName) {
-        ref.responseCode = responseCode;
-        if (!ref.downloadMode) {
-            // 创建图像
-            createImage(ref, path, cacheName);
-            // 检查图片是否可以使用，如果可以发送200通知
-            if (ref.loadSuccess) {
-                sendMessage(LOADER_IMAGE_SUCCESS, ref);
-                // 下载成功后维护全局缓存
-                BasicRuntimeCache.IMAGE_PATH_CACHE.put(cacheName, path);
-            } else {
-                // 图片不可用,删除本地文件
-                FileTool.delete(path);
-                sendMessage(LOADER_IMAGE_ERROR, ref);
-            }
-        } else {
-            /**
-             * 离线下载的任务会执行一次end()
-             */
-            sendMessage(LOADER_IMAGE_EXECUTE_END, ref);
-        }
-    }
-
-    /**
-     * 网络文件下载失败是执行的逻辑
-     *
-     * @param ref   ImageOptions
-     * @param state 状态
-     */
-    private void fileDownloadError(ImageOptions ref, String state) {
-        // 离线任务如果下载失败，将不进行重新下载
-        if (!ref.downloadMode) {
-            removePid(ref);
-            if ("url is null".equals(state)) {
-                sendMessage(LOADER_IMAGE_URL_IS_NULL, ref);//放弃任务，不在继续处理
-            } else {
-                if (TextUtils.isNumber(state)) {
-                    ref.responseCode = TextUtils.parseInt(state, 0);
-                }
-                if (state != null) {
-                    if (state.contains("No space left on device")) {
-                        sendMessage(LOADER_IMAGE_RECORD_LAST_TIME, null);// 内存不足
-                    } else {
-                        sendMessage(101, ref);//发送重新下载消息
+        boolean result = true;
+        if (ref.isEffectiveTask()) {
+            synchronized (P_IDS) {
+                final String pId = ref.pId;
+                if (P_IDS.containsKey(pId)) {
+                    // 检查是否需要清除PID
+                    String uuid = P_IDS.get(pId);
+                    // 如果不相等，表示任务已经失效，被新任务替代
+                    if (!uuid.equals(ref.UUID)) {
+                        result = false;// 放弃这次任务
                     }
                 }
             }
         } else {
-            //离线下载的任务会执行一次end()
-            sendMessage(LOADER_IMAGE_EXECUTE_END, ref);
+            result = false;
+            removePid(ref);
         }
+        return result;
     }
 
     /**
@@ -661,108 +563,60 @@ public class LazyImageDownloader {
         }
     }
 
-    // 用来显示图像的Handler
-    protected static class SecurityHandler<T extends LazyImageDownloader> extends Handler {
-        private static long lastTime;
-        WeakReference<T> w;
-
-        private SecurityHandler(T t) {
-            w = new WeakReference<>(t);
+    /**
+     * 图像下载成功
+     *
+     * @param ref ImageOptions
+     */
+    void imageDownloadSuccess(ImageOptions ref) {
+        if (ref.isEffectiveTask() && ref.loadSuccess) {
+            ref.onSuccess(APPLICATION_CONTENT);// 设置图像
+            ref.end();
         }
+    }
 
-        @Override
-        public void handleMessage(Message msg) {
-            if (w.get() == null || APPLICATION_CONTENT == null) {
-                return;
-            }
-            switch (msg.what) {
-                case LOADER_IMAGE_SUCCESS: {// 图标下载成功
-                    ImageOptions ref = (ImageOptions) msg.obj;
-                    if (ref.view != null && (ref.pId).equals(String.valueOf(ref.view.getTag(ImageOptions.TAG_ID)))) {
-                        imageDownloadSuccess(APPLICATION_CONTENT, ref);
-                    }
-                    break;
-                }
-                case LOADER_IMAGE_ERROR: {
-                    // 图片下载失败
-                    ImageOptions ref = (ImageOptions) msg.obj;
-                    if (ref != null) {
-                        imageDownloadError(ref);
-                    }
-                    break;
-                }
-                case LOADER_IMAGE_WAKE_TASK:// 通过handler唤醒任务
-                    w.get().addTask((ImageOptions) msg.obj);
-                    break;
-                case LOADER_IMAGE_ERROR_OOM:// 内存溢出
-                    if (System.currentTimeMillis() - lastTime > 3000) {
-                        SystemTool.killBackgroundProcesses(APPLICATION_CONTENT.getApplicationContext());
-                        lastTime = System.currentTimeMillis();
-                    }
-                    break;
-                case LOADER_IMAGE_RECORD_LAST_TIME:
-                    if (System.currentTimeMillis() - lastTime > 3000) {
-                        lastTime = System.currentTimeMillis();
-                    }
-                    break;
-                case LOADER_IMAGE_URL_IS_NULL: {//任务下载失败，会触发failed(Context, errorState)方法
-                    ImageOptions ref = (ImageOptions) msg.obj;
-                    if (ref.view != null && (ref.pId).equals(String.valueOf(ref.view.getTag(ImageOptions.TAG_ID)))) {
-                        ref.failed(APPLICATION_CONTENT, -1);
-                        ref.end();
-                    }
-                }
-                break;
-                case LOADER_IMAGE_EXECUTE_END: {
-                    ImageOptions ref = (ImageOptions) msg.obj;
-                    if (ref.view != null && (ref.pId).equals(String.valueOf(ref.view.getTag(ImageOptions.TAG_ID)))) {
-                        ref.end();
-                    }
-                }
-                break;
-                default:
-                    break;
-            }
+    /**
+     * 加载图片出现OOM时的处理方法
+     */
+    void loaderImageErrorOom() {
+        SystemTool.killBackgroundProcesses(APPLICATION_CONTENT);
+    }
+
+    /**
+     * 图像url is null 时触发
+     *
+     * @param ref ImageOptions
+     */
+    void loaderImageUrlIsNull(ImageOptions ref) {
+        if (ref.isEffectiveTask()) {
+            ref.failed(APPLICATION_CONTENT, -1);
+            ref.end();
         }
+    }
 
-        /**
-         * 图像下载成功
-         *
-         * @param ref ImageOptions
-         */
-        private void imageDownloadSuccess(Context context, ImageOptions ref) {
-            if (ref.loadSuccess) {
-                ref.onSuccess(context);// 设置图像
-                ref.end();
-            }
+    /**
+     * 图像下载失败
+     *
+     * @param ref ImageOptions
+     */
+    void imageDownloadError(ImageOptions ref) {
+        if (ref == null) return;
+        BasicRuntimeCache.IMAGE_PATH_CACHE.remove(ref.cacheName);
+        if (ref.view != null) {// 重置View的PID标记，下载失败时必须重置这个标记
+            ref.view.setTag(ImageOptions.TAG_ID, "");
         }
-
-        /**
-         * 图像下载失败
-         *
-         * @param ref ImageOptions
-         */
-        private void imageDownloadError(ImageOptions ref) {
-            BasicRuntimeCache.IMAGE_PATH_CACHE.remove(ref.cacheName);
-            if (ref.view != null) {// 重置View的PID标记，下载失败时必须重置这个标记
-                ref.view.setTag(ImageOptions.TAG_ID, "");
+        if (ref.retryCount == 0) {// 尝试一次重新下载
+            ref.retryCount = 1;
+            addTask(ref);
+        } else {
+            if (defDrawable != null || useNullFill) {
+                ref.setDefaultImage(defDrawable);
             }
-            if (w != null && w.get() != null) {
-                LazyImageDownloader t = w.get();
-                if (ref.retryCount == 0) {// 尝试一次重新下载
-                    ref.retryCount = 1;
-                    t.addTask(ref);
-                } else {
-                    if (t.defDrawable != null || t.useNullFill) {
-                        ref.setDefaultImage(t.defDrawable);
-                    }
-                    if (ref.progressView != null) {
-                        ref.progressView.setVisibility(View.GONE);
-                    }
-                    ref.failed(APPLICATION_CONTENT, ref.responseCode);
-                    ref.end();
-                }
+            if (ref.progressView != null) {
+                ref.progressView.setVisibility(View.GONE);
             }
+            ref.failed(APPLICATION_CONTENT, ref.responseCode);
+            ref.end();
         }
     }
 
@@ -892,40 +746,6 @@ public class LazyImageDownloader {
         }
         this.maxTaskNumber = maxTaskNumber;
         return lazyImageOnScrollListener;
-    }
-
-    /**
-     * 阻尼时用来做暂存任务的容器
-     *
-     * @author ldm
-     */
-    class FlingImageRef {
-        List<ImageOptions> refs = new ArrayList<>();
-
-        public void put(String key, ImageOptions r) {
-            // 如果有重复的任务，先做remove
-            int len = refs.size();
-            for (int i = len - 1; i >= 0; i--) {
-                if (key.equals(refs.get(i).pId)) {
-                    refs.remove(i);
-                    break;
-                }
-            }
-            // 新的任务保持加载最后
-            refs.add(r);
-        }
-
-        public void removeFirst() {
-            refs.remove(0);
-        }
-
-        public void clear() {
-            refs.clear();
-        }
-
-        public int size() {
-            return refs.size();
-        }
     }
 
 }
