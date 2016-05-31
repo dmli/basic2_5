@@ -186,7 +186,7 @@ public class BitmapHelper {
                     byte[] data = baos.toByteArray();
                     int[] width = new int[]{0};
                     int[] height = new int[]{0};
-                    Libwebp.WebPDecodeARGB(data, data.length, width, height);
+                    LibWebp.WebPDecodeARGB(data, data.length, width, height);
                     is[0] = width[0];
                     is[1] = height[0];
                 } catch (Exception e) {
@@ -1042,7 +1042,7 @@ public class BitmapHelper {
 
             int[] width = new int[]{0};
             int[] height = new int[]{0};
-            byte[] decodedData = Libwebp.WebPDecodeARGB(data, data.length, width, height);
+            byte[] decodedData = LibWebp.WebPDecodeARGB(data, data.length, width, height);
             int[] pixels = new int[decodedData.length / 4];
             ByteBuffer.wrap(decodedData).asIntBuffer().get(pixels);
             bitmap = Bitmap.createBitmap(pixels, width[0], height[0], Bitmap.Config.ARGB_8888);
@@ -1072,7 +1072,7 @@ public class BitmapHelper {
             ByteBuffer byteBuffer = ByteBuffer.allocate(bitmap.getRowBytes() * bitmap.getHeight());
             bitmap.copyPixelsToBuffer(byteBuffer);
             sourceByteArray = byteBuffer.array();
-            encodedData = Libwebp.WebPEncodeRGBA(sourceByteArray, width, height, width * 4, quality);
+            encodedData = LibWebp.WebPEncodeRGBA(sourceByteArray, width, height, width * 4, quality);
         } else {
             sourceByteArray = new byte[width * height * 4];
             for (int i = 0; i < width; i++) {
@@ -1085,7 +1085,7 @@ public class BitmapHelper {
                     sourceByteArray[index + 3] = (byte) (pixel >> 24 & 0xff);
                 }
             }
-            encodedData = Libwebp.WebPEncodeRGBA(sourceByteArray, width, height, width * 4, quality);
+            encodedData = LibWebp.WebPEncodeRGBA(sourceByteArray, width, height, width * 4, quality);
         }
         try {
             os.write(encodedData);
