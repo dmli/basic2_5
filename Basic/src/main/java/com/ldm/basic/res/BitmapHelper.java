@@ -50,17 +50,6 @@ public class BitmapHelper {
     /**
      * 按比例返回图片适合的BitmapFactory.Options，但不强制宽高度
      *
-     * @param path  绝对路径
-     * @param width 宽度
-     * @return BitmapFactory.Options
-     */
-    public static BitmapFactory.Options getOptions(final String path, final int width, final int height) {
-        return getOptions(path, width, height, Config.ARGB_8888);
-    }
-
-    /**
-     * 按比例返回图片适合的BitmapFactory.Options，但不强制宽高度
-     *
      * @param path              绝对路径
      * @param width             宽度
      * @param inPreferredConfig 图片输入使用的模式
@@ -68,25 +57,23 @@ public class BitmapHelper {
      */
     public static BitmapFactory.Options getOptions(final String path, final int width, final int height, final Bitmap.Config inPreferredConfig) {
         BitmapFactory.Options options = new BitmapFactory.Options();
-        if (width > 0) {
-            options.inJustDecodeBounds = true;
-            options.inPurgeable = true;// 允许可清除
-            options.inInputShareable = true;
-            BitmapFactory.decodeFile(path, options);
-            options.inPreferredConfig = inPreferredConfig;
-            int scale;
-            if (width == options.outWidth) {
-                scale = 1;
+        options.inJustDecodeBounds = true;
+        options.inPurgeable = true;// 允许可清除
+        options.inInputShareable = true;
+        BitmapFactory.decodeFile(path, options);
+        options.inPreferredConfig = inPreferredConfig;
+        int scale;
+        if (width == options.outWidth) {
+            scale = 1;
+        } else {
+            if (height > 0) {
+                scale = (options.outHeight / height + options.outWidth / width) / 2;
             } else {
-                if (height > 0) {
-                    scale = (options.outHeight / height + options.outWidth / width) / 2;
-                } else {
-                    scale = options.outWidth / width;
-                }
+                scale = options.outWidth / width;
             }
-            options.inSampleSize = scale <= 0 ? 1 : scale;
-            options.inJustDecodeBounds = false;
         }
+        options.inSampleSize = scale <= 0 ? 1 : scale;
+        options.inJustDecodeBounds = false;
         return options;
     }
 
@@ -186,7 +173,6 @@ public class BitmapHelper {
         int[] is = new int[2];
         try {
             if (SystemTool.SYS_SDK_INT <= Build.VERSION_CODES.JELLY_BEAN && "webp".equals(FileType.getFileType(path))) {
-                FileTool ft = new FileTool();
                 Bitmap bit = BitmapHelper.decodeWebp(FileTool.openFile(path));
 
                 byte[] buffer = new byte[1024];
@@ -440,19 +426,13 @@ public class BitmapHelper {
                 }
                 m.postRotate(degree);
             }
-            int _w = width;
-            if (_w <= 0) {// 如果没有设置宽度 使用原图宽度
-                _w = w;
-            }
-            float ws, hs;
-            ws = _w * 1.0f / w;
-            if (height <= 0) {
-                hs = ws;
-            } else {
-                hs = height * 1.0f * h;
-            }
-            m.postScale(ws, hs);
-            if (ws != 1.0f || hs != 1.0f || degree != 0) {
+
+            // 如果没有设置宽度 使用原图宽度
+            float targetWidth = width <= 0 ? w : width;
+            float targetScaleX = targetWidth * 1.0f / w;
+            float targetScaleY = height <= 0 ? targetScaleX : height * 1.0f * h;
+            m.postScale(targetScaleX, targetScaleY);
+            if (targetScaleX != 1.0f || targetScaleY != 1.0f || degree != 0) {
                 result = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), bm.getHeight(), m, true);
                 if (bm != result && !bm.isRecycled()) {
                     bm.recycle();
@@ -476,21 +456,14 @@ public class BitmapHelper {
      * @throws OutOfMemoryError
      */
     public static Bitmap getBitmapThrowsOutOfMemoryError(final String path, final int width, final int height, final Bitmap.Config inPreferredConfig) throws OutOfMemoryError {
-        BitmapFactory.Options options = null;
+        BitmapFactory.Options options;
         if (width > 0) {
             options = getOptions(path, width, height, inPreferredConfig);
-        }
-        if (options == null) {
+        }else{
             options = new BitmapFactory.Options();
             options.inPreferredConfig = inPreferredConfig;
         }
         Bitmap bm = BitmapFactory.decodeFile(path, options);
-        if (bm == null) {// 图片读取失败，重试一次
-            bm = BitmapFactory.decodeFile(path, options);
-            if (bm == null) {
-                return null;
-            }
-        }
         Matrix m = new Matrix();
         m.reset();
         // 计算是否有旋转
@@ -503,20 +476,13 @@ public class BitmapHelper {
             }
             m.postRotate(degree);
         }
-        int _w = width;
-        if (_w <= 0) {// 如果没有设置宽度 使用原图宽度
-            _w = w;
-        }
-        float ws, hs;
-        ws = _w * 1.0f / w;
-        if (height <= 0) {
-            hs = ws;
-        } else {
-            hs = height * 1.0f * h;
-        }
-        m.postScale(ws, hs);
+        // 如果没有设置宽度 使用原图宽度
+        float targetWidth = width <= 0 ? w : width;
+        float targetScaleX = targetWidth * 1.0f / w;
+        float targetScaleY = height <= 0 ? targetScaleX : height * 1.0f * h;
+        m.postScale(targetScaleX, targetScaleY);
         Bitmap result;
-        if (ws != 1.0f || hs != 1.0f || degree != 0) {
+        if (targetScaleX != 1.0f || targetScaleY != 1.0f || degree != 0) {
             result = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), bm.getHeight(), m, true);
             if (bm != result && !bm.isRecycled()) {
                 bm.recycle();
@@ -550,20 +516,13 @@ public class BitmapHelper {
             }
             m.postRotate(degree);
         }
-        int _w = width;
-        if (_w <= 0) {// 如果没有设置宽度 使用原图宽度
-            _w = w;
-        }
-        float ws, hs;
-        ws = _w * 1.0f / w;
-        if (height <= 0) {
-            hs = ws;
-        } else {
-            hs = height * 1.0f * h;
-        }
-        m.postScale(ws, hs);
+        // 如果没有设置宽度 使用原图宽度
+        float targetWidth = width <= 0 ? w : width;
+        float targetScaleX = targetWidth * 1.0f / w;
+        float targetScaleY = height <= 0 ? targetScaleX : height * 1.0f * h;
+        m.postScale(targetScaleX, targetScaleY);
         Bitmap result;
-        if (ws != 1.0f || hs != 1.0f || degree != 0) {
+        if (targetScaleX != 1.0f || targetScaleY != 1.0f || degree != 0) {
             result = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), bm.getHeight(), m, true);
             if (bm != result && !bm.isRecycled()) {
                 bm.recycle();
