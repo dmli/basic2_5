@@ -22,12 +22,13 @@ public class ImageOptions {
      * 下载过程中用来与PID匹配的value值存储的KEY
      */
     public static final int TAG_ID = 0x59999999;
+
     public static final int CREATE_TIME_ID = 0x59999998;
 
     /**
      * 这个对象可以存储一个临时的数据，在处理是使用
      */
-    public Object obj;
+    public String obj;
 
     /**
      * 队列ID 模块内将用此变量来控制ImageRef的重复
@@ -47,38 +48,83 @@ public class ImageOptions {
     public View progressView;
 
     /**
+     * 图片通道模式，默认ARGB8888
+     */
+    public Bitmap.Config inPreferredConfig = null;
+
+    /**
      * 如果是ListView及类似控件中使用时，可以设置这个参数，可以与LazyImageDownloader.failViewPosition属性做比较，可以过滤掉失效的任务
      */
     public int position;
+
     /**
      * 当下载图片时，且重写onAsynchronous方法时 需要给这个bitmap赋值
      */
     public Bitmap bitmap;
+
     public int width;
     public int height;
-    //设置true时这个任务将不会被设置默认图片
+
+    /**
+     * 设置true时这个任务将不会被设置默认图片
+     */
     public boolean ignoreDefaultImage;
-    // 设置后将忽略全局的default功能
+
+    /**
+     * 设置后将忽略全局的default功能
+     */
     public String uSuffix = null;
-    // 缓存名字
+
+    /**
+     * 缓存名字
+     */
     public String cacheName;
-    // 重试次数，大于等于1时将不继续重试
+
+    /**
+     * 重试次数，大于等于1时将不继续重试
+     */
     public int retryCount;
-    //0默认的
+
+    /**
+     * 0默认的
+     */
     public int responseCode = 0;
-    //是否是本地任务，如果这个变量被设置true，控件会先检查本地文件，如果不存在执行网络下载
+
+    /**
+     * 是否是本地任务，如果这个变量被设置true，控件会先检查本地文件，如果不存在执行网络下载
+     */
     public boolean localImage;
+
+    /**
+     * 默认true, 如果设置false后 下载后的图片将会被填充到background中
+     */
     public boolean imageToSrc;
-    // 设置true后这个任务将近做下载，不做显示使用
+
+    /**
+     * 设置true后这个任务将近做下载，不做显示使用
+     */
     public boolean downloadMode;
-    // 使用较小的宽度，设置true后将会使用原图的宽度及给定的width做比较，使用较小的宽度作为读取图片的标准
+
+    /**
+     * 使用较小的宽度，设置true后将会使用原图的宽度及给定的width做比较，使用较小的宽度作为读取图片的标准
+     */
     public boolean useMinWidth;
-    //下载完成后的文件路径
+
+    /**
+     * 下载完成后的文件路径
+     */
     public String filePath;
-    // 设置后强制将图片下载到某路径下面
+
+    /**
+     * 设置后强制将图片下载到某路径下面
+     */
     public String localDirectory;
-    //这个属性用来接收onAsynchronous方法的返回值
+
+    /**
+     * 这个属性用来接收onAsynchronous方法的返回值
+     */
     protected boolean loadSuccess;
+
     public String UUID;
 
     /**
@@ -152,7 +198,7 @@ public class ImageOptions {
      * @return true/false 返回当前加载是否成功
      */
     public boolean onAsynchronous(String path, int targetWidth, int targetHeight) {
-        bitmap = BitmapHelper.getBitmapThrowsOutOfMemoryError(path, targetWidth, targetHeight);
+        bitmap = BitmapHelper.getBitmapThrowsOutOfMemoryError(path, targetWidth, targetHeight, inPreferredConfig == null ? Bitmap.Config.ARGB_8888 : inPreferredConfig);
         return bitmap != null && !bitmap.isRecycled();
     }
 

@@ -49,7 +49,7 @@ public class LoaderAssignTask extends TaskThreadToMultiService.Task{
             String path = BasicRuntimeCache.IMAGE_PATH_CACHE.get(cacheName);
             if (BasicRuntimeCache.IMAGE_PATH_CACHE.containsKey(cacheName) && path != null && new File(path).exists()) {
                 if (ref.downloadMode) {
-                    lazy.sendMessage(LazyImageDownloader.LOADER_IMAGE_EXECUTE_END, ref);
+                    lazy.sendMessage(LazyImageHandler.LOADER_IMAGE_EXECUTE_END, ref);
                     lazy.removePid(ref);
                 } else {
                     // 使用缓存任务处理

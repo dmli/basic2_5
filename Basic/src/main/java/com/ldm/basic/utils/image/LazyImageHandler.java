@@ -11,6 +11,14 @@ import java.lang.ref.WeakReference;
  */
 public class LazyImageHandler extends Handler {
 
+    public static final int LOADER_IMAGE_SUCCESS = 200;
+    public static final int LOADER_IMAGE_ERROR = 101;
+    public static final int LOADER_IMAGE_WAKE_TASK = 102;
+    public static final int LOADER_IMAGE_RECORD_LAST_TIME = 105;
+    public static final int LOADER_IMAGE_URL_IS_NULL = 106;
+    public static final int LOADER_IMAGE_EXECUTE_END = 107;
+    public static final int LOADER_IMAGE_ERROR_OOM = 103;
+
     private static long lastTime;
     private WeakReference<LazyImageDownloader> imageDownloader;
 
@@ -25,34 +33,34 @@ public class LazyImageHandler extends Handler {
         }
         LazyImageDownloader lazy = imageDownloader.get();
         switch (msg.what) {
-            case LazyImageDownloader.LOADER_IMAGE_SUCCESS: {// 图标下载成功
+            case LOADER_IMAGE_SUCCESS: {// 图标下载成功
                 lazy.imageDownloadSuccess((ImageOptions) msg.obj);
                 break;
             }
-            case LazyImageDownloader.LOADER_IMAGE_ERROR: {
+            case LOADER_IMAGE_ERROR: {
                 // 图片下载失败
                 lazy.imageDownloadError((ImageOptions) msg.obj);
                 break;
             }
-            case LazyImageDownloader.LOADER_IMAGE_WAKE_TASK:// 通过handler唤醒任务
+            case LOADER_IMAGE_WAKE_TASK:// 通过handler唤醒任务
                 lazy.addTask((ImageOptions) msg.obj);
                 break;
-            case LazyImageDownloader.LOADER_IMAGE_ERROR_OOM:// 内存溢出
+            case LOADER_IMAGE_ERROR_OOM:// 内存溢出
                 if (System.currentTimeMillis() - lastTime > 3000) {
                     lazy.loaderImageErrorOom();
                     lastTime = System.currentTimeMillis();
                 }
                 break;
-            case LazyImageDownloader.LOADER_IMAGE_RECORD_LAST_TIME:
+            case LOADER_IMAGE_RECORD_LAST_TIME:
                 if (System.currentTimeMillis() - lastTime > 3000) {
                     lastTime = System.currentTimeMillis();
                 }
                 break;
-            case LazyImageDownloader.LOADER_IMAGE_URL_IS_NULL: {//任务下载失败，会触发failed(Context, errorState)方法
+            case LOADER_IMAGE_URL_IS_NULL: {//任务下载失败，会触发failed(Context, errorState)方法
                 lazy.loaderImageUrlIsNull((ImageOptions) msg.obj);
             }
             break;
-            case LazyImageDownloader.LOADER_IMAGE_EXECUTE_END: {
+            case LOADER_IMAGE_EXECUTE_END: {
                 ImageOptions ref = (ImageOptions) msg.obj;
                 if (ref.isEffectiveTask()) {
                     ref.end();

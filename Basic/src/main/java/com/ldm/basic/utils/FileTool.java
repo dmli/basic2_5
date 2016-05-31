@@ -19,7 +19,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 /**
- * Created by ldm on 13-12-14. 常用的File操作代码段
+ * Created by ldm on 13-12-14.
+ * 常用的File操作代码段
  */
 public class FileTool {
 

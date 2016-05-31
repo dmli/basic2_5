@@ -43,14 +43,14 @@ public class LoaderCacheTask extends TaskThreadToMultiService.Task {
 
             // 检查图片是否可以使用，如果可以发送200通知
             if (ref.loadSuccess) {
-                lazy.sendMessage(LazyImageDownloader.LOADER_IMAGE_SUCCESS, ref);
+                lazy.sendMessage(LazyImageHandler.LOADER_IMAGE_SUCCESS, ref);
             } else {
                 FileTool.delete(filePath);// 删除本地文件
-                lazy.sendMessage(LazyImageDownloader.LOADER_IMAGE_ERROR, ref);
+                lazy.sendMessage(LazyImageHandler.LOADER_IMAGE_ERROR, ref);
             }
         } catch (Exception e) {
             lazy.removePid(ref);
-            lazy.sendMessage(LazyImageDownloader.LOADER_IMAGE_ERROR, null);
+            lazy.sendMessage(LazyImageHandler.LOADER_IMAGE_ERROR, null);
             e.printStackTrace();
         }
     }

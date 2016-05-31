@@ -41,17 +41,17 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
     /**
      * 软键盘关闭
      */
-    public static final int SOFT_INPUT_STATE_CLOSE = 0;
+    protected static final int SOFT_INPUT_STATE_CLOSE = 0;
 
     /**
      * 软键盘开启
      */
-    public static final int SOFT_INPUT_STATE_OPEN = 1;
+    protected static final int SOFT_INPUT_STATE_OPEN = 1;
 
     /**
      * 软盘高度
      */
-    protected int softInputHeight;
+    private int softInputHeight;
 
     private String[] ACTION = null;//
 
@@ -459,7 +459,7 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
         rootNode.getWindowVisibleDisplayFrame(r);
         DisplayMetrics dm = getResources().getDisplayMetrics();
         int state, sih = Math.min(rootNode.getRootView().getHeight(), dm.heightPixels) - r.bottom;
-        if (sih <= 200) {
+        if (sih <= 240) {
             state = SOFT_INPUT_STATE_CLOSE;
         } else {
             state = SOFT_INPUT_STATE_OPEN;
@@ -477,4 +477,11 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
 
     }
 
+    /**
+     * 返回键盘高度
+     * @return px
+     */
+    protected int getSoftInputHeight() {
+        return softInputHeight;
+    }
 }

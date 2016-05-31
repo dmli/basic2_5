@@ -53,7 +53,7 @@ public class ImageRefRoundBitmap extends ImageOptions {
                 bit = BitmapHelper.resetBitmapThrowsOutOfMemoryError(bmp, path, targetWidth, targetHeight);
             }
         } else {
-            bit = BitmapHelper.getBitmapThrowsOutOfMemoryError(path, targetWidth, targetHeight);
+            bit = BitmapHelper.getBitmapThrowsOutOfMemoryError(path, targetWidth, targetHeight, inPreferredConfig == null ? Bitmap.Config.ARGB_8888 : inPreferredConfig);
         }
         if (bit != null) {
             bitmap = BitmapHelper.getRoundBitmap(bit);

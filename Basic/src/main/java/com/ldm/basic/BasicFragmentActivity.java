@@ -64,17 +64,17 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
     /**
      * 软键盘关闭
      */
-    public static final int SOFT_INPUT_STATE_CLOSE = 0;
+    protected static final int SOFT_INPUT_STATE_CLOSE = 0;
 
     /**
      * 软键盘开启
      */
-    public static final int SOFT_INPUT_STATE_OPEN = 1;
+    protected static final int SOFT_INPUT_STATE_OPEN = 1;
 
     /**
      * 软盘高度
      */
-    protected int softInputHeight;
+    private int softInputHeight;
 
     /**
      * 这里保存了这个activity生成时所带的uuid值
@@ -494,7 +494,7 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
         rootNode.getWindowVisibleDisplayFrame(r);
         DisplayMetrics dm = getResources().getDisplayMetrics();
         int state, sih = Math.min(rootNode.getRootView().getHeight(), dm.heightPixels) - r.bottom;
-        if (sih <= 200) {
+        if (sih <= 240) {
             state = SOFT_INPUT_STATE_CLOSE;
         } else {
             state = SOFT_INPUT_STATE_OPEN;
@@ -510,6 +510,14 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
      */
     protected void onSoftInputState(int state) {
 
+    }
+
+    /**
+     * 返回键盘高度
+     * @return px
+     */
+    protected int getSoftInputHeight() {
+        return softInputHeight;
     }
 
     public class BaseReceiver extends BroadcastReceiver {

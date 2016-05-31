@@ -475,13 +475,14 @@ public class BitmapHelper {
      * @return Bitmap
      * @throws OutOfMemoryError
      */
-    public static Bitmap getBitmapThrowsOutOfMemoryError(final String path, final int width, final int height) throws OutOfMemoryError {
+    public static Bitmap getBitmapThrowsOutOfMemoryError(final String path, final int width, final int height, final Bitmap.Config inPreferredConfig) throws OutOfMemoryError {
         BitmapFactory.Options options = null;
         if (width > 0) {
-            options = getOptions(path, width, height);
+            options = getOptions(path, width, height, inPreferredConfig);
         }
         if (options == null) {
             options = new BitmapFactory.Options();
+            options.inPreferredConfig = inPreferredConfig;
         }
         Bitmap bm = BitmapFactory.decodeFile(path, options);
         if (bm == null) {// 图片读取失败，重试一次

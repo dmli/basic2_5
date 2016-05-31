@@ -1,7 +1,5 @@
 package com.ldm.basic.utils;
 
-import com.ldm.basic.BasicTimerTask;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -245,7 +243,7 @@ public class TaskThreadToMultiService {
     }
 
     public interface OnTaskNumberEmptyListener {
-        public void onTaskNumberEmptyListener();
+        void onTaskNumberEmptyListener();
     }
 
     /**
@@ -287,19 +285,4 @@ public class TaskThreadToMultiService {
         }
     };
 
-    public static void main(String[] args) {
-        TaskThreadToMultiService t = new TaskThreadToMultiService(50);
-        System.out.println("任务启动");
-        for (int i = 0; i < 300; i++) {
-            Task task = new Task(i) {
-                @Override
-                public void taskStart(Object... obj) {
-                    System.out.println("任务号 " + obj[0]);
-                }
-            }.setSleepTime(30);
-            t.addTask(task);
-
-        }
-        t.stopTask();
-    }
 }
