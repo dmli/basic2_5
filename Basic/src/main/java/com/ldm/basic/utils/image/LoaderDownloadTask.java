@@ -2,7 +2,6 @@ package com.ldm.basic.utils.image;
 
 import com.ldm.basic.app.BasicRuntimeCache;
 import com.ldm.basic.utils.FileTool;
-import com.ldm.basic.utils.TaskThreadToMultiService;
 import com.ldm.basic.utils.TextUtils;
 import com.ldm.basic.utils.image.http.Http;
 import com.ldm.basic.utils.image.http.HttpResult;
@@ -11,9 +10,9 @@ import java.io.File;
 
 /**
  * Created by ldm on 16/5/16.
- * 处理下载任务的TaskThreadToMultiService.Task
+ * 用来下载图片使用的
  */
-public class LoaderDownloadTask extends TaskThreadToMultiService.Task {
+public class LoaderDownloadTask implements Runnable {
 
     private ImageOptions ref;
     private LazyImageDownloader lazy;
@@ -25,7 +24,7 @@ public class LoaderDownloadTask extends TaskThreadToMultiService.Task {
     }
 
     @Override
-    public void taskStart(Object... obj) {
+    public void run() {
         if (ref == null) {
             return;
         }
@@ -42,7 +41,7 @@ public class LoaderDownloadTask extends TaskThreadToMultiService.Task {
             }
 
             //下载后的路径
-            final String filePath = ref.filePath;
+            final String filePath = ref.localDirectory + "/" + ref.cacheName;
             File f = new File(filePath);
 
             /**
@@ -57,11 +56,11 @@ public class LoaderDownloadTask extends TaskThreadToMultiService.Task {
             } else {
                 String url = ref.getUrl();
                 if (!TextUtils.isNull(url) && url.startsWith("http")) {
-                    result.addHttpResult(new Http(url, filePath).request());
+                    result.addHttpResult(new Http(url, ref.localDirectory, ref.cacheName).request());
                 }
             }
             if (result.code == 1) {
-                fileDownloadSuccess(ref, lazy.getCacheName(ref), result);
+                fileDownloadSuccess(ref, result);
                 // 任务完成后删除
                 lazy.removePid(ref);
             } else {
@@ -71,7 +70,7 @@ public class LoaderDownloadTask extends TaskThreadToMultiService.Task {
         } catch (Exception e) {
             // 任务完成后删除
             lazy.removePid(ref);
-            lazy.sendMessage(LazyImageHandler.LOADER_IMAGE_ERROR, null);
+            lazy.sendMessage(DisplayUIPresenter.LOADER_IMAGE_ERROR, null);
             e.printStackTrace();
         }
     }
@@ -80,29 +79,28 @@ public class LoaderDownloadTask extends TaskThreadToMultiService.Task {
      * 文件下载成功后的逻辑
      *
      * @param ref       ImageOptions
-     * @param cacheName 缓存名
      * @param result    HttpResult
      */
-    void fileDownloadSuccess(ImageOptions ref, String cacheName, HttpResult result) {
+    void fileDownloadSuccess(ImageOptions ref, HttpResult result) {
         ref.responseCode = result.responseCode;
         if (!ref.downloadMode) {
             // 创建图像
-            lazy.createImage(ref, result.localFilePath, cacheName);
+            lazy.createImage(ref, result.localFilePath);
             // 检查图片是否可以使用，如果可以发送200通知
             if (ref.loadSuccess) {
-                lazy.sendMessage(LazyImageHandler.LOADER_IMAGE_SUCCESS, ref);
+                lazy.sendMessage(DisplayUIPresenter.LOADER_IMAGE_SUCCESS, ref);
                 // 下载成功后维护全局缓存
-                BasicRuntimeCache.IMAGE_PATH_CACHE.put(cacheName, result.localFilePath);
+                BasicRuntimeCache.IMAGE_PATH_CACHE.put(ref.getCacheName(), result.localFilePath);
             } else {
                 // 图片不可用,删除本地文件
                 FileTool.delete(result.localFilePath);
-                lazy.sendMessage(LazyImageHandler.LOADER_IMAGE_ERROR, ref);
+                lazy.sendMessage(DisplayUIPresenter.LOADER_IMAGE_ERROR, ref);
             }
         } else {
             /**
              * 离线下载的任务会执行一次end()
              */
-            lazy.sendMessage(LazyImageHandler.LOADER_IMAGE_EXECUTE_END, ref);
+            lazy.sendMessage(DisplayUIPresenter.LOADER_IMAGE_EXECUTE_END, ref);
         }
     }
 
@@ -118,12 +116,12 @@ public class LoaderDownloadTask extends TaskThreadToMultiService.Task {
             lazy.removePid(ref);
 
             if (result.isUrlNull()) {
-                lazy.sendMessage(LazyImageHandler.LOADER_IMAGE_URL_IS_NULL, ref);//放弃任务，不在继续处理
+                lazy.sendMessage(DisplayUIPresenter.LOADER_IMAGE_URL_IS_NULL, ref);//放弃任务，不在继续处理
             } else {
                 ref.responseCode = result.responseCode;
-                if (result.error != null){
+                if (result.error != null) {
                     if (result.error.contains("No space left on device")) {
-                        lazy.sendMessage(LazyImageHandler.LOADER_IMAGE_RECORD_LAST_TIME, null);// 内存不足
+                        lazy.sendMessage(DisplayUIPresenter.LOADER_IMAGE_RECORD_LAST_TIME, null);// 内存不足
                     } else {
                         lazy.sendMessage(101, ref);//发送重新下载消息
                     }
@@ -131,7 +129,9 @@ public class LoaderDownloadTask extends TaskThreadToMultiService.Task {
             }
         } else {
             //离线下载的任务会执行一次end()
-            lazy.sendMessage(LazyImageHandler.LOADER_IMAGE_EXECUTE_END, ref);
+            lazy.sendMessage(DisplayUIPresenter.LOADER_IMAGE_EXECUTE_END, ref);
         }
     }
+
+
 }

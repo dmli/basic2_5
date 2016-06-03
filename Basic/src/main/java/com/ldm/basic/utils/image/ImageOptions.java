@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -29,6 +30,8 @@ public class ImageOptions {
      * 这个对象可以存储一个临时的数据，在处理是使用
      */
     public String obj;
+
+    public long time1;
 
     /**
      * 队列ID 模块内将用此变量来控制ImageRef的重复
@@ -109,11 +112,6 @@ public class ImageOptions {
      * 使用较小的宽度，设置true后将会使用原图的宽度及给定的width做比较，使用较小的宽度作为读取图片的标准
      */
     public boolean useMinWidth;
-
-    /**
-     * 下载完成后的文件路径
-     */
-    public String filePath;
 
     /**
      * 设置后强制将图片下载到某路径下面
@@ -211,6 +209,15 @@ public class ImageOptions {
      */
     public boolean isLocalImage() {
         return localImage;
+    }
+
+    /**
+     * 返回这个任务的cacheName，如果有后缀会自动拼接上
+     *
+     * @return 带后缀的cacheName
+     */
+    public String getCacheName() {
+        return cacheName + (uSuffix == null ? "" : "." + uSuffix);
     }
 
     public ImageOptions setWidth(int width) {
@@ -315,6 +322,8 @@ public class ImageOptions {
         view.setVisibility(View.VISIBLE);
         // 放弃Bitmap的引用
         bitmap = null;
+
+        Log.e("aaaaaaaaaaa", "time = "+ (System.currentTimeMillis() - time1) );
     }
 
     // 图片是否存在，true存在 false不存在

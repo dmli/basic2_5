@@ -67,24 +67,6 @@ public class LScrollView extends ScrollView implements OnPullAbsScrollListener {
     }
 
     /**
-     * 是否达到底部
-     *
-     * @return true 在底部
-     */
-    public boolean isBottom() {
-        return getScrollY() + getHeight() >= computeVerticalScrollRange();
-    }
-
-    /**
-     * 是否在最顶端
-     *
-     * @return true 在顶部
-     */
-    public boolean isTop() {
-        return getScrollY() <= 0;
-    }
-
-    /**
      * 滚动到顶部
      */
     public void scrollToTop() {
@@ -107,14 +89,24 @@ public class LScrollView extends ScrollView implements OnPullAbsScrollListener {
         }
     }
 
+    /**
+     * 当前控件是否在最底部
+     *
+     * @return true/false
+     */
     @Override
-    public boolean isMoveDown() {
-        return isTop();
+    public boolean isBottom() {
+        return getScrollY() + getHeight() >= computeVerticalScrollRange();
     }
 
+    /**
+     * 当前控件是否在最顶部
+     *
+     * @return true/false
+     */
     @Override
-    public boolean isMoveUp() {
-        return isBottom();
+    public boolean isTop() {
+        return getScrollY() <= 0;
     }
 
     public interface OnScrollListener {

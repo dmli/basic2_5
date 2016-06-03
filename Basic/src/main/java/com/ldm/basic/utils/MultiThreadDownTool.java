@@ -372,10 +372,9 @@ public class MultiThreadDownTool {
     private void saveFdr() {
         if (fdr != null) {
             //本地缓存下载配置信息
-            FileTool ft = new FileTool();
             fdr.setCurrentSize(currentSize);//不是十分精确的进度
             try {
-                ft.save(SystemTool.getGson().toJson(fdr), filePath + DOWNLOAD_RECORD_SUFFIX);
+                FileTool.save(SystemTool.getGson().toJson(fdr), filePath + DOWNLOAD_RECORD_SUFFIX);
             } catch (IOException e) {
                 e.printStackTrace();
             }

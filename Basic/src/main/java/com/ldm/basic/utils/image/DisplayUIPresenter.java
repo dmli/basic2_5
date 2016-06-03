@@ -1,6 +1,7 @@
 package com.ldm.basic.utils.image;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 
 import java.lang.ref.WeakReference;
@@ -9,20 +10,21 @@ import java.lang.ref.WeakReference;
  * Created by ldm on 16/5/16.
  * LazyImageDownloader使用的Handler
  */
-public class LazyImageHandler extends Handler {
+public class DisplayUIPresenter extends Handler {
 
     public static final int LOADER_IMAGE_SUCCESS = 200;
     public static final int LOADER_IMAGE_ERROR = 101;
     public static final int LOADER_IMAGE_WAKE_TASK = 102;
+    public static final int LOADER_IMAGE_ERROR_OOM = 103;
     public static final int LOADER_IMAGE_RECORD_LAST_TIME = 105;
     public static final int LOADER_IMAGE_URL_IS_NULL = 106;
     public static final int LOADER_IMAGE_EXECUTE_END = 107;
-    public static final int LOADER_IMAGE_ERROR_OOM = 103;
 
     private static long lastTime;
     private WeakReference<LazyImageDownloader> imageDownloader;
 
-    public LazyImageHandler(LazyImageDownloader imageDownloader) {
+    public DisplayUIPresenter(LazyImageDownloader imageDownloader) {
+        super(Looper.getMainLooper());
         this.imageDownloader = new WeakReference<>(imageDownloader);
     }
 
@@ -32,6 +34,9 @@ public class LazyImageHandler extends Handler {
             return;
         }
         LazyImageDownloader lazy = imageDownloader.get();
+        if (lazy.isBindActivity() && lazy.isDestroyed()) {
+            return;
+        }
         switch (msg.what) {
             case LOADER_IMAGE_SUCCESS: {// 图标下载成功
                 lazy.imageDownloadSuccess((ImageOptions) msg.obj);

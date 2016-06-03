@@ -1,15 +1,14 @@
 package com.ldm.basic.utils.image;
 
 import com.ldm.basic.app.BasicRuntimeCache;
-import com.ldm.basic.utils.TaskThreadToMultiService;
 
 import java.io.File;
 
 /**
  * Created by ldm on 16/5/16.
- * 分配任务的TaskThreadToMultiService.Task
+ * 做来分配任务使用的
  */
-public class LoaderAssignTask extends TaskThreadToMultiService.Task{
+public class LoaderAssignTask implements Runnable {
 
     private ImageOptions ref;
     private LazyImageDownloader lazy;
@@ -21,7 +20,7 @@ public class LoaderAssignTask extends TaskThreadToMultiService.Task{
     }
 
     @Override
-    public void taskStart(Object... obj) {
+    public void run() {
         if (ref == null) {
             return;
         }
@@ -30,30 +29,33 @@ public class LoaderAssignTask extends TaskThreadToMultiService.Task{
             return;
         }
 
-        // 验证图像是否已经下载过，如果下载过使用addCacheTask(ImageOptions, String)方法创建任务
-        final String cacheName = lazy.getCacheName(ref);
+        /**
+         * 验证图像是否已经下载过，如果下载过使用addCacheTask(ImageOptions, String)方法创建任务
+         */
+        final String cacheName = ref.getCacheName();
         if (!BasicRuntimeCache.IMAGE_PATH_CACHE.containsKey(cacheName)) {// 检查本地是否有文件
-            File f = new File(ref.filePath);
+            String filePath = ref.localDirectory +"/" + cacheName;
+            File f = new File(filePath);
             if (f.exists()) {
-                BasicRuntimeCache.IMAGE_PATH_CACHE.put(cacheName, ref.filePath);
+                BasicRuntimeCache.IMAGE_PATH_CACHE.put(cacheName, filePath);
             }
         }
         // 如果URL直接对应本地文件
         if (ref.isLocalImage()) {
             if (new File(ref.url).exists()) {
                 // 使用缓存任务处理
-                lazy.addCacheTask(ref, ref.url, cacheName);
+                lazy.addCacheTask(ref, ref.url);
             }
             lazy.removePid(ref);
         } else {
             String path = BasicRuntimeCache.IMAGE_PATH_CACHE.get(cacheName);
             if (BasicRuntimeCache.IMAGE_PATH_CACHE.containsKey(cacheName) && path != null && new File(path).exists()) {
                 if (ref.downloadMode) {
-                    lazy.sendMessage(LazyImageHandler.LOADER_IMAGE_EXECUTE_END, ref);
+                    lazy.sendMessage(DisplayUIPresenter.LOADER_IMAGE_EXECUTE_END, ref);
                     lazy.removePid(ref);
                 } else {
                     // 使用缓存任务处理
-                    lazy.addCacheTask(ref, BasicRuntimeCache.IMAGE_PATH_CACHE.get(cacheName), cacheName);
+                    lazy.addCacheTask(ref, BasicRuntimeCache.IMAGE_PATH_CACHE.get(cacheName));
                 }
             } else {
                 // 使用下载任务

@@ -2,8 +2,6 @@ package com.ldm.basic.conn;
 
 import android.content.Context;
 
-import com.ldm.basic.app.BasicApplication;
-import com.ldm.basic.dialog.LDialog;
 import com.ldm.basic.utils.MD5;
 import com.ldm.basic.utils.SystemTool;
 
@@ -91,7 +89,6 @@ public class HttpEntity {
      */
     public static void httpPostSet(final Context context, final String tag, final RequestSet requestSet) {
         if (!SystemTool.isNetworkAvailable(context)) {
-            LDialog.netWorkErrDialog(context, BasicApplication.CONSTANTS.NET_WORKERROR0);
             requestSet.ioError();// 网络异常
         } else {
             requestSet.enter();// 本次网络请求进入初始化状态

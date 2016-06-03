@@ -32,29 +32,31 @@ public class LRecyclerView extends RecyclerView implements OnPullAbsScrollListen
     }
 
     /**
-     * 是否可以向下滑动（手指向下滑动）
+     * 当前控件是否在最底部
      *
      * @return true/false
      */
     @Override
-    public boolean isMoveDown() {
+    public boolean isBottom() {
+        LinearLayoutManager manager = (LinearLayoutManager) getLayoutManager();
+        int lastVisibleItem = manager.findLastCompletelyVisibleItemPosition();
+        return lastVisibleItem == (manager.getItemCount() - 1);
+    }
+
+    /**
+     * 当前控件是否在最顶部
+     *
+     * @return true/false
+     */
+    @Override
+    public boolean isTop() {
         boolean state;
         if (getChildCount() <= 0) {
             state = false;
         } else {
-            LinearLayoutManager lm = (LinearLayoutManager) getLayoutManager();
-            state = lm.findFirstVisibleItemPosition() == 0 && lm.findViewByPosition(lm.findFirstVisibleItemPosition()).getTop() == 0;
+            LinearLayoutManager manager = (LinearLayoutManager) getLayoutManager();
+            state = manager.findFirstCompletelyVisibleItemPosition() == 0;
         }
         return state;
-    }
-
-    /**
-     * 是否可以向上滑动（手指向上滑动）
-     *
-     * @return true/false
-     */
-    @Override
-    public boolean isMoveUp() {
-        return false;
     }
 }

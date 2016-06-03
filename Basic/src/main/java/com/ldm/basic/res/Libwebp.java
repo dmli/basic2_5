@@ -2,7 +2,7 @@ package com.ldm.basic.res;
 
 import com.google.webp.libwebp;
 
-public class Libwebp {
+public class LibWebp {
 
 	static {
 		System.loadLibrary("webp");

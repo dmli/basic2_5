@@ -7,9 +7,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Scroller;
 
-import com.ldm.basic.views.pull.listener.OnPullAbsScrollListener;
 import com.ldm.basic.utils.MeasureHelper;
 import com.ldm.basic.views.pull.anim.BasicPullViewAnimation;
+import com.ldm.basic.views.pull.listener.OnPullAbsScrollListener;
 
 /**
  * Created by ldm on 16/4/7.
@@ -196,9 +196,9 @@ public class LPullToRefreshListView extends ViewGroup {
                 if (yDiff * 0.5f > xDiff) {
                     if (y != touchMoveY) {
                         if (y > touchMoveY) {//向下滑动
-                            state = lAbsScrollState.isMoveDown();
+                            state = lAbsScrollState.isTop();
                         } else {//向上滑动
-                            state = isNext() && lAbsScrollState.isMoveUp();
+                            state = isNext() && lAbsScrollState.isBottom();
                         }
                     }
                 }

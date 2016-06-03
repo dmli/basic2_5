@@ -6,7 +6,6 @@ import com.ldm.basic.utils.TextUtils;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 
 /**
  * Created by ldm on 16/5/31.
@@ -15,11 +14,12 @@ import java.net.URLEncoder;
 public class Http {
 
     private String url;
-    private String filePath;
+    private String filePath, fileName;
 
-    public Http(String url, String filePath) {
+    public Http(String url, String filePath, String fileName) {
         this.url = url;
         this.filePath = filePath;
+        this.fileName = fileName;
     }
 
     /**
@@ -52,13 +52,14 @@ public class Http {
             int responseCode = result.responseCode = urlConnection.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 result.code = 1;
-                result.localFilePath = FileTool.save(urlConnection.getInputStream(), filePath);
+                result.localFilePath = FileTool.save(urlConnection.getInputStream(), filePath, fileName);
             } else {
                 //文件没有下载完成，执行一次删除
                 FileTool.delete(filePath);
             }
         } catch (Exception e) {
             result.error = e.getMessage();
+            e.printStackTrace();
         } finally {
             if (urlConnection != null) {
                 try {
@@ -79,7 +80,7 @@ public class Http {
      */
     private HttpURLConnection createHttpURLConnection() throws IOException {
         HttpURLConnection urlConnection;
-        URL httpUrl = new URL(URLEncoder.encode(url, "UTF-8"));
+        URL httpUrl = new URL(url);
         urlConnection = (HttpURLConnection) httpUrl.openConnection();
         urlConnection.setConnectTimeout(TIME_OUT);
         urlConnection.setReadTimeout(SO_TIME_OUT);

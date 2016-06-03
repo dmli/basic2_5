@@ -7,17 +7,17 @@ package com.ldm.basic.views.pull.listener;
 public interface OnPullAbsScrollListener {
 
     /**
-     * 是否可以向下滑动（手指向下滑动）
+     * 当前控件是否在最底部
      *
      * @return true/false
      */
-    boolean isMoveDown();
+    boolean isBottom();
 
     /**
-     * 是否可以向上滑动（手指向上滑动）
+     * 当前控件是否在最顶部
      *
      * @return true/false
      */
-    boolean isMoveUp();
+    boolean isTop();
 
 }

@@ -104,20 +104,20 @@ public class LListView extends ListView implements OnPullAbsScrollListener {
         this.onInterceptTouchEventListener = onInterceptTouchEventListener;
     }
 
-    @Override
-    public boolean isMoveDown() {
-        return getChildCount() <= 0 || (getFirstVisiblePosition() == 0 && getChildAt(0).getTop() == getPaddingTop());
-    }
-
-    @Override
-    public boolean isMoveUp() {
-        return (getChildCount() <= 0) || (getLastVisiblePosition() == getCount() - 1) && (getChildAt(getChildCount() - 1).getBottom() == getBottom() + getPaddingBottom());
-    }
-
     public void addPlaceholderView(int height) {
         View view = new View(getContext());
         view.setLayoutParams(new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
         this.addHeaderView(view, null, false);
+    }
+
+    @Override
+    public boolean isBottom() {
+        return (getChildCount() <= 0) || (getLastVisiblePosition() == getCount() - 1) && (getChildAt(getChildCount() - 1).getBottom() == getBottom() + getPaddingBottom());
+    }
+
+    @Override
+    public boolean isTop() {
+        return getChildCount() <= 0 || (getFirstVisiblePosition() == 0 && getChildAt(0).getTop() == getPaddingTop());
     }
 
     public interface OnInterceptTouchEventListener {
