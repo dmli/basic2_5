@@ -11,10 +11,10 @@ public class RequestSet {
 
     RequestTaskInfo taskInfo;
 
-	List<HttpRequestClient> _cs;
+	List<HttpRequestClient> child;
 
 	public RequestSet(List<HttpRequestClient> child) {
-		this._cs = child;
+		this.child = child;
 	}
 
     void setTaskInfo(RequestTaskInfo taskInfo) {
@@ -45,6 +45,6 @@ public class RequestSet {
 	 * @return HttpRequestChild[]
 	 */
 	public List<HttpRequestClient> getChild() {
-		return _cs;
+		return child;
 	}
 }
