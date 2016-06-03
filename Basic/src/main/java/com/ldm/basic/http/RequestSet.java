@@ -1,4 +1,4 @@
-package com.ldm.basic.conn;
+package com.ldm.basic.http;
 
 
 import java.util.List;
@@ -9,13 +9,19 @@ import java.util.List;
  */
 public class RequestSet {
 
+    RequestTaskInfo taskInfo;
+
 	List<HttpRequestClient> _cs;
 
 	public RequestSet(List<HttpRequestClient> child) {
 		this._cs = child;
 	}
 
-	/**
+    void setTaskInfo(RequestTaskInfo taskInfo) {
+        this.taskInfo = taskInfo;
+    }
+
+    /**
 	 * 当该任务开始处理时调用，该方法优先于start (主线程中被调用)
 	 */
 	public void enter() {
@@ -24,7 +30,7 @@ public class RequestSet {
 	/**
 	 * 当该任务处理完成后被调用(主线程中被调用)
 	 */
-	public void exit() {
+	public void end() {
 	}
 
 	/**

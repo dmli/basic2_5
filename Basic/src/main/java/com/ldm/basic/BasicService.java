@@ -7,8 +7,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 
-import com.ldm.basic.conn.BasicHttpGet;
-import com.ldm.basic.conn.BasicHttpPost;
+import com.ldm.basic.http.BasicHttpGet;
+import com.ldm.basic.http.BasicHttpPost;
 import com.ldm.basic.utils.SystemTool;
 import com.ldm.basic.utils.TaskThreadToMultiService;
 

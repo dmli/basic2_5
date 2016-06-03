@@ -1,4 +1,4 @@
-package com.ldm.basic.conn;
+package com.ldm.basic.http;
 
 import com.ldm.basic.bean.BasicInternetRetBean;
 
