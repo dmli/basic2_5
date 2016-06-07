@@ -19,7 +19,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver;
 
-import com.ldm.basic.base.Base;
+import com.ldm.basic.base.OnControllerLifeListener;
 import com.ldm.basic.dialog.LToast;
 import com.ldm.basic.helper.RightSlidingFinishActivity;
 import com.ldm.basic.intent.IntentUtil;
@@ -157,23 +157,23 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
         if (v != null) {
             v.setOnClickListener(this);
         }
-        if (getPresenter() != null) {
-            getPresenter().onStart(getPresenter().isFirst);
+        if (getOnControllerLifeListener() != null) {
+            getOnControllerLifeListener().onStart(getOnControllerLifeListener().isFirst);
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (getPresenter() != null) {
-            getPresenter().onResume();
+        if (getOnControllerLifeListener() != null) {
+            getOnControllerLifeListener().onResume();
         }
     }
 
     @Override
     protected void onDestroy() {
-        if (getPresenter() != null) {
-            getPresenter().onDestroy();
+        if (getOnControllerLifeListener() != null) {
+            getOnControllerLifeListener().onDestroy();
         }
         //移除OnGlobalLayoutListener事件
         removeOnGlobalLayoutListener();
@@ -199,11 +199,11 @@ public class BasicActivity extends Activity implements OnClickListener, ViewTree
     }
 
     /**
-     * 实现这个方法后Base.BasePresenter会触发生命周期
+     * 实现这个方法后OnControllerLifeListener会触发生命周期
      *
-     * @return Base.BasePresenter
+     * @return OnControllerLifeListener
      */
-    public Base.BasePresenter getPresenter() {
+    public OnControllerLifeListener getOnControllerLifeListener() {
         return null;
     }
 

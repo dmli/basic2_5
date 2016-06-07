@@ -1,16 +1,15 @@
 package com.ldm.basic.views;
 
-import com.ldm.basic.anim.BasicAnimationListener;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
-import android.view.VelocityTracker;
 import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
 import android.widget.RelativeLayout;
+
+import com.ldm.basic.anim.BasicAnimationListener;
 
 /**
  * Created by ldm on 14-7-14. 
@@ -23,7 +22,6 @@ public class LZoomRelativeLayout extends RelativeLayout {
 	private OnClickListener click;
 	private float scale = 0.9f;
 	private Object obj;
-	private VelocityTracker vTracker;
 	private GestureDetector gd;
 	private boolean isClick = false;
 
@@ -44,18 +42,6 @@ public class LZoomRelativeLayout extends RelativeLayout {
 
 	private void init(Context context) {
 		gd = new GestureDetector(context, gestureListener);
-	}
-
-	@Override
-	protected void onDetachedFromWindow() {
-		if (vTracker != null) {
-			try {
-				vTracker.recycle();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		super.onDetachedFromWindow();
 	}
 
 	@Override
@@ -83,13 +69,6 @@ public class LZoomRelativeLayout extends RelativeLayout {
 
 	private void touchCancel() {
 		setPressed(false);
-		if (vTracker != null) {
-			try {
-				vTracker.clear();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
 		if (getAnimation() != null) {
 			this.clearAnimation();
 		}
@@ -111,14 +90,6 @@ public class LZoomRelativeLayout extends RelativeLayout {
 			animation2.setAnimationListener(animationListener);
 		}
 		this.startAnimation(animation1);
-		if (vTracker == null) {
-			vTracker = VelocityTracker.obtain();
-			if (vTracker != null) {
-				vTracker.addMovement(event);
-			}
-		} else {
-			vTracker.clear();
-		}
 	}
 
 	/**

@@ -1178,7 +1178,7 @@ public class LBasicViewPager extends ViewGroup {
         // Fix up offsets for later layout.
         if (oldCurInfo != null) {
             final int oldCurPosition = oldCurInfo.position;
-            // Base offsets off of oldCurInfo.
+            // BaseMvp offsets off of oldCurInfo.
             if (oldCurPosition < curItem.position) {
                 int itemIndex = 0;
                 ItemInfo ii;
@@ -1222,7 +1222,7 @@ public class LBasicViewPager extends ViewGroup {
             }
         }
 
-        // Base all offsets off of curItem.
+        // BaseMvp all offsets off of curItem.
         final int itemCount = mItems.size();
         float offset = curItem.offset;
         int pos = curItem.position - 1;

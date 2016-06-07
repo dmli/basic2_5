@@ -1,17 +1,16 @@
 package com.ldm.basic.views;
 
-import com.ldm.basic.anim.BasicAnimationListener;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
-import android.view.VelocityTracker;
 import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
+
+import com.ldm.basic.anim.BasicAnimationListener;
 
 public class LZoomImageView extends ImageView {
 
@@ -20,8 +19,6 @@ public class LZoomImageView extends ImageView {
 	private OnClickListener clickListener;
 	private OnLongClickListener longClickListener;
 	private float scale = 0.9f;
-	private Object obj;
-	private VelocityTracker vTracker;
 	private GestureDetector gd;
 	private boolean isClick = false;
 
@@ -54,18 +51,6 @@ public class LZoomImageView extends ImageView {
 		}
 	}
 
-	@Override
-	protected void onDetachedFromWindow() {
-		if (vTracker != null) {
-			try {
-				vTracker.recycle();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		super.onDetachedFromWindow();
-	}
-
 	@SuppressLint("ClickableViewAccessibility")
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
@@ -85,13 +70,6 @@ public class LZoomImageView extends ImageView {
 	}
 
 	private void touchCancel() {
-		if (vTracker != null) {
-			try {
-				vTracker.clear();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
 		if (getAnimation() != null) {
 			this.clearAnimation();
 		}
@@ -112,14 +90,6 @@ public class LZoomImageView extends ImageView {
 			animation2.setFillAfter(false);
 		}
 		this.startAnimation(animation1);
-		if (vTracker == null) {
-			vTracker = VelocityTracker.obtain();
-			if (vTracker != null) {
-				vTracker.addMovement(event);
-			}
-		} else {
-			vTracker.clear();
-		}
 	}
 
 	/**
@@ -144,14 +114,6 @@ public class LZoomImageView extends ImageView {
 	 */
 	public void setScale(float scale) {
 		this.scale = scale;
-	}
-
-	public Object getObj() {
-		return obj;
-	}
-
-	public void setObj(Object obj) {
-		this.obj = obj;
 	}
 
 	private BasicAnimationListener animationListener = new BasicAnimationListener() {

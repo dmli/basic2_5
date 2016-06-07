@@ -25,7 +25,7 @@ import java.util.Map;
 import android.graphics.Bitmap;
 
 /**
- * Base memory cache. Implements common functionality for memory cache. Provides object references (
+ * BaseMvp memory cache. Implements common functionality for memory cache. Provides object references (
  * {@linkplain Reference not strong}) storing.
  *
  * @author Sergey Tarasevich (nostra13[at]gmail[dot]com)

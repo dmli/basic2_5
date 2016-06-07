@@ -190,47 +190,6 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
     }
 
     /**
-     * 向BasicFragment消息
-     *
-     * @param position BasicFragment的位置
-     * @param obj      参数
-     * @return Object
-     */
-    public Object sendMessageToChildren(int position, int state, Object obj) {
-        if (fragments != null && position >= 0 && position < fragments.length) {
-            BasicFragment f = fragments[currentPosition];
-            if (f != null && f.THIS_FRAGMENT_STATE) {
-                return f.receiverMessageFromSuper(state, obj);
-            }
-        }
-        return null;
-    }
-
-    /**
-     * 向BasicFragment消息
-     *
-     * @param bf  需要接收消息的<? extends BasicFragment>
-     * @param obj 参数
-     * @return Object
-     */
-    public <T extends BasicFragment> Object sendMessageToChildren(T bf, int state, Object obj) {
-        if (bf != null && bf.THIS_FRAGMENT_STATE) {
-            return bf.receiverMessageFromSuper(state, obj);
-        }
-        return null;
-    }
-
-    /**
-     * 负责接收子类的指令
-     *
-     * @param obj 参数
-     * @return Object
-     */
-    public Object receiverMessageFromChildren(int state, Object obj) {
-        return null;
-    }
-
-    /**
      * 通过Id查询View
      *
      * @param viewId id

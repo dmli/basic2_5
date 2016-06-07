@@ -7,17 +7,14 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Message;
 import android.support.v4.app.Fragment;
-import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
-import com.ldm.basic.base.Base;
+import com.ldm.basic.base.OnControllerLifeListener;
 import com.ldm.basic.dialog.LToast;
 import com.ldm.basic.intent.IntentUtil;
 import com.ldm.basic.utils.BasicSimpleHandler;
-import com.ldm.basic.utils.LLog;
 
 import java.util.Map;
 
@@ -93,23 +90,23 @@ public class BasicFragment extends Fragment implements View.OnClickListener, Bas
     @Override
     public void onStart() {
         super.onStart();
-        if (getPresenter() != null) {
-            getPresenter().onStart(getPresenter().isFirst);
+        if (getOnControllerLifeListener() != null) {
+            getOnControllerLifeListener().onStart(getOnControllerLifeListener().isFirst);
         }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (getPresenter() != null) {
-            getPresenter().onResume();
+        if (getOnControllerLifeListener() != null) {
+            getOnControllerLifeListener().onResume();
         }
     }
 
     @Override
     public void onDestroyView() {
-        if (getPresenter() != null) {
-            getPresenter().onDestroy();
+        if (getOnControllerLifeListener() != null) {
+            getOnControllerLifeListener().onDestroy();
         }
         stopReceiver();
         THIS_FRAGMENT_STATE = false;
@@ -120,36 +117,11 @@ public class BasicFragment extends Fragment implements View.OnClickListener, Bas
     }
 
     /**
-     * 实现这个方法后Base.BasePresenter会触发生命周期
+     * 实现这个方法后OnControllerLifeListener会触发生命周期
      *
-     * @return Base.BasePresenter
+     * @return OnControllerLifeListener
      */
-    public Base.BasePresenter getPresenter() {
-        return null;
-    }
-
-    /**
-     * 向父类发送一个指令
-     *
-     * @param obj 参数
-     * @return Object
-     */
-    public Object sendMessageToSuper(int state, Object obj) {
-        if (activity != null) {
-            return activity.receiverMessageFromChildren(state, obj);
-        }
-        return null;
-    }
-
-    /**
-     * 接收由BasicFragmentActivity发来的消息
-     *
-     * @param state 状态
-     * @param obj   Object
-     * @return Object
-     */
-    public Object receiverMessageFromSuper(int state, Object obj) {
-
+    public OnControllerLifeListener getOnControllerLifeListener() {
         return null;
     }
 
@@ -161,37 +133,6 @@ public class BasicFragment extends Fragment implements View.OnClickListener, Bas
      */
     protected View getView(final int viewId) {
         return rootView.findViewById(viewId);
-    }
-
-    /**
-     * 通过Id给对应的TextView或其所有子类设置text
-     *
-     * @param viewId id
-     * @param str    s
-     */
-    protected void setText(final int viewId, final String str) {
-        TextView tv = (TextView) getView(viewId);
-        if (tv != null) {
-            tv.setText(str);
-        } else {
-            LLog.e("没有找到 id" + viewId + "所对应的View");
-        }
-    }
-
-    /**
-     * 通过Id给对应的TextView或其所有子类设置text
-     *
-     * @param viewId id
-     * @param html   s
-     */
-    protected void setText(final int viewId, final Spanned html) {
-        ((TextView) getView(viewId)).setText(html);
-        TextView tv = (TextView) getView(viewId);
-        if (tv != null) {
-            tv.setText(html);
-        } else {
-            LLog.e("没有找到 id" + viewId + "所对应的View");
-        }
     }
 
     /**
