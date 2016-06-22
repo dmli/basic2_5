@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.ldm.basic.base.OnControllerLifeListener;
 import com.ldm.basic.dialog.LToast;
 import com.ldm.basic.intent.IntentUtil;
 import com.ldm.basic.utils.BasicSimpleHandler;

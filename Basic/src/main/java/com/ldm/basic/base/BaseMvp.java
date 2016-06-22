@@ -1,6 +1,6 @@
 package com.ldm.basic.base;
 
-import android.os.Message;
+import android.content.Context;
 
 import com.ldm.basic.utils.BasicSimpleHandler;
 
@@ -17,28 +17,21 @@ public interface BaseMvp {
      */
     interface BaseView<T> {
 
+        /**
+         * 设置Presenter
+         *
+         * @param t T Presenter
+         */
         void setPresenter(T t);
-    }
 
-    /**
-     * 数据提供商
-     */
-    interface BaseProvider {
+        Context getContext();
+
     }
 
     /**
      * 主持人/控制器
      */
-    abstract class BasePresenter extends OnControllerLifeListener implements BasicSimpleHandler.OnSimpleHandlerInterface {
-
-        /**
-         * 所有请求均由BasicActivity中handleMessage(...)接收(这个handler允许在协议中使用)
-         */
-        public BasicSimpleHandler<BasePresenter> handler = new BasicSimpleHandler<>(this);
-
-        @Override
-        public void handleMessage(Message msg) {
-        }
+    interface BasePresenter extends BasicSimpleHandler.OnSimpleHandlerInterface {
 
     }
 

@@ -19,7 +19,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver;
 
-import com.ldm.basic.base.OnControllerLifeListener;
 import com.ldm.basic.dialog.LToast;
 import com.ldm.basic.helper.RightSlidingFinishActivity;
 import com.ldm.basic.intent.IntentUtil;

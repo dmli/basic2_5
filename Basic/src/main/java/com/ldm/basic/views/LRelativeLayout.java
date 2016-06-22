@@ -5,17 +5,18 @@ import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
-import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorSet;
 import com.nineoldandroids.animation.ObjectAnimator;
 
 /**
- * Created by ldm on 16/6/6.
- * 增加点击时动画效果，按下时透明度设置60%，抬起时透明度设置100%
+ * Created by ldm on 14-7-14.
+ * 点击有缩放效果的RelativeLayout，使用这个view后内部控件将无法接收到事件
  */
-public class LImageView extends ImageView {
+public class LRelativeLayout extends RelativeLayout {
+
 
     public static final int ANIM_ALPHA = 0;//透明度动画
     public static final int ANIM_SCALE = 1;//缩放动画
@@ -32,17 +33,17 @@ public class LImageView extends ImageView {
     private OnClickListener onClickListener;
     private OnLongClickListener onLongClickListener;
 
-    public LImageView(Context context) {
+    public LRelativeLayout(Context context) {
         super(context);
         init(context);
     }
 
-    public LImageView(Context context, AttributeSet attrs) {
+    public LRelativeLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(context);
     }
 
-    public LImageView(Context context, AttributeSet attrs, int defStyle) {
+    public LRelativeLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init(context);
     }
@@ -195,7 +196,7 @@ public class LImageView extends ImageView {
         public void onAnimationEnd(Animator animator) {
             if (isClick) {
                 if (onClickListener != null) {
-                    onClickListener.onClick(LImageView.this);
+                    onClickListener.onClick(LRelativeLayout.this);
                 }
                 isClick = false;
             }
@@ -238,7 +239,7 @@ public class LImageView extends ImageView {
         @Override
         public void onLongPress(MotionEvent e) {
             if (onLongClickListener != null) {
-                onLongClickListener.onLongClick(LImageView.this);
+                onLongClickListener.onLongClick(LRelativeLayout.this);
             }
         }
 
@@ -247,5 +248,4 @@ public class LImageView extends ImageView {
             return true;
         }
     };
-
 }

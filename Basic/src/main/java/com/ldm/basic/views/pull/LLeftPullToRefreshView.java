@@ -11,15 +11,10 @@ import com.ldm.basic.utils.MeasureHelper;
 import com.ldm.basic.views.pull.anim.BasicPullViewAnimation;
 
 /**
- * Description : 左滑刷新控件
  * Created by ldm  on 16/6/1.
- * Job number：143024
- * Phone ：18518677752
- * Email：lidaming@syswin.com
- * Person in charge : 李达明,李亚东
- * Leader：李亚东
+ * 左滑刷新控件
  */
-public class LeftPullToRefreshView extends ViewGroup {
+public class LLeftPullToRefreshView extends ViewGroup {
 
     public static final int RELEASE_TO_REFRESH = 0;// 松开刷新状态
     public static final int PULL_TO_REFRESH = 1;// 左拉刷新状态
@@ -38,17 +33,17 @@ public class LeftPullToRefreshView extends ViewGroup {
     private BasicPullViewAnimation basicPullViewAnimation;
     private boolean state;
 
-    public LeftPullToRefreshView(Context context) {
+    public LLeftPullToRefreshView(Context context) {
         super(context);
         init(context);
     }
 
-    public LeftPullToRefreshView(Context context, AttributeSet attrs) {
+    public LLeftPullToRefreshView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(context);
     }
 
-    public LeftPullToRefreshView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public LLeftPullToRefreshView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context);
     }

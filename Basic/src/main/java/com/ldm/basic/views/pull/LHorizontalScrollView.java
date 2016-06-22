@@ -5,13 +5,8 @@ import android.util.AttributeSet;
 import android.widget.HorizontalScrollView;
 
 /**
- * Description : 横向滑动控件
  * Created by ldm  on 16/6/1.
- * Job number：143024
- * Phone ：18518677752
- * Email：lidaming@syswin.com
- * Person in charge : 李达明,李亚东
- * Leader：李亚东
+ * 横向滑动控件
  */
 public class LHorizontalScrollView extends HorizontalScrollView {
 
