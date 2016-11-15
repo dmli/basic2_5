@@ -7,7 +7,7 @@ import com.ldm.basic.bean.BasicInternetRetBean;
  * Created by ldm on 15/10/15.
  * 用来处理单一任务的网络请求
  */
-public class HttpRequestSingleTask implements BasicHttpThreadTool.AsyncTask {
+class HttpRequestSingleTask implements HttpThreadTool.AsyncTask {
     private HttpMultiTaskHandler httpMultiTaskHandler;
 
     private String url;
@@ -27,7 +27,7 @@ public class HttpRequestSingleTask implements BasicHttpThreadTool.AsyncTask {
      * @param mode                 类型 - HTTP_MODE_POST --- HTTP_MODE_GET
      * @param callBack             回调接口
      */
-    public HttpRequestSingleTask(HttpMultiTaskHandler httpMultiTaskHandler, String url, String param, String mode, RequestRetCallBack callBack) {
+    HttpRequestSingleTask(HttpMultiTaskHandler httpMultiTaskHandler, String url, String param, String mode, RequestRetCallBack callBack) {
         this.httpMultiTaskHandler = httpMultiTaskHandler;
         this.url = url;
         this.param = param;
@@ -73,9 +73,9 @@ public class HttpRequestSingleTask implements BasicHttpThreadTool.AsyncTask {
 
         BasicInternetRetBean bib;
         if (HttpRequest.HTTP_MODE_GET.equals(mode)) {
-            bib = new BasicHttpGet(url).execute(param);
+            bib = new HttpGet(url).execute(param);
         } else {
-            bib = new BasicHttpPost(url).execute(param);
+            bib = new HttpPost(url).execute(param);
         }
         onResult(bib);
     }

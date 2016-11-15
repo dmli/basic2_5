@@ -17,10 +17,10 @@ import java.util.Map;
  * Created by ldm on 15/10/15.
  * 内部使用HttpURLConnection
  */
-public class BasicHttpGet extends HttpRequest {
+public class HttpGet extends HttpRequest {
 
 
-    public BasicHttpGet(String url) {
+    public HttpGet(String url) {
         super(url);
     }
 

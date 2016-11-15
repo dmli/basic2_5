@@ -16,13 +16,13 @@ import java.util.Map;
  * Created by ldm on 15/10/15.
  * 内部使用HttpURLConnection
  */
-public class BasicHttpPost extends HttpRequest {
+public class HttpPost extends HttpRequest {
 
     private static final String BOUNDARY = java.util.UUID.randomUUID().toString();
     private static final String PREFIX = "--", LINEND = "\r\n";
     private static final String CHARSET = "UTF-8";
 
-    public BasicHttpPost(String url) {
+    public HttpPost(String url) {
         super(url);
     }
 

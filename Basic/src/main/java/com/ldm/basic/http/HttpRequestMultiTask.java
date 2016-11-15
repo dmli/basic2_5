@@ -8,7 +8,7 @@ import java.util.List;
  * Created by ldm on 15/10/15.
  * 用来处理多任务的网络请求
  */
-public class HttpRequestMultiTask implements BasicHttpThreadTool.AsyncTask {
+class HttpRequestMultiTask implements HttpThreadTool.AsyncTask {
     private RequestSet requestSet;
     private HttpMultiTaskHandler httpMultiTaskHandler;
     private boolean isStop;
@@ -19,7 +19,7 @@ public class HttpRequestMultiTask implements BasicHttpThreadTool.AsyncTask {
      * @param requestSet 请求集合
      * @param httpMultiTaskHandler    HttpMultiTaskHandler 更新UI
      */
-    public HttpRequestMultiTask(RequestSet requestSet, HttpMultiTaskHandler httpMultiTaskHandler) {
+    HttpRequestMultiTask(RequestSet requestSet, HttpMultiTaskHandler httpMultiTaskHandler) {
         this.requestSet = requestSet;
         this.httpMultiTaskHandler = httpMultiTaskHandler;
         this.isStop = false;
@@ -38,9 +38,9 @@ public class HttpRequestMultiTask implements BasicHttpThreadTool.AsyncTask {
             BasicInternetRetBean bib;
             HttpRequest request;
             if (HttpRequest.HTTP_MODE_GET.equals(client.mode)) {
-                request = new BasicHttpGet(client.url);
+                request = new HttpGet(client.url);
             } else {
-                request = new BasicHttpPost(client.url);
+                request = new HttpPost(client.url);
             }
             //执行网络请求
             bib = client.execute(request);

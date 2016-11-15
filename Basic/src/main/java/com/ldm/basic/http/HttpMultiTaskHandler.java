@@ -11,42 +11,42 @@ import java.util.Map;
  * Created by ldm on 15/10/15.
  * 支持HttpEntity创建单线程多任务使用的Handler
  */
-public class HttpMultiTaskHandler extends Handler {
+class HttpMultiTaskHandler extends Handler {
 
     /**
      * 成功
      */
-    public static final int RESULT_SUCCESS = 200;
+    static final int RESULT_SUCCESS = 200;
 
     /**
      * 失败error 附带错误信息
      */
-    public static final int RESULT_ERROR = 100;
+    static final int RESULT_ERROR = 100;
 
     /**
      * 返回数据为空
      */
-    public static final int RESULT_RET_NULL = 101;
+    static final int RESULT_RET_NULL = 101;
 
     /**
      * IO error 网络连接异常
      */
-    public static final int RESULT_IO_ERROR = 102;
+    static final int RESULT_IO_ERROR = 102;
 
     /**
      * 任务进入
      */
-    public static final int RESULT_CHILD_ENTER = 110;
+    static final int RESULT_CHILD_ENTER = 110;
 
     /**
      * 任务退出
      */
-    public static final int RESULT_CHILD_END = 111;
+    static final int RESULT_CHILD_END = 111;
 
     /**
      * 线程集合请求完成后执行
      */
-    public static final int RESULT_REQUEST_SET_EXIT = 112;
+    static final int RESULT_REQUEST_SET_EXIT = 112;
 
 
     /**
@@ -78,7 +78,7 @@ public class HttpMultiTaskHandler extends Handler {
      * @param what int what
      * @param obj  Object obj
      */
-    public void sendResponseState(int what, Object obj) {
+    void sendResponseState(int what, Object obj) {
         sendMessage(obtainMessage(what, obj));
     }
 

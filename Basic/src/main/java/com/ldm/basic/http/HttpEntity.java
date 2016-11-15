@@ -40,7 +40,7 @@ public class HttpEntity {
             RequestTaskInfo taskInfo = new RequestTaskInfo(tag, System.currentTimeMillis());
             callBack.setTaskInfo(taskInfo);
             // 创建Thread
-            BasicHttpThreadTool.getInstance().addTask(tag, new HttpRequestSingleTask(HttpMultiTaskHandler.getInstance().build(taskInfo), url, null, HttpRequest.HTTP_MODE_GET, callBack));
+            HttpThreadTool.getInstance().addTask(tag, new HttpRequestSingleTask(HttpMultiTaskHandler.getInstance().build(taskInfo), url, null, HttpRequest.HTTP_MODE_GET, callBack));
         }
     }
 
@@ -71,7 +71,7 @@ public class HttpEntity {
             RequestTaskInfo taskInfo = new RequestTaskInfo(tag, System.currentTimeMillis());
             callBack.setTaskInfo(taskInfo);
             // 创建Thread
-            BasicHttpThreadTool.getInstance().addTask(tag, new HttpRequestSingleTask(HttpMultiTaskHandler.getInstance().build(taskInfo), url, param, HttpRequest.HTTP_MODE_POST, callBack));
+            HttpThreadTool.getInstance().addTask(tag, new HttpRequestSingleTask(HttpMultiTaskHandler.getInstance().build(taskInfo), url, param, HttpRequest.HTTP_MODE_POST, callBack));
         }
     }
 
@@ -89,7 +89,7 @@ public class HttpEntity {
             requestSet.enter();// 本次网络请求进入初始化状态
             RequestTaskInfo taskInfo = new RequestTaskInfo(tag, System.currentTimeMillis());
             requestSet.setTaskInfo(taskInfo);
-            BasicHttpThreadTool.getInstance().addTask(tag, new HttpRequestMultiTask(requestSet, HttpMultiTaskHandler.getInstance().build(taskInfo)));
+            HttpThreadTool.getInstance().addTask(tag, new HttpRequestMultiTask(requestSet, HttpMultiTaskHandler.getInstance().build(taskInfo)));
         }
     }
 

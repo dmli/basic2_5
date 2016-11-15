@@ -13,7 +13,7 @@ public abstract class RequestRetCallBack {
     public String[] _obj;// 提前存储的数据，可以在各个方法中使用的参数，通过构造方法传入
     public Object data;
     public int code;
-    public int requestType = BasicHttpPost.REQUEST_HTTP;
+    public int requestType = HttpPost.REQUEST_HTTP;
 
     /**
      * 创建回掉
