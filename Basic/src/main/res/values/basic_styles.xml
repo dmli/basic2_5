@@ -1,8 +1,7 @@
 <resources>
 
-    <!-- Base application theme. -->
+    <!-- BaseMvp application theme. -->
     <style name="AppTheme" parent="android:Theme.Light.NoTitleBar"/>
-
 
     <style name="ActivityThemeTransparent" parent="android:Theme.Light.NoTitleBar">
         <item name="android:windowBackground">@color/transparent</item>
@@ -38,7 +37,7 @@
     </style>
 
 
-    <style name="DialogViewTheme" parent="@android:style/Theme.Dialog">
+    <style name="BaseDialogViewTheme" parent="@android:style/Theme.Dialog">
         <item name="android:windowBackground">@color/transparent</item>
         <item name="android:windowFrame">@null</item>
         <item name="android:windowNoTitle">true</item>
@@ -47,6 +46,5 @@
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:backgroundDimEnabled">true</item>
     </style>
-
 
 </resources>

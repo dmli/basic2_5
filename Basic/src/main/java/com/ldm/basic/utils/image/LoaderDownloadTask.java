@@ -12,12 +12,12 @@ import java.io.File;
  * Created by ldm on 16/5/16.
  * 用来下载图片使用的
  */
-public class LoaderDownloadTask implements Runnable {
+class LoaderDownloadTask implements Runnable {
 
     private ImageOptions ref;
     private LazyImageDownloader lazy;
 
-    public LoaderDownloadTask(ImageOptions ref, LazyImageDownloader lazy) {
+    LoaderDownloadTask(ImageOptions ref, LazyImageDownloader lazy) {
         super();
         this.ref = ref;
         this.lazy = lazy;
@@ -33,11 +33,9 @@ public class LoaderDownloadTask implements Runnable {
             return;
         }
         try {
-            if (!ref.downloadMode) {
-                if (!lazy.checkAvailability(ref)) {
-                    lazy.removePid(ref);
-                    return;
-                }
+            if (!ref.downloadMode && !lazy.checkAvailability(ref)) {
+                lazy.removePid(ref);
+                return;
             }
 
             //下载后的路径
@@ -78,10 +76,10 @@ public class LoaderDownloadTask implements Runnable {
     /**
      * 文件下载成功后的逻辑
      *
-     * @param ref       ImageOptions
-     * @param result    HttpResult
+     * @param ref    ImageOptions
+     * @param result HttpResult
      */
-    void fileDownloadSuccess(ImageOptions ref, HttpResult result) {
+    private void fileDownloadSuccess(ImageOptions ref, HttpResult result) {
         ref.responseCode = result.responseCode;
         if (!ref.downloadMode) {
             // 创建图像
@@ -110,11 +108,13 @@ public class LoaderDownloadTask implements Runnable {
      * @param ref    ImageOptions
      * @param result HttpResult
      */
-    void fileDownloadError(ImageOptions ref, HttpResult result) {
-        // 离线任务如果下载失败，将不进行重新下载
-        if (!ref.downloadMode) {
+    private void fileDownloadError(ImageOptions ref, HttpResult result) {
+        if (ref.downloadMode) {
+            //离线下载的任务会执行一次end()
+            lazy.sendMessage(DisplayUIPresenter.LOADER_IMAGE_EXECUTE_END, ref);
+        } else {
+            // 离线任务如果下载失败，将不进行重新下载
             lazy.removePid(ref);
-
             if (result.isUrlNull()) {
                 lazy.sendMessage(DisplayUIPresenter.LOADER_IMAGE_URL_IS_NULL, ref);//放弃任务，不在继续处理
             } else {
@@ -127,9 +127,6 @@ public class LoaderDownloadTask implements Runnable {
                     }
                 }
             }
-        } else {
-            //离线下载的任务会执行一次end()
-            lazy.sendMessage(DisplayUIPresenter.LOADER_IMAGE_EXECUTE_END, ref);
         }
     }
 

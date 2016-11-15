@@ -7,7 +7,7 @@ import android.widget.AbsListView;
 
 /**
  * Created by ldm on 15-5-27. 
- * 实现这个ViewGroup的View，表示可以在LNotBoringActionBarView下使用
+ * 继承这个ViewGroup的View，表示可以在LNotBoringActionBarView下使用
  * （未完成）
  */
 public abstract class LViewGroup extends ViewGroup {

@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -322,8 +321,6 @@ public class ImageOptions {
         view.setVisibility(View.VISIBLE);
         // 放弃Bitmap的引用
         bitmap = null;
-
-        Log.e("aaaaaaaaaaa", "time = "+ (System.currentTimeMillis() - time1) );
     }
 
     // 图片是否存在，true存在 false不存在

@@ -35,7 +35,7 @@ import java.util.UUID;
  */
 public class LazyImageDownloader {
 
-    private static Context APPLICATION_CONTENT;
+    private static WeakReference<Context> applicationContent;
 
     private WeakReference<Activity> activityWeakReference;
 
@@ -62,17 +62,17 @@ public class LazyImageDownloader {
     private int maxTaskNumber = 20;
 
     // 图片保存路径
-    public String IMAGE_CACHE_PATH;
+    private String imageCachePath;
 
     /**
      * 全局默认的图片缓存路径
      */
-    public static String DEFAULT_IMAGE_CACHE_PATH;
+    private static String defaultImageCachePath;
 
     /**
      * 任务列表
      */
-    public final Map<String, String> P_IDS = new HashMap<>();
+    private final Map<String, String> P_IDS = new HashMap<>();
 
     /**
      * 使用了LazyImageOnScrollListener监听时用来做临时缓存使用
@@ -85,9 +85,9 @@ public class LazyImageDownloader {
     final FlingImageRef SCROLL_FLING_P_IDS = new FlingImageRef();
 
     /**
-     * 可以与effectiveViewPosition配合使用， 仅当ImageRef.position > effectiveViewPosition时才会生效
+     * 占位符图片
      */
-    Drawable placeholder;
+    private Drawable placeholder;
 
     /**
      * 当notifyDataSetChanged刷新时可以使用这个变量控制刷新失效的View位置，防止多次刷新
@@ -118,11 +118,11 @@ public class LazyImageDownloader {
      * @return LazyImageDownloader
      */
     public static LazyImageDownloader getDefaultInstance() {
-        if (APPLICATION_CONTENT == null) {
-            APPLICATION_CONTENT = BasicApplication.getApp();
+        if (applicationContent == null) {
+            applicationContent = new WeakReference<Context>(BasicApplication.getApp());
         }
         if (lazyImageDownloader == null) {
-            lazyImageDownloader = new LazyImageDownloader(10, 6, DEFAULT_IMAGE_CACHE_PATH);
+            lazyImageDownloader = new LazyImageDownloader(10, 6, defaultImageCachePath);
         }
         return lazyImageDownloader;
     }
@@ -135,14 +135,17 @@ public class LazyImageDownloader {
      */
     public static void initDefaultConfig(Context context, String defaultImageCachePath) {
         if (context instanceof Application) {
-            APPLICATION_CONTENT = context;
+            applicationContent = new WeakReference<>(context);
         } else {
-            APPLICATION_CONTENT = context.getApplicationContext();
+            applicationContent = new WeakReference<>(context.getApplicationContext());
         }
-        DEFAULT_IMAGE_CACHE_PATH = defaultImageCachePath;
+        LazyImageDownloader.defaultImageCachePath = defaultImageCachePath;
     }
 
     public void bindActivity(Activity activity) {
+        if (activityWeakReference != null) {
+            activityWeakReference.clear();
+        }
         if (activityWeakReference == null) {
             activityWeakReference = new WeakReference<>(activity);
         }
@@ -158,7 +161,7 @@ public class LazyImageDownloader {
                 return activityWeakReference.get();
             }
         }
-        return APPLICATION_CONTENT;
+        return applicationContent == null ? null : applicationContent.get();
     }
 
     /**
@@ -209,12 +212,12 @@ public class LazyImageDownloader {
      */
     public void restart(int downloadTaskNumber, int cacheAsyncTaskNumber, String cachePath) {
         if (cachePath != null) {
-            IMAGE_CACHE_PATH = cachePath;
+            imageCachePath = cachePath;
         }
         /**
          * 检查指定路径是否存在，不存尝试创建
          */
-        FileTool.createDirectory(IMAGE_CACHE_PATH);
+        FileTool.createDirectory(imageCachePath);
         scrollState = SCROLL_STATE_IDLE;
         isStart = true;
         this.downloadTaskNumber = downloadTaskNumber;
@@ -240,8 +243,8 @@ public class LazyImageDownloader {
     /**
      * 创建一个图像下载任务，图像下载使用原图大小
      *
-     * @param url      图像地址
-     * @param view     显示图片的View
+     * @param url        图像地址
+     * @param view       显示图片的View
      * @param imageWidth 目标图片载入内存中宽度
      */
     public synchronized void addTask(String url, View view, int imageWidth) {
@@ -260,8 +263,8 @@ public class LazyImageDownloader {
         //编译任务
         ref.builder();
         //记录当前任务对应的本地缓存路径
-        if (ref.localDirectory == null){
-            ref.localDirectory = IMAGE_CACHE_PATH;
+        if (ref.localDirectory == null) {
+            ref.localDirectory = imageCachePath;
         }
         // 仅下载模式
         if (ref.downloadMode || ref.view == null) {
@@ -406,7 +409,7 @@ public class LazyImageDownloader {
      * @return path
      */
     public String getFilePath(ImageOptions ref) {
-        String path = TextUtils.isNull(ref.localDirectory) ? IMAGE_CACHE_PATH : ref.localDirectory;
+        String path = TextUtils.isNull(ref.localDirectory) ? imageCachePath : ref.localDirectory;
         return path + "/" + (ref.cacheName + (ref.uSuffix == null ? "" : "." + ref.uSuffix));
     }
 
@@ -440,7 +443,7 @@ public class LazyImageDownloader {
      * @param ref ImageOptions
      */
     void addCacheTask(ImageOptions ref, String filePath) {
-        getTaskThread().addCacheTask(new LoaderCacheTask(ref, filePath, ref.getCacheName(), this));
+        getTaskThread().addCacheTask(new LoaderCacheTask(ref, filePath, this));
     }
 
     /**
@@ -461,8 +464,8 @@ public class LazyImageDownloader {
     /**
      * 根据给定的信息将图片从本地路径中读取出来并设置的ImageRef中
      *
-     * @param ref       ImageOptions
-     * @param path      地址
+     * @param ref  ImageOptions
+     * @param path 地址
      */
     void createImage(ImageOptions ref, String path) {
         int targetWidth = ref.width, targetHeight = ref.height;
@@ -556,7 +559,7 @@ public class LazyImageDownloader {
      * @param imageCachePath 缓存路径
      */
     public void setImageCachePath(String imageCachePath) {
-        IMAGE_CACHE_PATH = imageCachePath;
+        imageCachePath = imageCachePath;
     }
 
 

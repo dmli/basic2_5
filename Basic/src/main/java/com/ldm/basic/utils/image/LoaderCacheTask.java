@@ -6,13 +6,13 @@ import com.ldm.basic.utils.FileTool;
  * Created by ldm on 16/5/16.
  * 用来loader本地图像使用的
  */
-public class LoaderCacheTask implements Runnable {
+class LoaderCacheTask implements Runnable {
 
     private ImageOptions ref;
     private String filePath;
     private LazyImageDownloader lazy;
 
-    public LoaderCacheTask(ImageOptions ref, String filePath, String cacheName, LazyImageDownloader lazy) {
+    LoaderCacheTask(ImageOptions ref, String filePath, LazyImageDownloader lazy) {
         super();
         this.ref = ref;
         this.filePath = filePath;

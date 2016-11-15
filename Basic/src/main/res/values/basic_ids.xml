@@ -38,4 +38,7 @@
     <item name="footerPullToRefreshText" type="id"/>
     <item name="footerPullToRefreshImage" type="id"/>
     <item name="footerPullToRefreshProgress" type="id"/>
+
+    <item name="pullToRefreshText" type="id"/>
+    <item name="pullToRefreshImage" type="id"/>
 </resources>

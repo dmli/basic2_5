@@ -1,17 +1,13 @@
 package com.ldm.basic.app;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-
 import com.google.gson.Gson;
-import com.ldm.basic.BasicService;
 import com.ldm.basic.bean.BasicErrorLogBean;
-import com.ldm.basic.utils.FileTool;
 import com.ldm.basic.utils.LLog;
 import com.ldm.basic.utils.SystemTool;
 
-import android.content.Context;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 /**
  * Created by ldm on 14-6-20.
@@ -52,37 +48,6 @@ public class BasicUncaughtExceptionHandler implements Thread.UncaughtExceptionHa
         this.userErrorLogCachePath = userErrorLogCachePath;
         this.userErrorLogCacheFileName = userErrorLogCacheFileName;
         this.asyncCallback = asyncCallback;
-        if (asyncCallback != null) {
-            uploadErrorLog();
-        }
-    }
-
-    /**
-     * 如果存在错误日志，执行上传操作
-     */
-    private void uploadErrorLog() {
-        File f = new File(userErrorLogCachePath + "/" + userErrorLogCacheFileName);
-        if (f.exists()) {
-            //如果错误日志存在就执行上传操作，如果BasicService没有启动的话将无法上传，需等待BasicService启动后执行上传
-            FileTool ft = new FileTool();
-            String err = ft.inputStreamToString(ft.openFile(f));
-            if (err != null) {
-                BasicService.createAsyncTask(null, "upload_error_log", new BasicService.AsyncTaskCallback(err) {
-                    @Override
-                    public int asynchronous(Context context) {
-                        try {
-                            asyncCallback.error(String.valueOf(_obj[0]));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        return 0;
-                    }
-                });
-            }
-            if (!f.delete()) {
-                LLog.e("error.log 缓存文件删除失败！");
-            }
-        }
     }
 
     @Override

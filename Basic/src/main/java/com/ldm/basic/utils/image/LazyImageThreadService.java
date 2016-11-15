@@ -7,7 +7,7 @@ import java.util.concurrent.Executors;
  * Created by ldm on 16/5/31.
  * 线程池
  */
-public class LazyImageThreadService {
+class LazyImageThreadService {
 
     private ExecutorService cacheThreadPool;
     private ExecutorService assignThreadPool;
@@ -20,7 +20,7 @@ public class LazyImageThreadService {
 
     private DisplayUIPresenter handler;
 
-    public LazyImageThreadService(LazyImageDownloader lazy, int downloadTaskNumber, int cacheAsyncTaskNumber) {
+    private LazyImageThreadService(LazyImageDownloader lazy, int downloadTaskNumber, int cacheAsyncTaskNumber) {
         this.downloadTaskNumber = downloadTaskNumber;
         this.cacheAsyncTaskNumber = cacheAsyncTaskNumber;
         if (handler == null) {
@@ -88,7 +88,7 @@ public class LazyImageThreadService {
      *
      * @return true/false
      */
-    public boolean isRunning() {
+    boolean isRunning() {
         return isRunning;
     }
 

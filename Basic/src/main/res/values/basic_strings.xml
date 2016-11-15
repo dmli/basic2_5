@@ -12,4 +12,7 @@
     <string name="footer_unlock_to_loading_text">释放加载</string>
     <string name="footer_being_loading_text">正在加载&#8230;</string>
 
+    <string name="left_release_refresh_text">释\n放\n查\n看\n更\n多</string>
+    <string name="left_pull_refresh_text">左\n滑\n查\n看\n更\n多</string>
+
 </resources>

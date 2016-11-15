@@ -8,12 +8,12 @@ import java.io.File;
  * Created by ldm on 16/5/16.
  * 做来分配任务使用的
  */
-public class LoaderAssignTask implements Runnable {
+class LoaderAssignTask implements Runnable {
 
     private ImageOptions ref;
     private LazyImageDownloader lazy;
 
-    public LoaderAssignTask(ImageOptions ref, LazyImageDownloader lazy) {
+    LoaderAssignTask(ImageOptions ref, LazyImageDownloader lazy) {
         super();
         this.ref = ref;
         this.lazy = lazy;

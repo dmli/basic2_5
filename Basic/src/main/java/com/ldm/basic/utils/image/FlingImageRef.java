@@ -7,7 +7,7 @@ import java.util.List;
  * Created by ldm on 16/5/4.
  * 使用列表是处于滑动时的ImageRef缓存列表
  */
-public class FlingImageRef {
+class FlingImageRef {
 
     List<ImageOptions> refs = new ArrayList<>();
 
@@ -24,7 +24,7 @@ public class FlingImageRef {
         refs.add(r);
     }
 
-    public void removeFirst() {
+    void removeFirst() {
         refs.remove(0);
     }
 

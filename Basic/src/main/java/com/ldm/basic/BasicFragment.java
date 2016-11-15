@@ -5,27 +5,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Message;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.ldm.basic.dialog.LToast;
-import com.ldm.basic.intent.IntentUtil;
-import com.ldm.basic.utils.BasicSimpleHandler;
-
-import java.util.Map;
 
 /**
- * Created by ldm on 14-2-21. 基于Fragment增加了一些常用的功能, 用户调用initView(LayoutInflater,
- * ViewGroup, int)后，将可以使用BasicFragment的一些基础属性及方法 如：rootView =（布局）、inflater
- * =（LayoutInflater）、inflate(resource, ViewGroup,
- * attachToRoot)及getView(resource)等方法
- * <p/>
- * *仅限于配合BasicFragmentActivity使用*
+ * Created by ldm on 14-2-21.
+ * 基于Fragment增加了一些常用的功能, 用户调用initView(LayoutInflater, ViewGroup, int)
  */
-public class BasicFragment extends Fragment implements View.OnClickListener, BasicSimpleHandler.OnSimpleHandlerInterface {
+public abstract class BasicFragment extends Fragment {
 
     protected View rootView;
     protected LayoutInflater inflater;
@@ -39,37 +31,42 @@ public class BasicFragment extends Fragment implements View.OnClickListener, Bas
     public boolean THIS_FRAGMENT_STATE;
 
     /**
-     * 界面按钮控制器，可以通过设置间隔时间开启点击事件监听
-     */
-    private long upClickTime;// 上一次点击的时间
-    private long clickSleepTime;
-
-    protected BasicSimpleHandler<BasicFragment> handler = new BasicSimpleHandler<>(this);
-
-    /**
-     * 返回resource指向的View布局，并初始化相关功能及方法， 建议使用方法： public View
-     * onCreateView(LayoutInflater inflater, ViewGroup container, Bundle
-     * savedInstanceState) { return initView(LayoutInflater, ViewGroup,
-     * R.layout.*); }
+     * Called to have the fragment instantiate its user interface view.
+     * This is optional, and non-graphical fragments can return null (which
+     * is the default implementation).  This will be called between
+     * {@link #onCreate(Bundle)} and {@link #onActivityCreated(Bundle)}.
+     * <p/>
+     * <p>If you return a View from here, you will later be called in
+     * {@link #onDestroyView} when the view is being released.
      *
-     * @param inflater  LayoutInflater
-     * @param container ViewGroup根节点
-     * @param resource  布局源
-     * @return View
+     * @param inflater           The LayoutInflater object that can be used to inflate
+     *                           any views in the fragment,
+     * @param container          If non-null, this is the parent view that the fragment's
+     *                           UI should be attached to.  The fragment should not add the view itself,
+     *                           but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     *                           from a previous saved state as given here.
+     * @return Return the View for the fragment's UI, or null.
      */
-    protected View initView(LayoutInflater inflater, ViewGroup container, int resource) {
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         this.inflater = inflater;
-        return rootView = inflater.inflate(resource, container, false);
+        return rootView = inflater.inflate(getContentViewId(), container, false);
     }
 
+
     /**
-     * 界面布局初始化方法，如果用户在onCreateView中成功为rootView初始化或使用了BasicFragment提供的initView(
-     * LayoutInflater, ViewGroup, int)方法后 将可以通过init()方法进行布局初始化，
-     * 该方法的好处在于开发者可以不用考虑onCreateView与onActivityCreated的关系和界面隐藏后恢复时activity ==
-     * null的问题
+     * 返回用来创建ContentView布局的ViewId
+     *
+     * @return R.layout.***
      */
-    protected void init() {
-    }
+    protected abstract int getContentViewId();
+
+    /**
+     * 使用buildContentView()方法可以不用考虑onCreateView与onActivityCreated的关系和界面隐藏后恢复时activity == null的问题
+     */
+    protected abstract void buildContentView();
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -77,7 +74,7 @@ public class BasicFragment extends Fragment implements View.OnClickListener, Bas
         this.activity = (BasicFragmentActivity) getActivity();
         THIS_FRAGMENT_STATE = true;
         if (rootView != null) {
-            init();
+            buildContentView();
         }
     }
 
@@ -87,51 +84,10 @@ public class BasicFragment extends Fragment implements View.OnClickListener, Bas
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        if (getOnControllerLifeListener() != null) {
-            getOnControllerLifeListener().onStart(getOnControllerLifeListener().isFirst);
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (getOnControllerLifeListener() != null) {
-            getOnControllerLifeListener().onResume();
-        }
-    }
-
-    @Override
     public void onDestroyView() {
-        if (getOnControllerLifeListener() != null) {
-            getOnControllerLifeListener().onDestroy();
-        }
         stopReceiver();
         THIS_FRAGMENT_STATE = false;
-        if (handler != null) {
-            handler.removeCallbacksAndMessages(null);
-        }
         super.onDestroyView();
-    }
-
-    /**
-     * 实现这个方法后OnControllerLifeListener会触发生命周期
-     *
-     * @return OnControllerLifeListener
-     */
-    public OnControllerLifeListener getOnControllerLifeListener() {
-        return null;
-    }
-
-    /**
-     * 通过Id查询View
-     *
-     * @param viewId id
-     * @return View
-     */
-    protected View getView(final int viewId) {
-        return rootView.findViewById(viewId);
     }
 
     /**
@@ -153,126 +109,13 @@ public class BasicFragment extends Fragment implements View.OnClickListener, Bas
     }
 
     /**
-     * 页面跳转
+     * 对应findViewById方法
      *
-     * @param classes c
-     */
-    protected void intent(final Class<?> classes) {
-        IntentUtil.intentDIY(activity, classes);
-    }
-
-    /**
-     * 页面跳转
-     *
-     * @param classes   目标
-     * @param enterAnim 进入动画文件ID
-     * @param exitAnim  退出动画文件ID
-     */
-    protected void intent(final Class<?> classes, final int enterAnim, final int exitAnim) {
-        IntentUtil.intentDIY(activity, classes, enterAnim, exitAnim);
-    }
-
-    /**
-     * 页面跳转
-     *
-     * @param classes 目标
-     * @param map     参数
-     */
-    protected void intent(final Class<?> classes, final Map<String, Object> map) {
-        IntentUtil.intentDIY(activity, classes, map);
-    }
-
-    /**
-     * 页面跳转
-     *
-     * @param classes   目标
-     * @param map       参数
-     * @param enterAnim 进入动画文件ID
-     * @param exitAnim  退出动画文件ID
-     */
-    protected void intent(final Class<?> classes, final Map<String, Object> map, final int enterAnim, final int exitAnim) {
-        IntentUtil.intentDIY(activity, classes, map, enterAnim, exitAnim);
-    }
-
-    /**
-     * 查询 VIEW 并执行页面跳转
-     *
-     * @param id      ViewId
-     * @param classes 目标
-     */
-    protected void intent(final int id, final Class<?> classes) {
-        intent(id, classes, null, IntentUtil.INTENT_DEFAULT_ENTER_ANIM, IntentUtil.INTENT_DEFAULT_EXIT_ANIM);
-    }
-
-    /**
-     * 查询 VIEW 并执行页面跳转
-     *
-     * @param id        ViewId
-     * @param classes   目标
-     * @param enterAnim 进入动画文件ID
-     * @param exitAnim  退出动画文件ID
-     */
-    protected void intent(final int id, final Class<?> classes, final int enterAnim, final int exitAnim) {
-        intent(id, classes, null, enterAnim, exitAnim);
-    }
-
-    /**
-     * 查询 VIEW 并执行页面跳转
-     *
-     * @param id      ViewId
-     * @param classes 目标
-     * @param map     参数
-     */
-    protected void intent(final int id, final Class<?> classes, final Map<String, Object> map) {
-        intent(id, classes, map, IntentUtil.INTENT_DEFAULT_ENTER_ANIM, IntentUtil.INTENT_DEFAULT_EXIT_ANIM);
-    }
-
-    /**
-     * 查询 VIEW 并执行页面跳转
-     *
-     * @param id        ViewId
-     * @param classes   目标
-     * @param map       参数
-     * @param enterAnim 进入动画文件ID
-     * @param exitAnim  退出动画文件ID
-     */
-    protected void intent(final int id, final Class<?> classes, final Map<String, Object> map, final int enterAnim, final int exitAnim) {
-        View v = getView(id);
-        v.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                IntentUtil.intentDIY(activity, classes, map, enterAnim, exitAnim);
-            }
-        });
-    }
-
-    /**
-     * 动画形式关闭页面
-     */
-    public void finishAnim() {
-        IntentUtil.finishDIY(activity);
-    }
-
-    /**
-     * 动画形式关闭页面
-     *
-     * @param enterAnim 进入动画
-     * @param exitAnim  退出动画
-     */
-    public void finishAnim(final int enterAnim, final int exitAnim) {
-        IntentUtil.finishDIY(activity, enterAnim, exitAnim);
-    }
-
-    /**
-     * 查询并添加OnClickListener事件 如果View不存在则抛出NullPointerException
-     *
-     * @param id ViewId
+     * @param viewId View Id
      * @return View
      */
-    protected View setOnClickListener(final int id) {
-        View v = getView(id);
-        v.setOnClickListener(this);
-        return v;
+    protected View getView(int viewId) {
+        return rootView.findViewById(viewId);
     }
 
     /**
@@ -280,7 +123,7 @@ public class BasicFragment extends Fragment implements View.OnClickListener, Bas
      *
      * @param actions 动作
      */
-    protected void startReceiver(String... actions) {
+    protected void registerReceiver(String... actions) {
         IntentFilter localIntentFilter = new IntentFilter();
         if (actions != null && actions.length > 0) {
             for (String a : actions) {
@@ -295,50 +138,15 @@ public class BasicFragment extends Fragment implements View.OnClickListener, Bas
      * 关闭接收器
      */
     private void stopReceiver() {
-        if (null != receiver && activity != null)
+        if (null != receiver && activity != null){
             this.activity.unregisterReceiver(receiver);
+        }
     }
 
     /**
      * 消息响应方法 当Activity需要响应Broadcast时使用
      */
     protected synchronized void receiver(Context context, Intent intent) {
-
-    }
-
-    @Override
-    public void onClick(View v) {
-        boolean bool = true;
-        if (clickSleepTime > 0) {
-            if (System.currentTimeMillis() - upClickTime < clickSleepTime) {
-                bool = false;// 阻止这次点击事件的发生
-            }
-        }
-        if (bool) {
-            onViewClick(v);
-        }
-        upClickTime = System.currentTimeMillis();
-    }
-
-    /**
-     * View.OnClickListener事件回调
-     *
-     * @param v View
-     */
-    protected void onViewClick(View v) {
-    }
-
-    /**
-     * 开启点击事件睡眠时间，设置时间后将无法通过BasicFragment的onViewClick方法进行多次点击，直到超过设置的睡眠时间为止
-     *
-     * @param time 毫秒
-     */
-    protected void setClickSleepTime(int time) {
-        this.clickSleepTime = time;
-    }
-
-    @Override
-    public void handleMessage(Message msg) {
 
     }
 

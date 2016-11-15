@@ -6,12 +6,12 @@ import android.widget.AbsListView;
  * Created by ldm on 16/5/4.
  * 用来控制AbsListView在滑动时不执行任务
  */
-public class LazyImageOnScrollListener implements AbsListView.OnScrollListener {
+class LazyImageOnScrollListener implements AbsListView.OnScrollListener {
 
     private LazyImageDownloader lazyImageDownloader;
     private AbsListView.OnScrollListener onScrollListener;
 
-    public LazyImageOnScrollListener(LazyImageDownloader lazyImageDownloader, AbsListView.OnScrollListener onScrollListener) {
+    LazyImageOnScrollListener(LazyImageDownloader lazyImageDownloader, AbsListView.OnScrollListener onScrollListener) {
         this.lazyImageDownloader = lazyImageDownloader;
         this.onScrollListener = onScrollListener;
     }

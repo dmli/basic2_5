@@ -10,20 +10,19 @@ import java.lang.ref.WeakReference;
  * Created by ldm on 16/5/16.
  * LazyImageDownloader使用的Handler
  */
-public class DisplayUIPresenter extends Handler {
+class DisplayUIPresenter extends Handler {
 
-    public static final int LOADER_IMAGE_SUCCESS = 200;
-    public static final int LOADER_IMAGE_ERROR = 101;
-    public static final int LOADER_IMAGE_WAKE_TASK = 102;
-    public static final int LOADER_IMAGE_ERROR_OOM = 103;
-    public static final int LOADER_IMAGE_RECORD_LAST_TIME = 105;
-    public static final int LOADER_IMAGE_URL_IS_NULL = 106;
-    public static final int LOADER_IMAGE_EXECUTE_END = 107;
+    static final int LOADER_IMAGE_SUCCESS = 200;
+    static final int LOADER_IMAGE_ERROR = 101;
+    static final int LOADER_IMAGE_ERROR_OOM = 103;
+    static final int LOADER_IMAGE_RECORD_LAST_TIME = 105;
+    static final int LOADER_IMAGE_URL_IS_NULL = 106;
+    static final int LOADER_IMAGE_EXECUTE_END = 107;
 
     private static long lastTime;
     private WeakReference<LazyImageDownloader> imageDownloader;
 
-    public DisplayUIPresenter(LazyImageDownloader imageDownloader) {
+    DisplayUIPresenter(LazyImageDownloader imageDownloader) {
         super(Looper.getMainLooper());
         this.imageDownloader = new WeakReference<>(imageDownloader);
     }
@@ -47,9 +46,6 @@ public class DisplayUIPresenter extends Handler {
                 lazy.imageDownloadError((ImageOptions) msg.obj);
                 break;
             }
-            case LOADER_IMAGE_WAKE_TASK:// 通过handler唤醒任务
-                lazy.addTask((ImageOptions) msg.obj);
-                break;
             case LOADER_IMAGE_ERROR_OOM:// 内存溢出
                 if (System.currentTimeMillis() - lastTime > 3000) {
                     lazy.loaderImageErrorOom();

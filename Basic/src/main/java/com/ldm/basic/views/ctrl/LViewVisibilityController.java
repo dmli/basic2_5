@@ -8,9 +8,13 @@ import com.nineoldandroids.view.ViewHelper;
 
 /**
  * Created by ldm on 16/4/5.
+ * <p/>
  * 控制View Visibility状态的控制器
+ * <p/>
  * **********************************************************************
+ * <p/>
  * *当使用这个控制器设置了View的隐藏状态时就需要使用这个控制器设置View的显示状态*
+ * <p/>
  * **********************************************************************
  */
 public class LViewVisibilityController {

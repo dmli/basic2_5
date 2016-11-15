@@ -1,37 +1,34 @@
 package com.ldm.basic;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Rect;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver;
 
+import com.ldm.basic.app.Configuration;
 import com.ldm.basic.dialog.LToast;
-import com.ldm.basic.intent.IntentUtil;
 import com.ldm.basic.utils.SystemTool;
-import com.ldm.basic.utils.image.LazyImageDownloader;
 
 import java.lang.ref.WeakReference;
-import java.util.Map;
 import java.util.UUID;
 
 /**
- * Created by ldm on 13-11-10. BasicFragmentActivity中提供了全局的Activity记录、BaseReceiver接收 ，FragmentActivity状态及常用了一些方法
+ * Created by ldm on 13-11-10.
+ * <p/>
+ * BasicFragmentActivity中提供了全局的Activity记录、BaseReceiver接收 ，
+ * <p/>
+ * FragmentActivity状态及常用了一些方法
  */
-public class BasicFragmentActivity extends FragmentActivity implements OnClickListener, ViewTreeObserver.OnGlobalLayoutListener {
-
-    private String[] ACTION = null;
+public abstract class BasicFragmentActivity extends FragmentActivity implements ViewTreeObserver.OnGlobalLayoutListener {
 
     private BaseReceiver receiver = null;
 
@@ -49,27 +46,6 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
      * 当前位置
      */
     protected int currentPosition;
-
-    /**
-     * 界面按钮控制器，可以通过设置间隔时间开启点击事件监听
-     */
-    private long upClickTime;// 上一次点击的时间
-    private long clickSleepTime;
-
-    /**
-     * true将开启对软盘的监听
-     */
-    private boolean isSoftInputStateListener;
-
-    /**
-     * 软键盘关闭
-     */
-    protected static final int SOFT_INPUT_STATE_CLOSE = 0;
-
-    /**
-     * 软键盘开启
-     */
-    protected static final int SOFT_INPUT_STATE_OPEN = 1;
 
     /**
      * 软盘高度
@@ -98,8 +74,9 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
      * 注册每一个启动的Activity, 用于退出时结束程序
      */
     public BasicFragmentActivity() {
-        init(null);
+        init();
     }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,12 +84,7 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
         //super
         super.onCreate(savedInstanceState);
 
-        /** 不重复注册receiver **/
-        if (ACTION != null && ACTION.length > 0 && null == receiver) {
-            startReceiver();
-        }
-
-        getSupportFragmentManager().getFragments();
+        fragments = getFragments();
     }
 
     /**
@@ -133,33 +105,7 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
         }
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        // 返回按钮添加事件，如果存在
-        View v = findViewById(getResources().getIdentifier("back", "id", getPackageName()));
-        if (v != null) {
-            v.setOnClickListener(this);
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (fragments != null && currentPosition >= 0 && currentPosition < fragments.length) {
-            BasicFragment f = fragments[currentPosition];
-        }
-    }
-
-    /**
-     * 在注册Activity的基础上增加本Activity的消息响应能力, 使用receiver()响应消息
-     */
-    public BasicFragmentActivity(String... action) {
-        init(action);
-    }
-
-    private void init(String[] action) {
-        ACTION = action;
+    private void init() {
         THIS_ACTIVITY_STATE = true;
         SystemTool.activitySet.put(getActivityKey(), new WeakReference<Activity>(this));
     }
@@ -180,24 +126,13 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     }
 
-    /**
-     * 设置所需的所有窗口
-     *
-     * @param fragments BasicFragment[]
-     */
-    public void setFragments(BasicFragment[] fragments) {
-        this.fragments = fragments;
-    }
 
     /**
-     * 通过Id查询View
+     * 使用BasicFragmentActivity需要实现这个方法,将创建的Fragment数组返回
      *
-     * @param viewId id
-     * @return View
+     * @return BasicFragment[]
      */
-    protected View getView(final int viewId) {
-        return findViewById(viewId);
-    }
+    protected abstract BasicFragment[] getFragments();
 
     /**
      * Short Toast
@@ -217,58 +152,6 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
         LToast.showLong(this, smg);
     }
 
-    /**
-     * 页面跳转
-     *
-     * @param classes c
-     */
-    protected void intent(final Class<?> classes) {
-        IntentUtil.intentDIY(this, classes);
-    }
-
-    /**
-     * 页面跳转
-     *
-     * @param classes   目标
-     * @param enterAnim 进入动画文件ID
-     * @param exitAnim  退出动画文件ID
-     */
-    protected void intent(final Class<?> classes, final int enterAnim, final int exitAnim) {
-        IntentUtil.intentDIY(this, classes, enterAnim, exitAnim);
-    }
-
-    /**
-     * 页面跳转
-     *
-     * @param classes 目标
-     * @param map     参数
-     */
-    protected void intent(final Class<?> classes, final Map<String, Object> map) {
-        IntentUtil.intentDIY(this, classes, map);
-    }
-
-    /**
-     * 页面跳转
-     *
-     * @param classes   目标
-     * @param map       参数
-     * @param enterAnim 进入动画文件ID
-     * @param exitAnim  退出动画文件ID
-     */
-    protected void intent(final Class<?> classes, final Map<String, Object> map, final int enterAnim, final int exitAnim) {
-        IntentUtil.intentDIY(this, classes, map, enterAnim, exitAnim);
-    }
-
-    /**
-     * 动画形式关闭页面
-     */
-    public void finishAnim() {
-        if (getDownloader() != null) {
-            getDownloader().stopAllTask();
-        }
-        IntentUtil.finishDIY(this);
-    }
-
     @Override
     public void finish() {
         /**
@@ -276,20 +159,6 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
          */
         SystemTool.removeActivity(getActivityKey());
         super.finish();
-    }
-
-    public LazyImageDownloader getDownloader() {
-        return null;
-    }
-
-    /**
-     * 动画形式关闭页面
-     *
-     * @param enterAnim 进入动画
-     * @param exitAnim  退出动画
-     */
-    public void finishAnim(final int enterAnim, final int exitAnim) {
-        IntentUtil.finishDIY(this, enterAnim, exitAnim);
     }
 
     /**
@@ -300,24 +169,25 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
      * @param isAnim      是否使用预设动画
      */
     protected void switchFragment(int oldPosition, int newPosition, boolean isAnim) {
+        if (oldPosition == newPosition) return;
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         // 切换前检查是否有预制动画
-        switchFragmentAnim(oldPosition, newPosition, isAnim, ft);
-        BasicFragment newFragment = (BasicFragment) getSupportFragmentManager().findFragmentByTag(newPosition + "");
-        BasicFragment oldFragment = (BasicFragment) getSupportFragmentManager().findFragmentByTag(oldPosition + "");
+        onSwitchFragmentAnim(oldPosition, newPosition, isAnim, ft);
+        BasicFragment newFragment = (BasicFragment) getSupportFragmentManager().findFragmentByTag(String.valueOf(newPosition));
+        BasicFragment oldFragment = (BasicFragment) getSupportFragmentManager().findFragmentByTag(String.valueOf(oldPosition));
         if (newFragment != null) {
             newFragment.setMenuVisibility(true);
             newFragment.setUserVisibleHint(true);
             ft.show(newFragment);
         } else {
             newFragment = fragments[newPosition];
-            ft.add(getResources().getIdentifier("container", "id", getPackageName()), newFragment, newPosition + "");
+            ft.add(getResources().getIdentifier("container", "id", getPackageName()), newFragment, String.valueOf(newPosition));
         }
         if (oldFragment != null) {
             ft.hide(oldFragment);
         }
         // 切换Fragment后触发switchFragmentAfter方法
-        switchFragmentAfter(ft, oldFragment, newFragment);
+        onSwitchFragmentAfter(ft, oldFragment, newFragment);
         ft.commitAllowingStateLoss();
         getSupportFragmentManager().executePendingTransactions();
         currentPosition = newPosition;
@@ -331,7 +201,7 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
      * @param isAnim      switchFragment时的isAnim参数
      * @param ft          FragmentTransaction
      */
-    protected void switchFragmentAnim(int oldPosition, int newPosition, boolean isAnim, FragmentTransaction ft) {
+    protected void onSwitchFragmentAnim(int oldPosition, int newPosition, boolean isAnim, FragmentTransaction ft) {
     }
 
     /**
@@ -341,15 +211,14 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
      * @param oldFragment 旧的 Fragment
      * @param newFragment 新的Fragment
      */
-    protected void switchFragmentAfter(FragmentTransaction ft, BasicFragment oldFragment, BasicFragment newFragment) {
+    protected void onSwitchFragmentAfter(FragmentTransaction ft, BasicFragment oldFragment, BasicFragment newFragment) {
     }
 
     /**
      * 启动接收器
      */
-    private void startReceiver() {
+    private void registerReceiver(String[] actions) {
         IntentFilter localIntentFilter = new IntentFilter();
-        final String[] actions = ACTION;
         for (String action : actions) {
             localIntentFilter.addAction(action);
         }
@@ -367,83 +236,15 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
 
     @Override
     protected void onDestroy() {
-        //移除OnGlobalLayoutListener事件
-        removeOnGlobalLayoutListener();
         stopReceiver();
         THIS_ACTIVITY_STATE = false;
         super.onDestroy();
     }
 
     /**
-     * 移除OnGlobalLayoutListener事件
-     */
-    private void removeOnGlobalLayoutListener() {
-        if (isSoftInputStateListener) {
-            // 注销对ViewTreeObserver的监听
-            if (getWindow().getDecorView().getViewTreeObserver().isAlive()) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    getWindow().getDecorView().getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                } else {
-                    getWindow().getDecorView().getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                }
-            }
-        }
-    }
-
-    /**
      * 消息响应方法 当Activity需要响应Broadcast时使用
      */
     protected synchronized void receiver(Context context, Intent intent) {
-    }
-
-    @Override
-    public void onClick(View v) {
-        boolean bool = true;
-        if (clickSleepTime > 0) {
-            if (System.currentTimeMillis() - upClickTime < clickSleepTime) {
-                bool = false;// 阻止这次点击事件的发生
-            }
-        }
-        if (bool) {
-            onViewClick(v);
-        }
-        upClickTime = System.currentTimeMillis();
-    }
-
-    /**
-     * View.OnClickListener事件回调
-     *
-     * @param v View
-     */
-    protected void onViewClick(View v) {
-        if (v.getId() == getResources().getIdentifier("back", "id", getPackageName())) {
-            finishAnim();
-        }
-    }
-
-    /**
-     * 开启点击事件睡眠时间，设置时间后将无法通过BasicFragmentActivity的onViewClick方法进行多次点击， 直到超过设置的睡眠时间为止
-     *
-     * @param time 毫秒
-     */
-    protected void setClickSleepTime(int time) {
-        this.clickSleepTime = time;
-    }
-
-    /**
-     * 设置true后将开启对软键盘的监听，通过onSoftInputStateChange(state)方法触发 当activity的windowSoftInputMode属性设置为adjustNothing时，这个方法将无效
-     *
-     * @param isSoftInputStateListener true开启 默认false
-     */
-    @SuppressLint("NewApi")
-    @SuppressWarnings("deprecation")
-    public void setSoftInputStateListener(boolean isSoftInputStateListener) {
-        this.isSoftInputStateListener = isSoftInputStateListener;
-        if (isSoftInputStateListener) {
-            getWindow().getDecorView().getViewTreeObserver().addOnGlobalLayoutListener(this);
-        } else {
-            removeOnGlobalLayoutListener();
-        }
     }
 
     @Override
@@ -454,9 +255,9 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
         DisplayMetrics dm = getResources().getDisplayMetrics();
         int state, sih = Math.min(rootNode.getRootView().getHeight(), dm.heightPixels) - r.bottom;
         if (sih <= 240) {
-            state = SOFT_INPUT_STATE_CLOSE;
+            state = Configuration.SOFT_INPUT_STATE_CLOSE;
         } else {
-            state = SOFT_INPUT_STATE_OPEN;
+            state = Configuration.SOFT_INPUT_STATE_OPEN;
             softInputHeight = sih;
         }
         onSoftInputState(state);
@@ -473,6 +274,7 @@ public class BasicFragmentActivity extends FragmentActivity implements OnClickLi
 
     /**
      * 返回键盘高度
+     *
      * @return px
      */
     protected int getSoftInputHeight() {

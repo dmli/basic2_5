@@ -13,6 +13,17 @@ import com.ldm.basic.views.pull.anim.BasicPullViewAnimation;
 /**
  * Created by ldm  on 16/6/1.
  * 左滑刷新控件
+ * <p/>
+ * 使用方法：
+ * <p/>
+ * <LLeftPullToRefreshView>
+ * <LHorizontalScrollView>
+ * <LinearLayout android:id="@+id/rootView" android:orientation="horizontal">
+ * 这里可以动态添加ChildView
+ * <p>
+ * </LinearLayout>
+ * </LHorizontalScrollView>
+ * <LLeftPullToRefreshView/>
  */
 public class LLeftPullToRefreshView extends ViewGroup {
 
@@ -88,7 +99,7 @@ public class LLeftPullToRefreshView extends ViewGroup {
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                if (getParent() != null){
+                if (getParent() != null) {
                     getParent().requestDisallowInterceptTouchEvent(false);
                 }
                 touchUp();
@@ -97,7 +108,7 @@ public class LLeftPullToRefreshView extends ViewGroup {
                 break;
         }
         if (state) {
-            if (getParent() != null){
+            if (getParent() != null) {
                 getParent().requestDisallowInterceptTouchEvent(true);
             }
         }
@@ -112,7 +123,7 @@ public class LLeftPullToRefreshView extends ViewGroup {
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                if (getParent() != null){
+                if (getParent() != null) {
                     getParent().requestDisallowInterceptTouchEvent(false);
                 }
                 touchUp();

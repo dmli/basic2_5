@@ -3,9 +3,10 @@ package com.ldm.basic.utils;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.IBinder;
 import android.view.View;
-import android.view.Window;
+import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 
 /**
@@ -87,22 +88,6 @@ public class SoftInputTool {
     }
 
     /**
-     * 获取状态栏的高度
-     *
-     * @return int
-     */
-    public static int getStatusBarHeight(Activity activity) {
-        View root = activity.getWindow().findViewById(Window.ID_ANDROID_CONTENT);
-        if (root != null) {
-            int[] ii = new int[2];
-            root.getLocationInWindow(ii);
-            return ii[1];
-        }
-        return 0;
-    }
-
-
-    /**
      * 获取软键盘高度(这个方法需要在软键盘完全出现后调用有效,建议在OnGlobalLayoutListener监听中使用)
      * *rootNode.getViewTreeObserver().addOnGlobalLayoutListener*
      *
@@ -129,4 +114,31 @@ public class SoftInputTool {
         return sih != r.bottom;
     }
 
+
+    /**
+     * 设置true后将开启对软键盘的监听, 当activity的windowSoftInputMode属性设置为adjustNothing时，这个方法将无效
+     *
+     * @param activity               Activity
+     * @param onGlobalLayoutListener ViewTreeObserver.OnGlobalLayoutListener
+     */
+    public static void addSoftInputStateListener(Activity activity, ViewTreeObserver.OnGlobalLayoutListener onGlobalLayoutListener) {
+        activity.getWindow().getDecorView().getViewTreeObserver().addOnGlobalLayoutListener(onGlobalLayoutListener);
+    }
+
+    /**
+     * 移除OnGlobalLayoutListener事件
+     *
+     * @param activity               Activity
+     * @param onGlobalLayoutListener ViewTreeObserver.OnGlobalLayoutListener
+     */
+    public static void removeGlobalLayoutListener(Activity activity, ViewTreeObserver.OnGlobalLayoutListener onGlobalLayoutListener) {
+        // 注销对ViewTreeObserver的监听
+        if (activity.getWindow().getDecorView().getViewTreeObserver().isAlive()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                activity.getWindow().getDecorView().getViewTreeObserver().removeOnGlobalLayoutListener(onGlobalLayoutListener);
+            } else {
+                activity.getWindow().getDecorView().getViewTreeObserver().removeGlobalOnLayoutListener(onGlobalLayoutListener);
+            }
+        }
+    }
 }
